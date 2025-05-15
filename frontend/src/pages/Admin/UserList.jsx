@@ -56,8 +56,8 @@ const UserList = () => {
   };
 
   return (
-    <div className="p-4 bg-black min-h-screen text-white">
-      <h1 className="text-3xl font-bold text-center mb-6 text-pink-500">
+    <div className="min-h-screen p-6 bg-black text-white font-sans">
+      <h1 className="text-4xl font-extrabold text-center mb-8 text-pink-300">
         User List
       </h1>
 
@@ -68,54 +68,59 @@ const UserList = () => {
           {error?.data?.message || error.message}
         </Massage>
       ) : (
-        <div className="flex flex-col md:flex-row">
+        <div className="flex flex-col md:flex-row gap-6">
           <AdminMenu />
 
-          <div className="w-full md:w-4/5 p-4">
-            <div className="overflow-x-auto rounded-lg shadow-lg border border-pink-600">
-              <table className="min-w-full text-sm text-left table-auto border-collapse">
-                <thead className="bg-pink-800 text-white">
+          <div className="w-full md:w-4/5 p-6 bg-gray-900 rounded-md shadow-md border border-pink-300">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-sm border-collapse">
+                <thead className="bg-pink-300 text-black font-semibold rounded-t-md">
                   <tr>
-                    <th className="px-4 py-3 border-b border-pink-600">ID</th>
-                    <th className="px-4 py-3 border-b border-pink-600">Name</th>
-                    <th className="px-4 py-3 border-b border-pink-600">Email</th>
-                    <th className="px-4 py-3 border-b border-pink-600">Admin</th>
-                    <th className="px-4 py-3 border-b border-pink-600">Actions</th>
+                    <th className="px-5 py-4 border-b border-pink-300">ID</th>
+                    <th className="px-5 py-4 border-b border-pink-300">Name</th>
+                    <th className="px-5 py-4 border-b border-pink-300">Email</th>
+                    <th className="px-5 py-4 border-b border-pink-300 text-center">
+                      Admin
+                    </th>
+                    <th className="px-5 py-4 border-b border-pink-300 text-center">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800">
+                <tbody>
                   {users.map((user) => (
                     <tr
                       key={user._id}
-                      className="hover:bg-gray-800 transition-colors"
+                      className="hover:bg-gray-800 transition-colors duration-200"
                     >
-                      <td className="px-4 py-3">{user._id}</td>
+                      <td className="px-5 py-3 border-b border-gray-700">{user._id}</td>
 
-                      {/* Username Field */}
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3 border-b border-gray-700">
                         {editableUserId === user._id ? (
                           <div className="flex items-center gap-2">
                             <input
                               type="text"
                               value={editableUserName}
                               onChange={(e) => setEditableUserName(e.target.value)}
-                              className="p-2 rounded bg-black border border-pink-500 text-white w-full"
+                              className="w-full px-3 py-2 rounded border border-pink-300 bg-black text-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
                             />
                             <button
                               onClick={() => updateHandler(user._id)}
-                              className="bg-pink-600 hover:bg-pink-700 p-2 rounded"
+                              className="p-2 rounded bg-pink-300 text-black hover:bg-pink-400 transition"
+                              aria-label="Save username"
                             >
                               <FaCheck />
                             </button>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            {user.username}
+                            <span>{user.username}</span>
                             <button
                               onClick={() =>
                                 toggleEdit(user._id, user.username, user.email)
                               }
-                              className="text-pink-400 hover:text-pink-300"
+                              className="text-pink-300 hover:text-pink-400 transition"
+                              aria-label="Edit username"
                             >
                               <FaEdit />
                             </button>
@@ -123,31 +128,32 @@ const UserList = () => {
                         )}
                       </td>
 
-                      {/* Email Field */}
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3 border-b border-gray-700">
                         {editableUserId === user._id ? (
                           <div className="flex items-center gap-2">
                             <input
                               type="text"
                               value={editableUserEmail}
                               onChange={(e) => setEditableUserEmail(e.target.value)}
-                              className="p-2 rounded bg-black border border-pink-500 text-white w-full"
+                              className="w-full px-3 py-2 rounded border border-pink-300 bg-black text-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
                             />
                             <button
                               onClick={() => updateHandler(user._id)}
-                              className="bg-pink-600 hover:bg-pink-700 p-2 rounded"
+                              className="p-2 rounded bg-pink-300 text-black hover:bg-pink-400 transition"
+                              aria-label="Save email"
                             >
                               <FaCheck />
                             </button>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            {user.email}
+                            <span>{user.email}</span>
                             <button
                               onClick={() =>
                                 toggleEdit(user._id, user.username, user.email)
                               }
-                              className="text-pink-400 hover:text-pink-300"
+                              className="text-pink-300 hover:text-pink-400 transition"
+                              aria-label="Edit email"
                             >
                               <FaEdit />
                             </button>
@@ -155,21 +161,20 @@ const UserList = () => {
                         )}
                       </td>
 
-                      {/* Admin Icon */}
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-5 py-3 border-b border-gray-700 text-center">
                         {user.isAdmin ? (
-                          <FaCheck className="text-pink-400 mx-auto" />
+                          <FaCheck className="mx-auto text-pink-300" />
                         ) : (
-                          <FaTimes className="text-red-500 mx-auto" />
+                          <FaTimes className="mx-auto text-red-500" />
                         )}
                       </td>
 
-                      {/* Delete Button */}
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-5 py-3 border-b border-gray-700 text-center">
                         {!user.isAdmin && (
                           <button
                             onClick={() => deleteHandler(user._id)}
-                            className="bg-pink-600 hover:bg-pink-700 p-2 rounded text-white"
+                            className="p-2 rounded bg-pink-300 text-black hover:bg-pink-400 transition"
+                            aria-label="Delete user"
                           >
                             <FaTrash />
                           </button>
