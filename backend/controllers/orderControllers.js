@@ -1,5 +1,6 @@
 import Order from "../models/orderModel.js";
 import Product from "../models/productModal.js";
+import asyncHandler from 'express-async-handler';
 
 // Utility Function
 function calcPrices(orderItems) {
@@ -207,13 +208,14 @@ const markOrderAsDelivered = async (req, res) => {
 const deleteOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
-  if (order) {
-    await order.remove();
-    res.json({ message: 'Order removed' });
-  } else {
+  if (!order) {
     res.status(404);
-    throw new Error('Order not found');
+    throw new Error("Order not found");
   }
+
+  await order.deleteOne();
+
+  res.json({ message: "Order removed" });
 });
 
 export { 
