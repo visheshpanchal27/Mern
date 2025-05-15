@@ -16,7 +16,7 @@ import {
     filterProducts,
     fetchRandomProducts,
 } from '../controllers/productController.js';
-import { authentication,authorizeAdmin } from '../middlewares/authMiddleware.js';
+import { authentication,authorizeAdmin } from '../middlewares/authentication.js';
 import checkId from '../middlewares/checkId.js';
 
 router.route('/')

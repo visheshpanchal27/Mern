@@ -16,7 +16,7 @@ import {
 import { 
     authentication, 
     authorizeAdmin 
-} from "../middlewares/authMiddleware.js";
+} from "../middlewares/authentication.js";
 
 
 router.route("/")

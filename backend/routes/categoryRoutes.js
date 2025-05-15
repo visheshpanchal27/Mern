@@ -8,7 +8,7 @@ import {
     readCategory
 } from "../controllers/categoryControllers.js";
 
-import { authentication, authorizeAdmin } from "../middlewares/authMiddleware.js";
+import { authentication, authorizeAdmin } from "../middlewares/authentication.js";
 import { updateCurrentUserProfile } from "../controllers/userController.js";
 
 router.route('/').post(authentication,authorizeAdmin,createCategory);
