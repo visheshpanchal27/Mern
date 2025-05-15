@@ -21,7 +21,7 @@ const initialFormState = {
 const ProductList = () => {
   const [formData, setFormData] = useState(initialFormState);
   const [image, setImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState('');
+  const [imagePreview, setImagePreview] = useState('');
   const [uploading, setUploading] = useState(false);
   const [creatingProduct, setCreatingProduct] = useState(false);
 
@@ -35,25 +35,18 @@ const ProductList = () => {
     setFormData({ ...formData, [id]: value });
   };
 
-  const uploadFileHandler = async (e) => {
+  const uploadFileHandler = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setImage(file);
-
-    const formData = new FormData();
-    formData.append('image', file);
-
-    setUploading(true);
-    try {
-      const res = await uploadProductImage(formData).unwrap();
-      setImageUrl(res.image);
-      toast.success(res.message || 'Image uploaded');
-    } catch (error) {
-      toast.error(error?.data?.message || 'Image upload failed');
-    } finally {
-      setUploading(false);
-    }
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const submitHandler = async (e) => {
@@ -66,36 +59,39 @@ const ProductList = () => {
       return;
     }
 
+    if (!image) {
+      toast.error('Please select an image');
+      return;
+    }
+
     try {
       setCreatingProduct(true);
-      let uploadedImageUrl = imageUrl;
+      
+      // Upload image first
+      setUploading(true);
+      const uploadForm = new FormData();
+      uploadForm.append('image', image);
+      const uploadRes = await uploadProductImage(uploadForm).unwrap();
+      const uploadedImageUrl = uploadRes.image;
+      setUploading(false);
 
-      // If no uploaded URL and user selected a file
-      if (!uploadedImageUrl && image) {
-        const uploadForm = new FormData();
-        uploadForm.append('image', image);
-        setUploading(true);
-        const res = await uploadProductImage(uploadForm).unwrap();
-        uploadedImageUrl = res.image;
-        setUploading(false);
-      }
+      // Create product with the uploaded image URL
+      const productData = {
+        name,
+        description,
+        price,
+        category,
+        quantity,
+        brand,
+        countInStock: stock,
+        image: uploadedImageUrl
+      };
 
-      // Create FormData to send product details
-      const newFormData = new FormData();
-      newFormData.append('name', name);
-      newFormData.append('description', description);
-      newFormData.append('price', price);
-      newFormData.append('category', category);
-      newFormData.append('quantity', quantity);
-      newFormData.append('brand', brand);
-      newFormData.append('countInStock', stock);
-      newFormData.append('image', uploadedImageUrl);
-
-      await createProduct(newFormData).unwrap();
+      await createProduct(productData).unwrap();
       toast.success('Product created successfully!');
       setFormData(initialFormState);
       setImage(null);
-      setImageUrl('');
+      setImagePreview('');
       navigate('/');
 
     } catch (err) {
@@ -103,6 +99,7 @@ const ProductList = () => {
       toast.error(err?.data?.message || err?.message || 'Failed to create product');
     } finally {
       setCreatingProduct(false);
+      setUploading(false);
     }
   };
 
@@ -115,15 +112,11 @@ const ProductList = () => {
 
           {/* Image Preview and Upload */}
           <div className="mb-8">
-            {imageUrl && (
+            {imagePreview && (
               <div className="text-center mb-4">
                 <img
-                  src={
-                    imageUrl.startsWith('http')
-                      ? imageUrl
-                      : `${import.meta.env.VITE_API_URL}${imageUrl}`
-                  }                  
-                  alt="product"
+                  src={imagePreview}
+                  alt="product preview"
                   className="block mx-auto max-h-[200px] rounded-md shadow-md"
                 />
               </div>
@@ -133,7 +126,7 @@ const ProductList = () => {
                 uploading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              {uploading ? 'Uploading Image...' : image ? image.name : 'Upload Image'}
+              {image ? image.name : 'Upload Image'}
               <input
                 type="file"
                 accept="image/*"
