@@ -7,7 +7,10 @@ import {
 import { useFetchCategoriesQuery } from '../../redux/api/categoryApiSlice';
 import { toast } from 'react-toastify';
 import AdminMenu from './AdminMenu';
-import Button from '@mui/material/Button';
+
+// ✅ Material UI Imports (Only added lines)
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 
 const initialFormState = {
   name: '',
@@ -41,7 +44,7 @@ const ProductList = () => {
     if (!file) return;
 
     setImage(file);
-
+    
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result);
@@ -96,6 +99,7 @@ const ProductList = () => {
       setImage(null);
       setImagePreview('');
       navigate('/');
+
     } catch (err) {
       console.error('❌ Product Error:', err);
       toast.error(err?.data?.message || err?.message || 'Failed to create product');
@@ -121,14 +125,26 @@ const ProductList = () => {
                   alt="product preview"
                   className="block mx-auto max-h-[200px] rounded-md shadow-md"
                 />
-                <button
-                  type="button"
+                {/* ✅ Material UI Close Button */}
+                <IconButton
                   onClick={removeImageHandler}
-                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center transform translate-x-1/2 -translate-y-1/2 hover:bg-red-600 transition"
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    transform: 'translate(50%, -50%)',
+                    bgcolor: 'error.main',
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: 'error.dark',
+                    },
+                    width: 24,
+                    height: 24,
+                  }}
                   title="Remove image"
                 >
-                  ×
-                </button>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
               </div>
             )}
             <label
@@ -147,9 +163,9 @@ const ProductList = () => {
             </label>
           </div>
 
-          {/* Form Fields */}
+          {/* Input Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {[
+            {[ 
               { label: 'Name', id: 'name', type: 'text' },
               { label: 'Price', id: 'price', type: 'number' },
               { label: 'Quantity', id: 'quantity', type: 'number' },
@@ -199,36 +215,21 @@ const ProductList = () => {
             />
           </div>
 
-          {/* Submit & Cancel Buttons */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4">
-            <Button
+          {/* Submit Button */}
+          <div className="mb-6">
+            <button
               type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
               disabled={uploading || creatingProduct}
-              sx={{
-                bgcolor: '#ec4899',
-                '&:hover': { bgcolor: '#db2777' },
-              }}
+              className={`w-full bg-pink-500 text-white py-3 rounded-lg font-semibold transition ${
+                uploading || creatingProduct ? 'cursor-not-allowed opacity-50' : 'hover:bg-pink-700'
+              }`}
             >
               {uploading
                 ? 'Uploading Image...'
                 : creatingProduct
                 ? 'Creating Product...'
                 : 'Submit Product'}
-            </Button>
-
-            <Button
-              type="button"
-              variant="outlined"
-              color="secondary"
-              fullWidth
-              disabled={creatingProduct}
-              onClick={() => navigate(-1)} // or use navigate('/') or reset form
-            >
-              Cancel
-            </Button>
+            </button>
           </div>
         </div>
       </form>
