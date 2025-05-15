@@ -125,9 +125,11 @@ const ProductList = () => {
                   alt="product preview"
                   className="block mx-auto max-h-[200px] rounded-md shadow-md"
                 />
-                {/* ✅ Material UI Close Button */}
                 <IconButton
-                  onClick={removeImageHandler}
+                  onClick={(e) => {
+                    e.stopPropagation();  // Stop event bubbling so file input not triggered
+                    removeImageHandler();
+                  }}
                   sx={{
                     position: 'absolute',
                     top: 0,
@@ -145,6 +147,7 @@ const ProductList = () => {
                 >
                   <CloseIcon fontSize="small" />
                 </IconButton>
+
               </div>
             )}
             <label
