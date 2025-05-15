@@ -115,7 +115,10 @@ const OrderList = () => {
                           More
                         </button>
                       </Link>
-                      <DeleteIcon className="text-red-500 cursor-pointer hover:text-red-700" />
+                      <DeleteIcon
+                        onClick={() => handleDelete(order._id)}
+                        className="text-red-500 cursor-pointer hover:text-red-700"
+                      />
                     </td>
                   </tr>
                 ))}
