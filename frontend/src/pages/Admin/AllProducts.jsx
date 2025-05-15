@@ -2,12 +2,17 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import { useAllProductsQuery } from "../../redux/api/productApiSlice";
 import AdminMenu from "./AdminMenu";
+import Loader from "../../components/Loader";
 
 const AllProducts = () => {
   const { data: products, isLoading, isError } = useAllProductsQuery();
 
   if (isLoading) {
-    return <div className="text-white p-6">Loading...</div>;
+    return (
+      <div className="text-white p-6 flex justify-center items-center min-h-screen">
+        <Loader />
+      </div>
+    );
   }
 
   if (isError) {
@@ -29,9 +34,11 @@ const AllProducts = () => {
           >
             {/* Product Image */}
             <img
-              src={product.image.startsWith('http') 
-                ? product.image 
-                : `${import.meta.env.VITE_API_URL}${product.image}`}              
+              src={
+                product.image.startsWith("http")
+                  ? product.image
+                  : `${import.meta.env.VITE_API_URL}${product.image}`
+              }
               alt={product.name}
               className="w-40 h-48 object-cover min-w-[160px]"
               loading="lazy"
