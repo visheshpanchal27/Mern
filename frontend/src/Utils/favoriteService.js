@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = "https://mern12-95r9.onrender.com"; // your backend URL
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const addFavorite = async (product) => {
   try {
