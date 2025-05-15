@@ -1,11 +1,24 @@
 import Message from "../../components/Massage";
 import Loader from "../../components/Loader";
 import { Link } from "react-router-dom";
-import { useGetOrdersQuery } from "../../redux/api/orderApiSlice";
+import { useGetOrdersQuery, useDeleteOrderMutation } from "../../redux/api/orderApiSlice";
 import AdminMenu from "./AdminMenu";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const OrderList = () => {
-  const { data: orders, isLoading, error } = useGetOrdersQuery();
+  const { data: orders, isLoading, error, refetch } = useGetOrdersQuery();
+  const [deleteOrder] = useDeleteOrderMutation();
+
+  const handleDelete = async (orderId) => {
+    if (window.confirm("Are you sure you want to delete this order?")) {
+      try {
+        await deleteOrder(orderId).unwrap();
+        refetch();
+      } catch (err) {
+        console.error("Failed to delete:", err);
+      }
+    }
+  };
 
   return (
     <>
@@ -31,7 +44,7 @@ const OrderList = () => {
                   <th className="px-4 py-3">Paid</th>
                   <th className="px-4 py-3">Delivered</th>
                   <th className="px-4 py-3">Payment Method</th>
-                  <th className="px-4 py-3">Details</th>
+                  <th className="px-4 py-3">Actions</th>
                 </tr>
               </thead>
 
@@ -41,7 +54,6 @@ const OrderList = () => {
                     key={order._id}
                     className="hover:bg-gray-800 transition duration-200 border-b border-gray-700"
                   >
-                    {/* Order Item Image */}
                     <td className="px-4 py-3">
                       <img
                         src={
@@ -54,27 +66,18 @@ const OrderList = () => {
                       />
                     </td>
 
-                    {/* Order ID */}
                     <td className="px-4 py-3">{order._id}</td>
-
-                    {/* User Name */}
                     <td className="px-4 py-3">
                       {order.user ? order.user.username : "N/A"}
                     </td>
-
-                    {/* Order Date */}
                     <td className="px-4 py-3">
                       {order.createdAt
                         ? order.createdAt.substring(0, 10)
                         : "N/A"}
                     </td>
-
-                    {/* Total Price */}
                     <td className="px-4 py-3">
                       ${order.totalPrice.toFixed(2)}
                     </td>
-
-                    {/* Payment Status */}
                     <td className="px-4 py-3">
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
@@ -88,8 +91,6 @@ const OrderList = () => {
                           : "Pending"}
                       </span>
                     </td>
-
-                    {/* Delivery Status */}
                     <td className="px-4 py-3">
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
@@ -101,8 +102,6 @@ const OrderList = () => {
                         {order.isDelivered ? "Completed" : "Pending"}
                       </span>
                     </td>
-
-                    {/* Payment Method */}
                     <td className="px-4 py-3">
                       <span className="text-sm text-white font-medium">
                         {order.paymentMethod === "CashOnDelivery"
@@ -110,14 +109,13 @@ const OrderList = () => {
                           : order.paymentMethod || "N/A"}
                       </span>
                     </td>
-
-                    {/* Details Button */}
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 flex items-center gap-2">
                       <Link to={`/order/${order._id}`}>
                         <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-full transition">
                           More
                         </button>
                       </Link>
+                      <DeleteIcon className="text-red-500 cursor-pointer hover:text-red-700" />
                     </td>
                   </tr>
                 ))}

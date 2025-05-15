@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -6,7 +7,7 @@ import Message from "../../components/Massage";
 import ProgressSteps from "../../components/ProgressSteps";
 import Loader from "../../components/Loader";
 import { useCreateOrderMutation } from "../../redux/api/orderApiSlice";
-import { clearCartItems, calculatePrices } from "../../redux/features/Cart/CartSlice";
+import { clearCartItems, calculateCartPrices } from "../../redux/features/Cart/CartSlice";
 
 const PlaceOrder = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const PlaceOrder = () => {
 
   useEffect(() => {
     if (cart.cartItems.length > 0) {
-      dispatch(calculatePrices());
+      dispatch(calculateCartPrices());
     }
   }, [dispatch, cart.cartItems]);
 
@@ -94,20 +95,24 @@ const PlaceOrder = () => {
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-5">Order Summary</h2>
           <div className="flex justify-between flex-wrap p-8 bg-[#181818]">
-            <ul className="text-lg">
-              <li>
-                <span className="font-semibold mb-4">Items:</span> ${(cart.itemsPrice || 0).toFixed(2)}
-              </li>
-              <li>
-                <span className="font-semibold mb-4">Shipping:</span> ${(cart.shippingPrice || 0).toFixed(2)}
-              </li>
-              <li>
-                <span className="font-semibold mb-4">Tax:</span> ${(cart.taxPrice || 0).toFixed(2)}
-              </li>
-              <li>
-                <span className="font-semibold mb-4">Total:</span> ${(cart.totalPrice || 0).toFixed(2)}
-              </li>
-            </ul>
+          <ul className="text-lg">
+            <li>
+              <span className="font-semibold mb-4">Items:</span> $
+              {Number(cart.itemsPrice || 0).toFixed(2)}
+            </li>
+            <li>
+              <span className="font-semibold mb-4">Shipping:</span> $
+              {Number(cart.shippingPrice || 0).toFixed(2)}
+            </li>
+            <li>
+              <span className="font-semibold mb-4">Tax:</span> $
+              {Number(cart.taxPrice || 0).toFixed(2)}
+            </li>
+            <li>
+              <span className="font-semibold mb-4">Total:</span> $
+              {Number(cart.totalPrice || 0).toFixed(2)}
+            </li>
+          </ul>
 
             {error && <Message variant="danger">{error.data.message}</Message>}
 

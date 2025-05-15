@@ -22,15 +22,18 @@ const Order = () => {
     isLoading,
     error,
   } = useGetOrderDetailsQuery(orderId);
-  
+
   const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
   const [deliverOrder, { isLoading: loadingDeliver }] = useDeliverOrderMutation();
-  
+
   const { userInfo } = useSelector((state) => state.auth);
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
 
-  const { data: paypal, isLoading: loadingPayPal, error: errorPayPal } = 
-    useGetPaypalClientIdQuery();
+  const {
+    data: paypal,
+    isLoading: loadingPayPal,
+    error: errorPayPal,
+  } = useGetPaypalClientIdQuery();
 
   useEffect(() => {
     if (!errorPayPal && !loadingPayPal && paypal?.clientId) {
@@ -46,6 +49,10 @@ const Order = () => {
       }
     }
   }, [errorPayPal, loadingPayPal, order, paypal, paypalDispatch]);
+
+  useEffect(() => {
+    console.log("Fetched order:", order);
+  }, [order]);
 
   const onApprove = (data, actions) => {
     return actions.order.capture().then(async (details) => {
@@ -84,17 +91,13 @@ const Order = () => {
   if (isLoading) return <Loader />;
   if (error) return <Message variant="danger">{error.data.message}</Message>;
 
-  // Debug logs to verify values
-  console.log('User Info:', userInfo);
-  console.log('Order Status - isPaid:', order?.isPaid, 'isDelivered:', order?.isDelivered);
-
   return (
     <div className="container mx-auto p-6 flex flex-col md:flex-row gap-6 bg-[#121212] min-h-screen text-white">
-      {/* Left side - Order Items */}
-      <div className="md:w-2/3 space-y-6">
+      {/* Left - Order Items */}
+      <div className="md:w-2/3 space-y-6 border border-red-500"> {/* Debug border */}
         <div className="bg-[#1e1e1e] rounded-2xl shadow-lg p-6">
           <h2 className="text-2xl font-bold mb-4 text-pink-400">Order Items</h2>
-          {order.orderItems.length === 0 ? (
+          {!order?.orderItems || order.orderItems.length === 0 ? (
             <Message>Order is empty</Message>
           ) : (
             <div className="overflow-x-auto">
@@ -144,22 +147,14 @@ const Order = () => {
         </div>
       </div>
 
-      {/* Right side - Shipping & Summary */}
+      {/* Right - Summary */}
       <div className="md:w-1/3 space-y-6">
         <div className="bg-[#1e1e1e] rounded-2xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-4 text-pink-400">
-            Shipping Info
-          </h2>
+          <h2 className="text-2xl font-bold mb-4 text-pink-400">Shipping Info</h2>
           <div className="space-y-3 text-gray-300">
-            <p>
-              <strong>Order:</strong> {order._id}
-            </p>
-            <p>
-              <strong>Name:</strong> {order.user.username}
-            </p>
-            <p>
-              <strong>Email:</strong> {order.user.email}
-            </p>
+            <p><strong>Order:</strong> {order._id}</p>
+            <p><strong>Name:</strong> {order.user.username}</p>
+            <p><strong>Email:</strong> {order.user.email}</p>
             <p>
               <strong>Address:</strong> {order.shippingAddress.address},{" "}
               {order.shippingAddress.city}, {order.shippingAddress.postalCode},{" "}
@@ -194,9 +189,7 @@ const Order = () => {
         </div>
 
         <div className="bg-[#1e1e1e] rounded-2xl shadow-lg p-6">
-          <h2 className="text-2xl font-bold mb-4 text-pink-400">
-            Order Summary
-          </h2>
+          <h2 className="text-2xl font-bold mb-4 text-pink-400">Order Summary</h2>
           <div className="space-y-3 text-gray-300">
             <div className="flex justify-between">
               <span>Items</span>
@@ -216,45 +209,48 @@ const Order = () => {
             </div>
           </div>
 
-          {!order.isPaid && (
+          {/* Payment Section */}
+          {!order.isPaid && order.paymentMethod === "PayPal" && (
             <div className="mt-6">
               {loadingPay && <Loader />}
-
-              {order.paymentMethod === "PayPal" ? (
-                isPending ? (
-                  <Loader />
-                ) : (
-                  <PayPalButtons
-                    createOrder={createOrder}
-                    onApprove={onApprove}
-                    onError={onError}
-                  />
-                )
+              {isPending ? (
+                <Loader />
               ) : (
-                <div className="bg-gray-800 p-4 rounded-lg">
-                  <div className="flex items-center gap-2 text-green-400 mb-2">
-                    <FaMoneyBillWave />
-                    <span>Cash on Delivery Selected</span>
-                  </div>
-                  <p className="text-gray-300 text-sm">
-                    Payment will be collected when your order is delivered.
-                  </p>
-                </div>
+                <PayPalButtons
+                  createOrder={createOrder}
+                  onApprove={onApprove}
+                  onError={onError}
+                />
               )}
             </div>
           )}
 
+          {/* Cash on Delivery Message */}
+          {!order.isPaid && order.paymentMethod === "CashOnDelivery" && (
+            <div className="bg-gray-800 p-4 rounded-lg mt-6">
+              <div className="flex items-center gap-2 text-green-400 mb-2">
+                <FaMoneyBillWave />
+                <span>Cash on Delivery Selected</span>
+              </div>
+              <p className="text-gray-300 text-sm">
+                Payment will be collected when your order is delivered.
+              </p>
+            </div>
+          )}
+
+          {/* Admin Deliver Button */}
           {loadingDeliver && <Loader />}
-          {/* Updated deliver button logic */}
-          {userInfo?.isAdmin && order?.isPaid && !order?.isDelivered && (
-            <button
-              type="button"
-              className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 mt-6 rounded transition flex items-center justify-center gap-2"
-              onClick={deliverHandler}
-            >
-              <FaTruck />
-              Mark As Delivered
-            </button>
+          {userInfo?.isAdmin && !order?.isDelivered && (
+            (order?.isPaid || order?.paymentMethod === "CashOnDelivery") && (
+              <button
+                type="button"
+                className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 mt-6 rounded transition flex items-center justify-center gap-2"
+                onClick={deliverHandler}
+              >
+                <FaTruck />
+                Mark As Delivered
+              </button>
+            )
           )}
         </div>
       </div>
