@@ -24,7 +24,7 @@ connectDB();
 const app = express();
 
 const allowedOrigins = [
-    "https://mern12-1.onrender.com",
+    "https://mern-u27d.onrender.com",
     "http://localhost:5173"
 ];
 
