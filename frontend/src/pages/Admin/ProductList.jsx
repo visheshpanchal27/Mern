@@ -7,6 +7,7 @@ import {
 import { useFetchCategoriesQuery } from '../../redux/api/categoryApiSlice';
 import { toast } from 'react-toastify';
 import AdminMenu from './AdminMenu';
+import Button from '@mui/material/Button';
 
 const initialFormState = {
   name: '',
@@ -40,8 +41,7 @@ const ProductList = () => {
     if (!file) return;
 
     setImage(file);
-    
-    // Create preview URL
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result);
@@ -71,8 +71,7 @@ const ProductList = () => {
 
     try {
       setCreatingProduct(true);
-      
-      // Upload image first
+
       setUploading(true);
       const uploadForm = new FormData();
       uploadForm.append('image', image);
@@ -80,7 +79,6 @@ const ProductList = () => {
       const uploadedImageUrl = uploadRes.image;
       setUploading(false);
 
-      // Create product with the uploaded image URL
       const productData = {
         name,
         description,
@@ -89,7 +87,7 @@ const ProductList = () => {
         quantity,
         brand,
         countInStock: stock,
-        image: uploadedImageUrl
+        image: uploadedImageUrl,
       };
 
       await createProduct(productData).unwrap();
@@ -98,7 +96,6 @@ const ProductList = () => {
       setImage(null);
       setImagePreview('');
       navigate('/');
-
     } catch (err) {
       console.error('❌ Product Error:', err);
       toast.error(err?.data?.message || err?.message || 'Failed to create product');
@@ -150,7 +147,7 @@ const ProductList = () => {
             </label>
           </div>
 
-          {/* Rest of your form fields */}
+          {/* Form Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {[
               { label: 'Name', id: 'name', type: 'text' },
@@ -202,21 +199,36 @@ const ProductList = () => {
             />
           </div>
 
-          {/* Submit Button */}
-          <div className="mb-6">
-            <button
+          {/* Submit & Cancel Buttons */}
+          <div className="mb-6 flex flex-col sm:flex-row gap-4">
+            <Button
               type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
               disabled={uploading || creatingProduct}
-              className={`w-full bg-pink-500 text-white py-3 rounded-lg font-semibold transition ${
-                uploading || creatingProduct ? 'cursor-not-allowed opacity-50' : 'hover:bg-pink-700'
-              }`}
+              sx={{
+                bgcolor: '#ec4899',
+                '&:hover': { bgcolor: '#db2777' },
+              }}
             >
               {uploading
                 ? 'Uploading Image...'
                 : creatingProduct
                 ? 'Creating Product...'
                 : 'Submit Product'}
-            </button>
+            </Button>
+
+            <Button
+              type="button"
+              variant="outlined"
+              color="secondary"
+              fullWidth
+              disabled={creatingProduct}
+              onClick={() => navigate(-1)} // or use navigate('/') or reset form
+            >
+              Cancel
+            </Button>
           </div>
         </div>
       </form>
