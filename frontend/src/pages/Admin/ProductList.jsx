@@ -49,6 +49,11 @@ const ProductList = () => {
     reader.readAsDataURL(file);
   };
 
+  const removeImageHandler = () => {
+    setImage(null);
+    setImagePreview('');
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
 
@@ -111,14 +116,22 @@ const ProductList = () => {
           <div className="h-12 text-xl font-semibold mb-6">Create Product</div>
 
           {/* Image Preview and Upload */}
-          <div className="mb-8">
+          <div className="mb-8 relative">
             {imagePreview && (
-              <div className="text-center mb-4">
+              <div className="text-center mb-4 relative">
                 <img
                   src={imagePreview}
                   alt="product preview"
                   className="block mx-auto max-h-[200px] rounded-md shadow-md"
                 />
+                <button
+                  type="button"
+                  onClick={removeImageHandler}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center transform translate-x-1/2 -translate-y-1/2 hover:bg-red-600 transition"
+                  title="Remove image"
+                >
+                  ×
+                </button>
               </div>
             )}
             <label
@@ -126,7 +139,7 @@ const ProductList = () => {
                 uploading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
-              {image ? image.name : 'Upload Image'}
+              {image ? 'Change Image' : 'Upload Image'}
               <input
                 type="file"
                 accept="image/*"
@@ -137,7 +150,7 @@ const ProductList = () => {
             </label>
           </div>
 
-          {/* Form Fields */}
+          {/* Rest of your form fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {[
               { label: 'Name', id: 'name', type: 'text' },
