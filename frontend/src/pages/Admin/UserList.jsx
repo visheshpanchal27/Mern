@@ -56,8 +56,10 @@ const UserList = () => {
   };
 
   return (
-    <div className="p-4 text-white">
-      <h1 className="text-3xl font-bold text-center mb-6">User List</h1>
+    <div className="p-4 bg-black min-h-screen text-white">
+      <h1 className="text-3xl font-bold text-center mb-6 text-pink-500">
+        User List
+      </h1>
 
       {isLoading ? (
         <Loader />
@@ -70,20 +72,23 @@ const UserList = () => {
           <AdminMenu />
 
           <div className="w-full md:w-4/5 p-4">
-            <div className="overflow-x-auto rounded-lg shadow-md">
-              <table className="min-w-full text-sm text-left table-auto border border-gray-700">
-                <thead className="bg-gray-900 text-white">
+            <div className="overflow-x-auto rounded-lg shadow-lg border border-pink-600">
+              <table className="min-w-full text-sm text-left table-auto border-collapse">
+                <thead className="bg-pink-800 text-white">
                   <tr>
-                    <th className="px-4 py-3 border-b border-gray-700">ID</th>
-                    <th className="px-4 py-3 border-b border-gray-700">Name</th>
-                    <th className="px-4 py-3 border-b border-gray-700">Email</th>
-                    <th className="px-4 py-3 border-b border-gray-700">Admin</th>
-                    <th className="px-4 py-3 border-b border-gray-700">Actions</th>
+                    <th className="px-4 py-3 border-b border-pink-600">ID</th>
+                    <th className="px-4 py-3 border-b border-pink-600">Name</th>
+                    <th className="px-4 py-3 border-b border-pink-600">Email</th>
+                    <th className="px-4 py-3 border-b border-pink-600">Admin</th>
+                    <th className="px-4 py-3 border-b border-pink-600">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800">
                   {users.map((user) => (
-                    <tr key={user._id} className="hover:bg-gray-800 transition">
+                    <tr
+                      key={user._id}
+                      className="hover:bg-gray-800 transition-colors"
+                    >
                       <td className="px-4 py-3">{user._id}</td>
 
                       {/* Username Field */}
@@ -94,11 +99,11 @@ const UserList = () => {
                               type="text"
                               value={editableUserName}
                               onChange={(e) => setEditableUserName(e.target.value)}
-                              className="p-2 rounded bg-gray-900 border border-gray-600 text-white w-full"
+                              className="p-2 rounded bg-black border border-pink-500 text-white w-full"
                             />
                             <button
                               onClick={() => updateHandler(user._id)}
-                              className="bg-green-600 hover:bg-green-700 p-2 rounded"
+                              className="bg-pink-600 hover:bg-pink-700 p-2 rounded"
                             >
                               <FaCheck />
                             </button>
@@ -110,7 +115,7 @@ const UserList = () => {
                               onClick={() =>
                                 toggleEdit(user._id, user.username, user.email)
                               }
-                              className="text-blue-400 hover:text-blue-600"
+                              className="text-pink-400 hover:text-pink-300"
                             >
                               <FaEdit />
                             </button>
@@ -126,11 +131,11 @@ const UserList = () => {
                               type="text"
                               value={editableUserEmail}
                               onChange={(e) => setEditableUserEmail(e.target.value)}
-                              className="p-2 rounded bg-gray-900 border border-gray-600 text-white w-full"
+                              className="p-2 rounded bg-black border border-pink-500 text-white w-full"
                             />
                             <button
                               onClick={() => updateHandler(user._id)}
-                              className="bg-green-600 hover:bg-green-700 p-2 rounded"
+                              className="bg-pink-600 hover:bg-pink-700 p-2 rounded"
                             >
                               <FaCheck />
                             </button>
@@ -142,7 +147,7 @@ const UserList = () => {
                               onClick={() =>
                                 toggleEdit(user._id, user.username, user.email)
                               }
-                              className="text-blue-400 hover:text-blue-600"
+                              className="text-pink-400 hover:text-pink-300"
                             >
                               <FaEdit />
                             </button>
@@ -153,7 +158,7 @@ const UserList = () => {
                       {/* Admin Icon */}
                       <td className="px-4 py-3 text-center">
                         {user.isAdmin ? (
-                          <FaCheck className="text-green-500 mx-auto" />
+                          <FaCheck className="text-pink-400 mx-auto" />
                         ) : (
                           <FaTimes className="text-red-500 mx-auto" />
                         )}
@@ -164,7 +169,7 @@ const UserList = () => {
                         {!user.isAdmin && (
                           <button
                             onClick={() => deleteHandler(user._id)}
-                            className="bg-red-600 hover:bg-red-700 p-2 rounded text-white"
+                            className="bg-pink-600 hover:bg-pink-700 p-2 rounded text-white"
                           >
                             <FaTrash />
                           </button>
