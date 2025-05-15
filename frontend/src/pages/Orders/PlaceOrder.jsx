@@ -6,13 +6,12 @@ import Message from "../../components/Massage";
 import ProgressSteps from "../../components/ProgressSteps";
 import Loader from "../../components/Loader";
 import { useCreateOrderMutation } from "../../redux/api/orderApiSlice";
-import { clearCartItems } from "../../redux/features/Cart/CartSlice";
+import { clearCartItems, calculatePrices } from "../../redux/features/Cart/CartSlice";
 
 const PlaceOrder = () => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart);
-
   const [createOrder, { isLoading, error }] = useCreateOrderMutation();
 
   useEffect(() => {
@@ -21,7 +20,11 @@ const PlaceOrder = () => {
     }
   }, [cart.paymentMethod, cart.shippingAddress.address, navigate]);
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    if (cart.cartItems.length > 0) {
+      dispatch(calculatePrices());
+    }
+  }, [dispatch, cart.cartItems]);
 
   const placeOrderHandler = async () => {
     try {
@@ -65,25 +68,22 @@ const PlaceOrder = () => {
                 {cart.cartItems.map((item, index) => (
                   <tr key={index}>
                     <td className="p-2">
-                    <img
-                      src={
-                        item.image?.startsWith('http')
-                          ? item.image
-                          : `${import.meta.env.VITE_API_URL}${item.image}`
-                      }                      
-                      alt={item.name}
-                      className="w-16 h-16 object-cover rounded"
-                    />
+                      <img
+                        src={
+                          item.image?.startsWith('http')
+                            ? item.image
+                            : `${import.meta.env.VITE_API_URL}${item.image}`
+                        }                      
+                        alt={item.name}
+                        className="w-16 h-16 object-cover rounded"
+                      />
                     </td>
-
                     <td className="p-2">
                       <Link to={`/product/${item.product}`}>{item.name}</Link>
                     </td>
                     <td className="p-2">{item.qty}</td>
                     <td className="p-2">{item.price.toFixed(2)}</td>
-                    <td className="p-2">
-                      $ {(item.qty * item.price).toFixed(2)}
-                    </td>
+                    <td className="p-2">$ {(item.qty * item.price).toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -96,20 +96,16 @@ const PlaceOrder = () => {
           <div className="flex justify-between flex-wrap p-8 bg-[#181818]">
             <ul className="text-lg">
               <li>
-                <span className="font-semibold mb-4">Items:</span> $
-                {cart.itemsPrice}
+                <span className="font-semibold mb-4">Items:</span> ${(cart.itemsPrice || 0).toFixed(2)}
               </li>
               <li>
-                <span className="font-semibold mb-4">Shipping:</span> $
-                {cart.shippingPrice}
+                <span className="font-semibold mb-4">Shipping:</span> ${(cart.shippingPrice || 0).toFixed(2)}
               </li>
               <li>
-                <span className="font-semibold mb-4">Tax:</span> $
-                {cart.taxPrice}
+                <span className="font-semibold mb-4">Tax:</span> ${(cart.taxPrice || 0).toFixed(2)}
               </li>
               <li>
-                <span className="font-semibold mb-4">Total:</span> $
-                {cart.totalPrice}
+                <span className="font-semibold mb-4">Total:</span> ${(cart.totalPrice || 0).toFixed(2)}
               </li>
             </ul>
 
@@ -133,7 +129,7 @@ const PlaceOrder = () => {
           <button
             type="button"
             className="bg-pink-500 text-white py-2 px-4 rounded-full text-lg w-full mt-4"
-            disabled={cart.cartItems === 0}
+            disabled={cart.cartItems.length === 0 || isLoading}
             onClick={placeOrderHandler}
           >
             Place Order

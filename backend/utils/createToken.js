@@ -5,13 +5,15 @@ const createToken = (res, userId) => {
     expiresIn: '30d',
   });
 
+  // Set cookie
   res.cookie('jwt', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // Secure in production
-    sameSite: 'none', // Cross-site cookie
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   });
 
+  // Also return token for header-based auth
   return token;
 };
 

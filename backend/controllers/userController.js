@@ -4,76 +4,83 @@ import bcrypt from 'bcryptjs';
 import createToken from '../utils/createToken.js';
 import jwt from 'jsonwebtoken';
 
-// Register User
+// Enhanced Register User
 const createUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
 
+  // Validation
   if (!username || !email || !password) {
     res.status(400);
     throw new Error("Please fill in all inputs");
   }
 
+  // Check existing user
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     res.status(400);
     throw new Error("Email already exists");
   }
 
+  // Create user
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
+  const newUser = await User.create({ 
+    username, 
+    email, 
+    password: hashedPassword 
+  });
 
-  const newUser = await User.create({ username, email, password: hashedPassword });
-
-  createToken(res, newUser._id);
+  // Set cookie AND return token in response
+  const token = createToken(res, newUser._id);
 
   res.status(201).json({
     _id: newUser._id,
     username: newUser.username,
     email: newUser.email,
     isAdmin: newUser.isAdmin,
+    token // For header-based auth
   });
 });
 
-// Login User
+// Enhanced Login User
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const existingUser = await User.findOne({ email });
-  if (!existingUser) {
-    res.status(400);
+  // Find user
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(401);
     throw new Error("Invalid email or password");
   }
 
-  const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
-    res.status(400);
+    res.status(401);
     throw new Error("Invalid email or password");
   }
 
-  const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
-  });
+  // Set cookie AND return token
+  const token = createToken(res, user._id);
 
   res.status(200).json({
-    _id: existingUser._id,
-    username: existingUser.username,
-    email: existingUser.email,
-    isAdmin: existingUser.isAdmin,
-    token,
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    isAdmin: user.isAdmin,
+    token // For header-based auth
   });
 });
 
-// Logout User
+// Logout User (unchanged)
 const logoutCurrentUser = asyncHandler(async (req, res) => {
   res.cookie('jwt', '', {
     httpOnly: true,
     expires: new Date(0),
   });
-
   res.status(200).json({ message: "Logged out successfully" });
 });
 
-// Get All Users
 const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find({});
   res.json(users);
