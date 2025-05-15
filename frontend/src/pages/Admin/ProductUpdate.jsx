@@ -146,7 +146,10 @@ const ProductUpdate = () => {
               />
               <IconButton
                 aria-label="remove image"
-                onClick={removeImageHandler}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeImageHandler();
+                }}
                 className="!absolute !top-0 !right-0 !text-white !bg-red-600 hover:!bg-red-700 !p-1"
                 sx={{ transform: "translate(50%, -50%)" }}
               >

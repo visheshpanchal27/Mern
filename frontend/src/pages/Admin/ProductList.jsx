@@ -127,7 +127,7 @@ const ProductList = () => {
                 />
                 <IconButton
                   onClick={(e) => {
-                    e.stopPropagation();  // Stop event bubbling so file input not triggered
+                    e.stopPropagation();
                     removeImageHandler();
                   }}
                   sx={{
