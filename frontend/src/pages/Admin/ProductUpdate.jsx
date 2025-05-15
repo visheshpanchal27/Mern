@@ -10,6 +10,10 @@ import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
 import AdminMenu from "./AdminMenu";
 
+// ✅ Material UI
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+
 const ProductUpdate = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -17,8 +21,8 @@ const ProductUpdate = () => {
   const { data: productData } = useGetProductByIdQuery(id);
   const { data: categories = [] } = useFetchCategoriesQuery();
 
-  const [image, setImage] = useState("");
-  const [imageUrl, setImageUrl] = useState(null);
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -34,8 +38,7 @@ const ProductUpdate = () => {
 
   useEffect(() => {
     if (!productData) return;
-  
-    setImage(productData.image || "");
+
     setName(productData.name || "");
     setDescription(productData.description || "");
     setPrice(productData.price || "");
@@ -43,25 +46,32 @@ const ProductUpdate = () => {
     setQuantity(productData.quantity || "");
     setBrand(productData.brand || "");
     setStock(productData.countInStock || "");
-  }, [productData]);
-  
 
-  const uploadFileHandler = async (e) => {
-    const file = e.target.files[0];
-    setImage(file);
-    const formData = new FormData();
-    formData.append("image", file);
-
-    setUploading(true);
-    try {
-      const res = await uploadProductImage(formData).unwrap();
-      toast.success("Image uploaded");
-      setImageUrl(res.image);
-    } catch (err) {
-      toast.error("Image upload failed");
-    } finally {
-      setUploading(false);
+    if (productData.image) {
+      setImagePreview(
+        productData.image.startsWith("http")
+          ? productData.image
+          : `${import.meta.env.VITE_API_URL}${productData.image}`
+      );
     }
+  }, [productData]);
+
+  const uploadFileHandler = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImage(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImageHandler = () => {
+    setImage(null);
+    setImagePreview("");
   };
 
   const submitHandler = async (e) => {
@@ -73,38 +83,43 @@ const ProductUpdate = () => {
     }
 
     try {
-      let uploadedImageUrl = imageUrl || image;
+      setUploading(true);
 
-      if (!imageUrl && image instanceof File) {
-        const formData = new FormData();
-        formData.append("image", image);
-        const res = await uploadProductImage(formData).unwrap();
-        uploadedImageUrl = res.image;
+      let imageUrl = productData?.image || "";
+
+      if (image instanceof File) {
+        const uploadForm = new FormData();
+        uploadForm.append("image", image);
+        const res = await uploadProductImage(uploadForm).unwrap();
+        imageUrl = res.image;
       }
 
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("description", description);
-      formData.append("price", price);
-      formData.append("category", category);
-      formData.append("quantity", quantity);
-      formData.append("brand", brand);
-      formData.append("countInStock", stock);
-      formData.append("image", uploadedImageUrl);
+      const productData = {
+        name,
+        description,
+        price,
+        category,
+        quantity,
+        brand,
+        countInStock: stock,
+        image: imageUrl,
+      };
 
-      await updateProduct({ productId: id, formData }).unwrap();
+      await updateProduct({ productId: id, formData: productData }).unwrap();
 
       toast.success("Product updated successfully!");
       navigate("/admin/allproductslist");
     } catch (err) {
       toast.error(err?.data?.message || "Failed to update product");
+    } finally {
+      setUploading(false);
     }
   };
 
   const deleteHandler = async () => {
     const confirmed = window.confirm("Are you sure you want to delete this product?");
     if (!confirmed) return;
-  
+
     try {
       await deleteProduct(id).unwrap();
       toast.success("Product deleted successfully");
@@ -113,7 +128,6 @@ const ProductUpdate = () => {
       toast.error(err?.data?.message || "Delete failed");
     }
   };
-  
 
   return (
     <div className="container xl:mx-[9rem] sm:mx-[0] text-white">
@@ -123,21 +137,21 @@ const ProductUpdate = () => {
           <h2 className="text-xl font-semibold mb-6">Update / Delete Product</h2>
 
           {/* Image Preview */}
-          {(imageUrl || (typeof image === "string" && image.trim() !== "")) && (
-            <div className="text-center mb-4">
+          {imagePreview && (
+            <div className="text-center mb-4 relative">
               <img
-                src={
-                  imageUrl
-                    ? imageUrl.startsWith("http")
-                      ? imageUrl
-                      : `${import.meta.env.VITE_API_URL}${imageUrl}`
-                    : image.startsWith("http")
-                    ? image
-                    : `${import.meta.env.VITE_API_URL}${image}`
-                }
+                src={imagePreview}
                 alt="Product Preview"
                 className="block mx-auto max-h-[200px] rounded-lg shadow-md"
               />
+              <IconButton
+                aria-label="remove image"
+                onClick={removeImageHandler}
+                className="!absolute !top-0 !right-0 !text-white !bg-red-600 hover:!bg-red-700 !p-1"
+                sx={{ transform: "translate(50%, -50%)" }}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
             </div>
           )}
 
@@ -146,7 +160,7 @@ const ProductUpdate = () => {
               uploading ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
-            {uploading ? "Uploading..." : image?.name || "Upload Image"}
+            {image ? "Change Image" : "Upload Image"}
             <input
               type="file"
               accept="image/*"
@@ -241,7 +255,7 @@ const ProductUpdate = () => {
               className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold"
               disabled={uploading}
             >
-              Update
+              {uploading ? "Updating..." : "Update"}
             </button>
             <button
               type="button"
