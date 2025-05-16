@@ -56,9 +56,9 @@ const UserList = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-black text-white font-sans">
-      <h1 className="text-4xl font-extrabold text-center mb-8 text-pink-300">
-        User List
+    <div className="min-h-screen px-6 py-10 bg-gradient-to-br from-black via-zinc-900 to-black text-white font-sans">
+      <h1 className="text-4xl font-bold text-center mb-10 text-pink-600 drop-shadow-md">
+        Manage Users
       </h1>
 
       {isLoading ? (
@@ -71,43 +71,41 @@ const UserList = () => {
         <div className="flex flex-col md:flex-row gap-6">
           <AdminMenu />
 
-          <div className="w-full md:w-4/5 p-6 bg-gray-900 rounded-md shadow-md border border-pink-300">
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm border-collapse">
-                <thead className="bg-pink-300 text-black font-semibold rounded-t-md">
+          <div className="w-full md:w-4/5 p-6 bg-black/60 backdrop-blur-lg rounded-2xl shadow-2xl border border-pink-600">
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-pink-600 scrollbar-track-black/20">
+              <table className="min-w-full text-sm border-separate border-spacing-y-2">
+                <thead className="bg-pink-600 text-white rounded">
                   <tr>
-                    <th className="px-5 py-4 border-b border-pink-300">ID</th>
-                    <th className="px-5 py-4 border-b border-pink-300">Name</th>
-                    <th className="px-5 py-4 border-b border-pink-300">Email</th>
-                    <th className="px-5 py-4 border-b border-pink-300 text-center">
-                      Admin
-                    </th>
-                    <th className="px-5 py-4 border-b border-pink-300 text-center">
-                      Actions
-                    </th>
+                    <th className="px-4 py-3 text-left">ID</th>
+                    <th className="px-4 py-3 text-left">Name</th>
+                    <th className="px-4 py-3 text-left">Email</th>
+                    <th className="px-4 py-3 text-center">Admin</th>
+                    <th className="px-4 py-3 text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {users.map((user) => (
                     <tr
                       key={user._id}
-                      className="hover:bg-gray-800 transition-colors duration-200"
+                      className="bg-black/50 hover:bg-black/70 transition rounded-lg shadow-sm"
                     >
-                      <td className="px-5 py-3 border-b border-gray-700">{user._id}</td>
+                      <td className="px-4 py-3 rounded-l-lg">{user._id}</td>
 
-                      <td className="px-5 py-3 border-b border-gray-700">
+                      <td className="px-4 py-3">
                         {editableUserId === user._id ? (
                           <div className="flex items-center gap-2">
                             <input
                               type="text"
                               value={editableUserName}
-                              onChange={(e) => setEditableUserName(e.target.value)}
-                              className="w-full px-3 py-2 rounded border border-pink-300 bg-black text-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                              onChange={(e) =>
+                                setEditableUserName(e.target.value)
+                              }
+                              className="w-full px-3 py-2 rounded-md bg-black border border-pink-600 text-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-600"
                             />
                             <button
                               onClick={() => updateHandler(user._id)}
-                              className="p-2 rounded bg-pink-300 text-black hover:bg-pink-400 transition"
-                              aria-label="Save username"
+                              className="p-2 rounded-md bg-pink-600 text-white hover:bg-pink-700 transition"
+                              aria-label="Save name"
                             >
                               <FaCheck />
                             </button>
@@ -119,8 +117,8 @@ const UserList = () => {
                               onClick={() =>
                                 toggleEdit(user._id, user.username, user.email)
                               }
-                              className="text-pink-300 hover:text-pink-400 transition"
-                              aria-label="Edit username"
+                              className="text-pink-500 hover:text-pink-700 transition"
+                              aria-label="Edit name"
                             >
                               <FaEdit />
                             </button>
@@ -128,18 +126,20 @@ const UserList = () => {
                         )}
                       </td>
 
-                      <td className="px-5 py-3 border-b border-gray-700">
+                      <td className="px-4 py-3">
                         {editableUserId === user._id ? (
                           <div className="flex items-center gap-2">
                             <input
                               type="text"
                               value={editableUserEmail}
-                              onChange={(e) => setEditableUserEmail(e.target.value)}
-                              className="w-full px-3 py-2 rounded border border-pink-300 bg-black text-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300"
+                              onChange={(e) =>
+                                setEditableUserEmail(e.target.value)
+                              }
+                              className="w-full px-3 py-2 rounded-md bg-black border border-pink-600 text-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-600"
                             />
                             <button
                               onClick={() => updateHandler(user._id)}
-                              className="p-2 rounded bg-pink-300 text-black hover:bg-pink-400 transition"
+                              className="p-2 rounded-md bg-pink-600 text-white hover:bg-pink-700 transition"
                               aria-label="Save email"
                             >
                               <FaCheck />
@@ -152,7 +152,7 @@ const UserList = () => {
                               onClick={() =>
                                 toggleEdit(user._id, user.username, user.email)
                               }
-                              className="text-pink-300 hover:text-pink-400 transition"
+                              className="text-pink-500 hover:text-pink-700 transition"
                               aria-label="Edit email"
                             >
                               <FaEdit />
@@ -161,19 +161,19 @@ const UserList = () => {
                         )}
                       </td>
 
-                      <td className="px-5 py-3 border-b border-gray-700 text-center">
+                      <td className="px-4 py-3 text-center">
                         {user.isAdmin ? (
-                          <FaCheck className="mx-auto text-pink-300" />
+                          <FaCheck className="text-pink-500 mx-auto" />
                         ) : (
-                          <FaTimes className="mx-auto text-red-500" />
+                          <FaTimes className="text-red-500 mx-auto" />
                         )}
                       </td>
 
-                      <td className="px-5 py-3 border-b border-gray-700 text-center">
+                      <td className="px-4 py-3 text-center rounded-r-lg">
                         {!user.isAdmin && (
                           <button
                             onClick={() => deleteHandler(user._id)}
-                            className="p-2 rounded bg-pink-300 text-black hover:bg-pink-400 transition"
+                            className="p-2 rounded-md bg-pink-600 text-white hover:bg-pink-700 transition"
                             aria-label="Delete user"
                           >
                             <FaTrash />

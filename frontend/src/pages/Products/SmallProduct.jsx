@@ -3,7 +3,7 @@ import HeartIcon from "./HeartIcon";
 
 const SmallProduct = ({ product }) => {
   return (
-    <div className="w-[16rem] p-3">
+    <div className="w-[16rem] p-3 hidden sm:block">
       <div className="relative bg-white rounded-xl p-2">
         <img
           src={
