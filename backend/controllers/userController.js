@@ -213,7 +213,7 @@ const googleAuth = asyncHandler(async (req, res) => {
     email: user.email,
     isAdmin: user.isAdmin,
   });
-});
+}); 
 
 
 export {

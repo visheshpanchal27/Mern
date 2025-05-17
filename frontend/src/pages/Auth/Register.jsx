@@ -60,7 +60,6 @@ const Register = () => {
       const decoded = jwt_decode.default(credentialResponse.credential);
       const { name, email, picture } = decoded;
 
-      // You can optionally send this to your backend to register/login
       dispatch(setCredentials({ username: name, email, image: picture }));
       navigate(redirect);
       toast.success("Google login successful");
