@@ -49,7 +49,7 @@ const OrderList = () => {
               </thead>
 
               <tbody>
-                {orders.map((order) => (
+                {[...orders].reverse().map((order) => (
                   <tr
                     key={order._id}
                     className="hover:bg-gray-800 transition duration-200 border-b border-gray-700"

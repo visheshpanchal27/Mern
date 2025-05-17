@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { FaPaypal, FaMoneyBillWave, FaTruck } from "react-icons/fa";
+import { FaPaypal, FaMoneyBillWave, FaTruck, FaCheckCircle, FaBoxOpen } from "react-icons/fa";
 import Message from "../../components/Massage";
 import Loader from "../../components/Loader";
 import {
@@ -50,10 +50,6 @@ const Order = () => {
     }
   }, [errorPayPal, loadingPayPal, order, paypal, paypalDispatch]);
 
-  useEffect(() => {
-    console.log("Fetched order:", order);
-  }, [order]);
-
   const onApprove = (data, actions) => {
     return actions.order.capture().then(async (details) => {
       try {
@@ -94,7 +90,7 @@ const Order = () => {
   return (
     <div className="container mx-auto p-6 flex flex-col md:flex-row gap-6 bg-[#121212] min-h-screen text-white">
       {/* Left - Order Items */}
-      <div className="md:w-2/3 space-y-6 border border-red-500"> {/* Debug border */}
+      <div className="md:w-2/3 space-y-6">
         <div className="bg-[#1e1e1e] rounded-2xl shadow-lg p-6">
           <h2 className="text-2xl font-bold mb-4 text-pink-400">Order Items</h2>
           {!order?.orderItems || order.orderItems.length === 0 ? (
@@ -175,15 +171,17 @@ const Order = () => {
               )}
             </p>
           </div>
+          
+          {/* Payment Status */}
           <div className="mt-4">
             {order.isPaid ? (
               <Message variant="success">
                 Paid on {new Date(order.paidAt).toLocaleString()}
               </Message>
             ) : order.paymentMethod === "CashOnDelivery" ? (
-              <Message variant="warning">Payment to be collected on delivery</Message>
+              <Message variant="warning">Payment to be collected</Message>
             ) : (
-              <Message variant="danger">Not Paid</Message>
+              <Message variant="danger">Payment pending</Message>
             )}
           </div>
         </div>
@@ -225,18 +223,63 @@ const Order = () => {
             </div>
           )}
 
-          {/* Cash on Delivery Message */}
-          {!order.isPaid && order.paymentMethod === "CashOnDelivery" && (
-            <div className="bg-gray-800 p-4 rounded-lg mt-6">
-              <div className="flex items-center gap-2 text-green-400 mb-2">
-                <FaMoneyBillWave />
-                <span>Cash on Delivery Selected</span>
-              </div>
-              <p className="text-gray-300 text-sm">
-                Payment will be collected when your order is delivered.
-              </p>
+
+            {/* Order Status Section */}
+            <div className="mt-6 space-y-4">
+              {/* Cash on Delivery Notice - Only shows before delivery */}
+              {order.paymentMethod === "CashOnDelivery" && !order.isDelivered && (
+                <div className="bg-yellow-900/30 p-4 rounded-lg border border-yellow-500">
+                  <div className="flex items-center gap-2 text-yellow-400 mb-2">
+                    <FaMoneyBillWave />
+                    <span>Cash Payment Required</span>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Please prepare ${order.totalPrice} for the courier upon delivery.
+                  </p>
+                </div>
+              )}
+
+              {/* Delivery Status */}
+              {order.isDelivered ? (
+                <div className="bg-green-900/30 p-4 rounded-lg border border-green-500">
+                  <div className="flex items-center gap-2 text-green-400 mb-2">
+                    <FaCheckCircle />
+                    <span>Delivered Successfully</span>
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    Your order was delivered on {new Date(order.deliveredAt).toLocaleString()}
+                  </p>
+                  {order.paymentMethod === "CashOnDelivery" && (
+                    <p className="text-gray-300 text-sm mt-2">
+                      <FaMoneyBillWave className="inline mr-1" />
+                      Payment was collected upon delivery
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-blue-900/30 p-4 rounded-lg border border-blue-500">
+                  <div className="flex items-center gap-2 text-blue-400 mb-2">
+                    {order.isPaid || order.paymentMethod === "CashOnDelivery" ? (
+                      <>
+                        <FaTruck />
+                        <span>On The Way</span>
+                      </>
+                    ) : (
+                      <>
+                        <FaBoxOpen />
+                        <span>Processing Order</span>
+                      </>
+                    )}
+                  </div>
+                  <p className="text-gray-300 text-sm">
+                    {order.isPaid || order.paymentMethod === "CashOnDelivery"
+                      ? "Your order is being shipped to you"
+                      : "Waiting for payment confirmation"}
+                  </p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Admin Deliver Button */}
           {loadingDeliver && <Loader />}
@@ -254,7 +297,6 @@ const Order = () => {
           )}
         </div>
       </div>
-    </div>
   );
 };
 

@@ -84,7 +84,14 @@ const UserList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {[...users]
+                    .sort((a, b) => {
+                      if (b.isAdmin !== a.isAdmin) {
+                        return b.isAdmin - a.isAdmin; // Admins first
+                      }
+                      return new Date(b.createdAt) - new Date(a.createdAt); // Latest users first within group
+                    })
+                    .map((user) => (
                     <tr
                       key={user._id}
                       className="bg-black/50 hover:bg-black/70 transition rounded-lg shadow-sm"
