@@ -103,6 +103,15 @@ export const userApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: (result, error, { id }) => [{ type: 'User', id }],
     }),
+
+    googleLogin: builder.mutation({
+      query: (tokenIdPayload) => ({
+        url: `${USERS_URL}/google-auth`,
+        method: 'POST',
+        body: tokenIdPayload, 
+      }),
+    }),
+
   }),
 });
 
@@ -116,4 +125,5 @@ export const {
   useDeleteUserMutation,
   useGetUserDetailsQuery,
   useUpdateUserMutation,
+  useGoogleLoginMutation,
 } = userApiSlice;
