@@ -6,6 +6,8 @@ import { setCredentials } from "../../redux/features/auth/authSlice";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
+import { GoogleLogin } from "@react-oauth/google";
+import * as jwt_decode from "jwt-decode";
 
 const Register = () => {
   const [username, setName] = useState("");
@@ -52,6 +54,25 @@ const Register = () => {
     }
   };
 
+  // 🔐 Google Login Handler
+  const googleSuccess = async (credentialResponse) => {
+    try {
+      const decoded = jwt_decode.default(credentialResponse.credential);
+      const { name, email, picture } = decoded;
+
+      // You can optionally send this to your backend to register/login
+      dispatch(setCredentials({ username: name, email, image: picture }));
+      navigate(redirect);
+      toast.success("Google login successful");
+    } catch (err) {
+      toast.error("Google login failed");
+    }
+  };
+
+  const googleError = () => {
+    toast.error("Google login failed");
+  };
+
   return (
     <section className="flex flex-col md:flex-row items-center justify-center min-h-screen px-6 bg-gradient-to-tr from-[#0f0f0f] to-[#1a1a1a]">
       
@@ -65,7 +86,6 @@ const Register = () => {
         <h1 className="text-3xl text-pink-500 font-bold mb-8 text-center">Register</h1>
 
         <form onSubmit={submitHandler} className="flex flex-col gap-6">
-
           <div>
             <label htmlFor="name" className="block text-sm text-gray-300 mb-2">Name</label>
             <input
@@ -123,6 +143,14 @@ const Register = () => {
           </button>
         </form>
 
+        {/* Google Login Button */}
+        <div className="mt-6 flex justify-center">
+          <GoogleLogin
+            onSuccess={googleSuccess}
+            onError={googleError}
+          />
+        </div>
+
         <div className="text-gray-400 text-center mt-6">
           Already have an account?{" "}
           <Link
@@ -143,7 +171,6 @@ const Register = () => {
         transition={{ delay: 0.5, duration: 0.8 }}
         className="hidden md:block md:w-1/2 object-cover h-screen rounded-2xl ml-10"
       />
-
     </section>
   );
 };

@@ -1,4 +1,5 @@
 import asyncHandler from 'express-async-handler';
+import { OAuth2Client } from 'google-auth-library';
 import User from '../models/userModels.js';
 import bcrypt from 'bcryptjs';
 import createToken from '../utils/createToken.js';
@@ -183,6 +184,38 @@ const updateUserById = asyncHandler(async (req, res) => {
   }
 });
 
+const googleAuth = asyncHandler(async (req, res) => {
+  const { tokenId } = req.body;
+
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+  const ticket = await client.verifyIdToken({
+    idToken: tokenId,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  const payload = ticket.getPayload();
+  const { email, name } = payload;
+
+  let user = await User.findOne({ email });
+
+  if (!user) {
+    user = await User.create({
+      username: name,
+      email,
+      password: '', // No password for OAuth users
+    });
+  }
+
+  res.status(200).json({
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    isAdmin: user.isAdmin,
+  });
+});
+
+
 export {
   createUser,
   loginUser,
@@ -193,4 +226,5 @@ export {
   deleteUserById,
   getUserById,
   updateUserById,
+  googleAuth,
 };

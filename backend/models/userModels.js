@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
         required: true, 
         default: false 
     },
+    isGoogleUser: { 
+        type: Boolean, 
+        default: false 
+    },
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
