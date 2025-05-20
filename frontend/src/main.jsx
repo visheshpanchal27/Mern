@@ -32,38 +32,46 @@ import UserOrder from './pages/User/UserOrder.jsx';
 import OrderList from './pages/Admin/OrderList.jsx';
 import AdminDashboard from './pages/Admin/AdminDashboard.jsx';
 
+import ErrorPage from './components/ErrorPage.jsx';
+
 // Google Client ID from env
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<App />}>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route index={true} path="/" element={<Home />} />
-      <Route path="/favorite" element={<Favorites />} />
-      <Route path="/product/:id" element={<ProductDetails />} />
-      <Route path="/cart" element={<Cart />} />
-      <Route path="/shop" element={<Shop />} />
-      <Route path="/user-orders" element={<UserOrder />} />
+    <>
+      {/* 404 outside of layout */}
+      <Route path="*" element={<ErrorPage />} />
 
-      <Route path="" element={<PrivateRoute />}>
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/shipping" element={<ShippingCountry />} />
-        <Route path="/placeorder" element={<PlaceOrder />} />
-        <Route path="/order/:id" element={<Order />} />
-      </Route>
+      {/* All layout-based routes */}
+      <Route path="/" element={<App />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route index element={<Home />} />
+        <Route path="/favorite" element={<Favorites />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/user-orders" element={<UserOrder />} />
 
-      <Route path="/admin" element={<AdminRoute />}>
-        <Route path="userList" element={<UserList />} />
-        <Route path="categoryList" element={<CategoryList />} />
-        <Route path="productList" element={<ProductList />} />
-        <Route path="allProductsList" element={<AllProducts />} />
-        <Route path="orderlist" element={<OrderList />} />
-        <Route path="product/update/:id" element={<ProductUpdate />} />
-        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/shipping" element={<ShippingCountry />} />
+          <Route path="/placeorder" element={<PlaceOrder />} />
+          <Route path="/order/:id" element={<Order />} />
+        </Route>
+
+        <Route path="/admin" element={<AdminRoute />}>
+          <Route path="userList" element={<UserList />} />
+          <Route path="categoryList" element={<CategoryList />} />
+          <Route path="productList" element={<ProductList />} />
+          <Route path="allProductsList" element={<AllProducts />} />
+          <Route path="orderlist" element={<OrderList />} />
+          <Route path="product/update/:id" element={<ProductUpdate />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+        </Route>
       </Route>
-    </Route>
+    </>
   )
 );
 
