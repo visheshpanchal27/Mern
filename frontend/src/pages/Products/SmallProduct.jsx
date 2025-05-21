@@ -1,13 +1,29 @@
 import { Link } from "react-router-dom";
 import HeartIcon from "./HeartIcon";
 
-const SmallProduct = ({ product }) => {
+const SmallProduct = ({ product, isLoading }) => {
+  if (isLoading || !product) {
+    return (
+      <div className="w-[16rem] p-3 hidden sm:block animate-pulse">
+        <div className="bg-gray-800 rounded-xl p-2 h-36 flex items-center justify-center">
+          <div className="h-32 w-32 bg-gray-700 rounded-lg" />
+        </div>
+        <div className="p-3">
+          <div className="flex justify-between items-center">
+            <div className="h-4 w-24 bg-gray-700 rounded-md"></div>
+            <div className="h-4 w-10 bg-gray-700 rounded-md"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-[16rem] p-3 hidden sm:block">
       <div className="relative bg-white rounded-xl p-2">
         <img
           src={
-            product.image?.startsWith('http')
+            product.image?.startsWith("http")
               ? product.image
               : `${import.meta.env.VITE_API_URL}${product.image}`
           }

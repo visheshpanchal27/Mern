@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import axios from "axios";
-import Loader from "../components/Loader";
+import ProductCardSkeleton from "../components/ProductCardSkeleton.jsx";
 import Header from "../components/Header";
 import Massage from "../components/Massage";
 import ProductAll from "./Products/ProductAll.jsx";
@@ -31,7 +31,7 @@ const Home = () => {
     <>
       <Header />
       {isLoading ? (
-        <Loader />
+        <ProductCardSkeleton />
       ) : isError ? (
         <Massage variant="danger">Something went wrong!</Massage>
       ) : (

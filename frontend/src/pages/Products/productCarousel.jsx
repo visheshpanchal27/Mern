@@ -48,9 +48,66 @@ const ProductCarousel = () => {
     fetchRandomProducts();
   }, []);
 
+  // Improved BigProductSkeleton with image + details placeholders, matching real card size
+  const BigProductSkeleton = () => (
+    <div className="w-[40rem] ml-[0.3rem] p-3 relative animate-pulse">
+      <div className="relative overflow-hidden rounded-3xl shadow-xl bg-gradient-to-br from-gray-900 to-gray-800">
+        {/* Image placeholder */}
+        <div className="w-full h-[15rem] bg-gray-700 rounded-t-3xl" />
+
+        {/* Details placeholder */}
+        <div className="p-4 space-y-3">
+          {/* Product name & price */}
+          <div className="flex justify-between items-center">
+            <div className="h-6 w-48 bg-gray-600 rounded-md"></div>
+            <div className="h-6 w-16 bg-gray-600 rounded-md"></div>
+          </div>
+
+          {/* Brand & time */}
+          <div className="flex justify-between text-sm">
+            <div className="flex items-center space-x-2">
+              <div className="h-5 w-5 bg-gray-600 rounded-full" />
+              <div className="h-4 w-20 bg-gray-600 rounded-md"></div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="h-5 w-5 bg-gray-600 rounded-full" />
+              <div className="h-4 w-14 bg-gray-600 rounded-md"></div>
+            </div>
+          </div>
+
+          {/* Reviews & rating */}
+          <div className="flex justify-between text-sm">
+            <div className="flex items-center space-x-2">
+              <div className="h-5 w-5 bg-gray-600 rounded-full" />
+              <div className="h-4 w-20 bg-gray-600 rounded-md"></div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="h-5 w-5 bg-gray-600 rounded-full" />
+              <div className="h-4 w-16 bg-gray-600 rounded-md"></div>
+            </div>
+          </div>
+
+          {/* Qty & In Stock */}
+          <div className="flex justify-between text-sm">
+            <div className="flex items-center space-x-2">
+              <div className="h-5 w-5 bg-gray-600 rounded-full" />
+              <div className="h-4 w-16 bg-gray-600 rounded-md"></div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="h-5 w-5 bg-gray-600 rounded-full" />
+              <div className="h-4 w-20 bg-gray-600 rounded-md"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full max-w-2xl mx-auto xl:mr-[2rem] px-4 py-6">
-      {isLoading ? null : isError ? (
+      {isLoading ? (
+        <BigProductSkeleton />
+      ) : isError ? (
         <Message variant="danger">Something went wrong!</Message>
       ) : (
         <Slider {...settings}>
