@@ -6,77 +6,56 @@ body {
 
 #navigation-container {
   transition: width 0.3s ease-in-out;
-  overflow: hidden;
+  overflow-x: hidden !important;
 }
 
 #navigation-container:hover {
-  width: 15%;
+  width: 14rem;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
 .nav-item-name {
   display: none;
-  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+  transform: translateX(-5px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 #navigation-container:hover .nav-item-name {
   display: block;
   opacity: 1;
+  transform: translateX(0);
 }
 
-.search-input {
-  display: none;
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
+/* Scrollbar for nav item list */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #555 transparent;
 }
 
-#navigation-container:hover .search-input {
-  display: block;
-  opacity: 1;
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
 
-#navigation-container:hover .search-icon {
-  display: none;
-  transition: opacity 0.2s ease-in-out;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* ✅ Username Hover Dropdown */
-.dropdown-container {
-  position: relative;
-  display: inline-block;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #555, #888);
+  border-radius: 10px;
+  border: 1px solid #333;
 }
 
-/* Initially hide dropdown */
-.dropdown-menu {
-  display: none;
-  position: absolute;
-  right: 0;
-  margin-top: 8px;
-  background-color: white;
-  color: black;
-  min-width: 150px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
-  overflow: hidden;
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+/* Optional pulse animation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
-/* Show dropdown when hovering over the username */
-.dropdown-container:hover .dropdown-menu {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Dropdown list styling */
-.dropdown-menu li {
-  padding: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-/* Hover effect on dropdown items */
-.dropdown-menu li:hover {
-  background-color: #f0f0f0;
+.badge-pulse {
+  animation: pulse 0.4s ease;
 }
 
 @media (min-width: 768px) {

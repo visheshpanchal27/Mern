@@ -9,7 +9,6 @@ import {
 import { useState, useEffect } from "react";
 import { FaDollarSign, FaUsers, FaClipboardList } from "react-icons/fa";
 
-import AdminMenu from "./AdminMenu";
 import OrderList from "./OrderList";
 import Loader from "../../components/Loader";
 
@@ -120,7 +119,6 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <AdminMenu />
       <section className="xl:ml-[4rem] md:ml-0 p-5">
         <div className="flex justify-center flex-wrap gap-8">
           <StatCard

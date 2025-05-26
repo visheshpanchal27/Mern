@@ -1,133 +1,168 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { saveShippingAddress, savePaymentMethod, } from "../../redux/features/Cart/CartSlice";
+import {
+  saveShippingAddress,
+  savePaymentMethod,
+} from "../../redux/features/Cart/CartSlice";
 import ProgressSteps from "../../components/ProgressSteps";
-import { FaMoneyBillWave, FaCreditCard, FaPaypal } from "react-icons/fa";
+import { FaMoneyBillWave, FaPaypal, FaMousePointer } from "react-icons/fa";
 
 const ShippingCountry = () => {
-    const cart = useSelector((state) => state.cart);
-    const { shippingAddress } = cart;
+  const cart = useSelector((state) => state.cart);
+  const { shippingAddress } = cart;
 
-    const [paymentMethod, setPaymentMethod] = useState("PayPal");
-    const [address, setAddress] = useState(shippingAddress.address || "");
-    const [city, setCity] = useState(shippingAddress.city || "");
-    const [postalCode, setPostalCode] = useState(
-      shippingAddress.postalCode || ""
-    );
-    const [country, setCountry] = useState(shippingAddress.country || "");
+  const [paymentMethod, setPaymentMethod] = useState("PayPal");
+  const [address, setAddress] = useState(shippingAddress.address || "");
+  const [city, setCity] = useState(shippingAddress.city || "");
+  const [postalCode, setPostalCode] = useState(shippingAddress.postalCode || "");
+  const [country, setCountry] = useState(shippingAddress.country || "");
+  const [errors, setErrors] = useState({});
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
+  const validatePostalCode = () => {
+    if (postalCode && !/^\d+$/.test(postalCode)) {
+      setErrors((prev) => ({ ...prev, postalCode: "Postal code must be numeric!" }));
+    } else {
+      setErrors((prev) => ({ ...prev, postalCode: "" }));
+    }
+  };
 
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+  const isFormValid =
+    address && city && postalCode && country && !errors.postalCode;
 
-    const submitHandler = (e) => {
-        e.preventDefault();
-    
-        dispatch(saveShippingAddress({ address, city, postalCode, country }));
-        dispatch(savePaymentMethod(paymentMethod));
-        navigate("/placeorder");
-    };
+  const submitHandler = (e) => {
+    e.preventDefault();
+    if (!isFormValid) return;
 
-    // Payment
-    useEffect(() => {
-        if (!shippingAddress.address) {
-        navigate("/shipping");
-        }
-    }, [navigate, shippingAddress]);
+    dispatch(saveShippingAddress({ address, city, postalCode, country }));
+    dispatch(savePaymentMethod(paymentMethod));
+    navigate("/placeorder");
+  };
+
+  useEffect(() => {
+    if (!shippingAddress.address) {
+      navigate("/shipping");
+    }
+  }, [navigate, shippingAddress]);
 
   return (
-    <div className="container mx-auto mt-10">
+    <div className="container mx-auto mt-10 px-4">
       <ProgressSteps step1 step2 />
-      <div className="mt-[5rem] flex justify-around items-center flex-wrap">
-        <form onSubmit={submitHandler} className="w-[40rem]">
-          <h1 className="text-2xl font-semibold mb-4">Shipping</h1>
-          <div className="mb-4">
-            <label className="block text-white mb-2">Address</label>
+      <div className="mt-12 flex justify-center">
+        <form
+          onSubmit={submitHandler}
+          className="w-full max-w-2xl bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-xl space-y-6"
+        >
+          <h1 className="text-3xl font-bold text-white mb-4">Shipping Information</h1>
+
+          {/* Address */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Address</label>
             <input
               type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Enter address"
+              placeholder="Enter your address"
               value={address}
-              required
               onChange={(e) => setAddress(e.target.value)}
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-white mb-2">City</label>
-            <input
-              type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Enter city"
-              value={city}
               required
-              onChange={(e) => setCity(e.target.value)}
+              className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-pink-500 focus:outline-none text-white"
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-white mb-2">Postal Code</label>
+
+          {/* City */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">City</label>
             <input
               type="text"
-              className="w-full p-2 border rounded"
+              placeholder="Enter your city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              required
+              className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-pink-500 focus:outline-none text-white"
+            />
+          </div>
+
+          {/* Postal Code */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Postal Code</label>
+            <input
+              type="text"
               placeholder="Enter postal code"
               value={postalCode}
-              required
               onChange={(e) => setPostalCode(e.target.value)}
+              onBlur={validatePostalCode}
+              required
+              className={`w-full p-3 rounded-lg bg-gray-700 border ${
+                errors.postalCode ? "border-red-500" : "border-gray-600"
+              } focus:border-pink-500 focus:outline-none text-white`}
             />
+            {errors.postalCode && (
+              <p className="text-red-400 text-sm mt-1">{errors.postalCode}</p>
+            )}
           </div>
-          <div className="mb-4">
-            <label className="block text-white mb-2">Country</label>
+
+          {/* Country */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Country</label>
             <input
               type="text"
-              className="w-full p-2 border rounded"
-              placeholder="Enter country"
+              placeholder="Enter your country"
               value={country}
-              required
               onChange={(e) => setCountry(e.target.value)}
+              required
+              className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:border-pink-500 focus:outline-none text-white"
             />
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-400">Select Payment Method</label>
-            <div className="mt-2 space-y-2">
-              <label className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-800 cursor-pointer">
+
+          {/* Payment Method */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Payment Method</label>
+            <div className="space-y-3">
+              <label className="flex items-center p-3 bg-gray-700 rounded-lg border border-gray-600 hover:border-pink-500 transition-colors cursor-pointer">
                 <input
                   type="radio"
-                  className="form-radio text-pink-500"
                   name="paymentMethod"
                   value="PayPal"
                   checked={paymentMethod === "PayPal"}
                   onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="accent-pink-500 mr-3"
                 />
-                <FaPaypal className="text-blue-500" />
-                <span>PayPal or Credit Card</span>
+                <FaPaypal className="text-blue-400 text-xl mr-2" />
+                <span className="text-white">PayPal or Credit Card</span>
               </label>
 
-              <label className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-800 cursor-pointer">
+              <label className="flex items-center p-3 bg-gray-700 rounded-lg border border-gray-600 hover:border-pink-500 transition-colors cursor-pointer">
                 <input
                   type="radio"
-                  className="form-radio text-pink-500"
                   name="paymentMethod"
                   value="CashOnDelivery"
                   checked={paymentMethod === "CashOnDelivery"}
                   onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="accent-pink-500 mr-3"
                 />
-                <FaMoneyBillWave className="text-green-500" />
-                <span>Cash on Delivery</span>
+                <FaMoneyBillWave className="text-green-400 text-xl mr-2" />
+                <span className="text-white">Cash on Delivery</span>
               </label>
             </div>
           </div>
 
+          {/* Submit Button */}
           <button
-            className="bg-pink-500 text-white py-2 px-4 rounded-full text-lg w-full"
             type="submit"
+            disabled={!isFormValid}
+            className={`w-full flex items-center justify-center gap-2 bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-full text-lg transition ${
+              !isFormValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+            }`}
           >
+             
             Continue
           </button>
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default ShippingCountry;

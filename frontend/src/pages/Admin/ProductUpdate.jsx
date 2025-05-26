@@ -8,7 +8,6 @@ import {
 } from "../../redux/api/productApiSlice";
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
-import AdminMenu from "./AdminMenu";
 
 // ✅ Material UI
 import IconButton from "@mui/material/IconButton";
@@ -132,7 +131,6 @@ const ProductUpdate = () => {
   return (
     <div className="container xl:mx-[9rem] sm:mx-[0] text-white">
       <div className="flex flex-col md:flex-row">
-        <AdminMenu />
         <form onSubmit={submitHandler} className="md:w-3/4 p-4">
           <h2 className="text-xl font-semibold mb-6">Update / Delete Product</h2>
 

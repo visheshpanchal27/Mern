@@ -6,7 +6,6 @@ import {
 } from '../../redux/api/productApiSlice';
 import { useFetchCategoriesQuery } from '../../redux/api/categoryApiSlice';
 import { toast } from 'react-toastify';
-import AdminMenu from './AdminMenu';
 
 // ✅ Material UI Imports (Only added lines)
 import IconButton from '@mui/material/IconButton';
@@ -111,7 +110,6 @@ const ProductList = () => {
 
   return (
     <div className="container xl:mx-[9rem] sm:mx-[0] text-white">
-      <AdminMenu />
       <form onSubmit={submitHandler} className="flex flex-col md:flex-row">
         <div className="md:w-3/4 p-3">
           <div className="h-12 text-xl font-semibold mb-6">Create Product</div>

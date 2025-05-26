@@ -8,7 +8,6 @@ import {
   useUpdateUserMutation,
 } from "../../redux/api/usersApiSlice";
 import Massage from "../../components/Massage";
-import AdminMenu from "./AdminMenu";
 
 const UserList = () => {
   const { data: users, refetch, isLoading, error } = useGetUsersQuery();
@@ -69,7 +68,6 @@ const UserList = () => {
         </Massage>
       ) : (
         <div className="flex flex-col md:flex-row gap-6">
-          <AdminMenu />
 
           <div className="w-full md:w-4/5 p-6 bg-black/60 backdrop-blur-lg rounded-2xl shadow-2xl border border-pink-600">
             <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-pink-600 scrollbar-track-black/20">

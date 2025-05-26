@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -21,7 +21,7 @@ import Ratings from "./Ratings";
 import ProductTabs from "./ProductTabs";
 import { addToCart } from "../../redux/features/Cart/CartSlice";
 
-const productDetails = () => {
+const ProductDetails = () => {
   const { id: productId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -29,23 +29,17 @@ const productDetails = () => {
   const [qty, setQty] = useState(1);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [zoomImage, setZoomImage] = useState(false);
 
-  const { data: product, isLoading, refetch, error } =
-    useGetProductDetailsQuery(productId);
-
+  const { data: product, isLoading, refetch, error } = useGetProductDetailsQuery(productId);
   const { userInfo } = useSelector((state) => state.auth);
 
-  const [createReview, { isLoading: loadingProductReview }] =
-    useCreateReviewMutation();
+  const [createReview, { isLoading: loadingProductReview }] = useCreateReviewMutation();
 
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
-      await createReview({
-        productId,
-        rating,
-        comment,
-      }).unwrap();
+      await createReview({ productId, rating, comment }).unwrap();
       refetch();
       toast.success("Review created successfully");
     } catch (error) {
@@ -58,12 +52,21 @@ const productDetails = () => {
     navigate("/cart");
   };
 
+  // Close zoom on Escape key
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") setZoomImage(false);
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
+
   return (
     <>
       <div className="p-4 xl:px-20">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 mb-8 text-gray-300 hover:text-white bg-transparent border border-gray-600 hover:border-pink-500 rounded-full py-2 px-5 transition duration-300"
+          className="cursor-pointer flex items-center gap-2 mb-8 text-gray-300 hover:text-white bg-transparent border border-gray-600 hover:border-pink-500 rounded-full py-2 px-5 transition duration-300"
         >
           <svg
             className="h-4 w-4"
@@ -80,28 +83,27 @@ const productDetails = () => {
         {isLoading ? (
           <Loader />
         ) : error ? (
-          <Massage variant="danger">
-            {error?.data?.message || error.message}
-          </Massage>
+          <Massage variant="danger">{error?.data?.message || error.message}</Massage>
         ) : (
           <>
             <div className="flex flex-col xl:flex-row gap-10">
               {/* Product Image */}
               <div className="w-full xl:w-1/2">
                 <img
+                  onClick={() => setZoomImage(true)}
                   src={
                     product.image?.startsWith("http")
                       ? product.image
                       : `${import.meta.env.VITE_API_URL}${product.image}`
                   }
                   alt={product.name}
-                  className="w-full max-h-[50rem] object-contain rounded"
+                  className="w-full max-h-[50rem] object-contain rounded cursor-zoom-in"
                 />
               </div>
 
               {/* Details Section */}
               <div className="w-full xl:w-1/2 xl:sticky xl:top-20 space-y-6">
-                <HeartIcon product={product} />
+                <HeartIcon product={product} className="cursor-pointer" />
 
                 <h2 className="text-3xl font-bold">{product.name}</h2>
                 <p className="text-gray-400">{product.description}</p>
@@ -109,45 +111,44 @@ const productDetails = () => {
                 <p className="text-4xl font-extrabold text-pink-600">$ {product.price}</p>
 
                 <div className="flex flex-col sm:flex-row justify-between gap-6">
-                <div>
+                  <div>
                     <p className="flex items-center">
-                    <FaStore className="mr-2 text-pink-300" /> Brand: {product.brand}
+                      <FaStore className="mr-2 text-pink-300" /> Brand: {product.brand}
                     </p>
                     <p className="flex items-center">
-                    <FaClock className="mr-2 text-yellow-300" />
-                    Added: {moment(product.createdAt).fromNow()}
+                      <FaClock className="mr-2 text-yellow-300" />
+                      Added: {moment(product.createdAt).fromNow()}
                     </p>
                     <p className="flex items-center">
-                    <FaStar className="mr-2 text-green-400" />
-                    Reviews: {product.numReviews}
+                      <FaStar className="mr-2 text-green-400" />
+                      Reviews: {product.numReviews}
                     </p>
+                  </div>
+                  <div>
+                    <p className="flex items-center">
+                      <FaStar className="mr-2 text-yellow-400" /> Rating:{" "}
+                      {Math.round(product.rating)}
+                    </p>
+                    <p className="flex items-center">
+                      <FaShoppingCart className="mr-2 text-blue-400" /> Quantity:{" "}
+                      {product.quantity}
+                    </p>
+                    <p className="flex items-center">
+                      <FaBox className="mr-2 text-purple-400" /> In Stock:{" "}
+                      {product.countInStock}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                    <p className="flex items-center">
-                    <FaStar className="mr-2 text-yellow-400" /> Rating: {Math.round(product.rating)}
-                    </p>
-                    <p className="flex items-center">
-                    <FaShoppingCart className="mr-2 text-blue-400" /> Quantity: {product.quantity}
-                    </p>
-                    <p className="flex items-center">
-                    <FaBox className="mr-2 text-purple-400" /> In Stock: {product.countInStock}
-                    </p>
-                </div>
-                </div>
-
 
                 <div className="flex flex-wrap items-center gap-4">
-                  <Ratings
-                    value={product.rating}
-                    text={`${product.numReviews} reviews`}
-                  />
+                  <Ratings value={product.rating} text={`${product.numReviews} reviews`} />
 
                   {product.countInStock > 0 && (
                     <div className="relative w-[8rem]">
                       <select
                         value={qty}
-                        onChange={(e) => setQty(e.target.value)}
-                        className="w-full appearance-none bg-[#1a1a1a] border border-gray-500/40 text-white py-2 px-4 pr-8 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-pink-600"
+                        onChange={(e) => setQty(Number(e.target.value))}
+                        className="cursor-pointer w-full appearance-none bg-[#1a1a1a] border border-gray-500/40 text-white py-2 px-4 pr-8 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-pink-600"
                       >
                         {[...Array(product.countInStock).keys()].map((x) => (
                           <option key={x + 1} value={x + 1}>
@@ -170,7 +171,11 @@ const productDetails = () => {
                   <button
                     onClick={addToCartHandler}
                     disabled={product.countInStock === 0}
-                    className="bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 transition"
+                    className={`${
+                      product.countInStock === 0
+                        ? "cursor-not-allowed opacity-50"
+                        : "cursor-pointer"
+                    } bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 transition`}
                   >
                     Add To Cart
                   </button>
@@ -194,8 +199,26 @@ const productDetails = () => {
           </>
         )}
       </div>
+
+      {/* Image Zoom Modal */}
+      {zoomImage && (
+        <div
+          onClick={() => setZoomImage(false)}
+          className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50"
+        >
+          <img
+            src={
+              product.image?.startsWith("http")
+                ? product.image
+                : `${import.meta.env.VITE_API_URL}${product.image}`
+            }
+            alt="Zoomed"
+            className="max-w-full max-h-full object-contain rounded"
+          />
+        </div>
+      )}
     </>
   );
 };
 
-export default productDetails;
+export default ProductDetails;

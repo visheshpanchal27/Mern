@@ -19,21 +19,20 @@ const Shop = () => {
   const [showAllBrands, setShowAllBrands] = useState(false);
 
   useEffect(() => {
-    if (!categoriesQuery.isLoading) {
+    if (!categoriesQuery.isLoading && categoriesQuery.data) {
       dispatch(setCategories(categoriesQuery.data));
     }
   }, [categoriesQuery.data, dispatch]);
 
   useEffect(() => {
-    if (!filteredProductsQuery.isLoading) {
+    if (!filteredProductsQuery.isLoading && filteredProductsQuery.data) {
       let filtered = [...filteredProductsQuery.data];
 
       if (priceFilter) {
-        filtered = filtered.filter(
-          (product) =>
-            product.price.toString().includes(priceFilter) ||
-            product.price === parseInt(priceFilter, 10)
-        );
+        const parsedPrice = parseFloat(priceFilter);
+        if (!isNaN(parsedPrice)) {
+          filtered = filtered.filter((product) => product.price <= parsedPrice);
+        }
       }
 
       if (sortOrder === "low-high") {
@@ -57,7 +56,7 @@ const Shop = () => {
     dispatch(setChecked([]));
     setPriceFilter("");
     setSortOrder("");
-    dispatch(setProducts(filteredProductsQuery.data));
+    dispatch(setProducts(filteredProductsQuery.data || []));
   };
 
   const uniqueBrands = [
@@ -72,7 +71,7 @@ const Shop = () => {
         <aside className="bg-[#151515] p-6 rounded-2xl w-full lg:w-[250px] shrink-0 shadow-lg">
           
           {/* Categories */}
-          <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mb-6 text-white font-bold shadow-lg">
+          <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mb-6 text-white font-bold shadow-lg cursor-default">
             Filter by Categories
           </h2>
 
@@ -80,13 +79,13 @@ const Shop = () => {
             {(showAllCategories ? categories : categories.slice(0, 4))?.map((c) => (
               <label
                 key={c._id}
-                className="flex items-center gap-3 cursor-pointer text-white"
+                className="flex items-center gap-3 cursor-pointer text-white select-none"
               >
                 <input
                   type="checkbox"
                   onChange={(e) => handleCheck(e.target.checked, c._id)}
                   checked={checked.includes(c._id)}
-                  className={`w-5 h-5 rounded-md border-2 border-pink-500 bg-transparent checked:bg-pink-500 checked:border-pink-500 transition-all duration-300 ease-in-out hover:scale-110 focus:ring-2 focus:ring-pink-500`}
+                  className="w-5 h-5 rounded-md border-2 border-pink-500 bg-transparent checked:bg-pink-500 checked:border-pink-500 transition-all duration-300 ease-in-out hover:scale-110 focus:ring-2 focus:ring-pink-500 cursor-pointer"
                   style={{
                     WebkitAppearance: "none",
                     appearance: "none",
@@ -106,14 +105,14 @@ const Shop = () => {
                     backgroundSize: "70%",
                   }}
                 />
-                <span className="text-sm">{c.name}</span>
+                <span className="text-sm cursor-pointer">{c.name}</span>
               </label>
             ))}
           </div>
 
           {categories.length > 5 && (
             <button
-              className="text-pink-400 text-xs mt-2 hover:underline transition"
+              className="text-pink-400 text-xs mt-2 hover:underline transition cursor-pointer"
               onClick={() => setShowAllCategories(!showAllCategories)}
             >
               {showAllCategories ? "Show Less" : "Show More"}
@@ -121,7 +120,7 @@ const Shop = () => {
           )}
 
           {/* Brands */}
-          <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mt-8 mb-6 text-white font-bold shadow-lg">
+          <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mt-8 mb-6 text-white font-bold shadow-lg cursor-default">
             Filter by Brands
           </h2>
 
@@ -129,28 +128,28 @@ const Shop = () => {
             {(showAllBrands ? uniqueBrands : uniqueBrands.slice(0, 4))?.map((brand) => (
               <label
                 key={brand}
-                className="flex items-center gap-3 cursor-pointer text-white"
+                className="flex items-center gap-3 cursor-pointer text-white select-none"
               >
-              <input
-                type="radio"
-                name="brand"
-                onChange={() =>
-                  dispatch(
-                    setProducts(
-                      filteredProductsQuery.data?.filter((p) => p.brand === brand)
+                <input
+                  type="radio"
+                  name="brand"
+                  onChange={() =>
+                    dispatch(
+                      setProducts(
+                        filteredProductsQuery.data?.filter((p) => p.brand === brand) || []
+                      )
                     )
-                  )
-                }
-                className="appearance-none w-5 h-5 rounded-full border-2 border-pink-500 checked:bg-pink-500 checked:border-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:ring-2 focus:ring-pink-500"
-              />
-                <span className="text-sm">{brand}</span>
+                  }
+                  className="appearance-none w-5 h-5 rounded-full border-2 border-pink-500 checked:bg-pink-500 checked:border-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:ring-2 focus:ring-pink-500 cursor-pointer"
+                />
+                <span className="text-sm cursor-pointer">{brand}</span>
               </label>
             ))}
           </div>
 
           {uniqueBrands.length > 5 && (
             <button
-              className="text-pink-400 text-xs mt-2 hover:underline transition"
+              className="text-pink-400 text-xs mt-2 hover:underline transition cursor-pointer"
               onClick={() => setShowAllBrands(!showAllBrands)}
             >
               {showAllBrands ? "Show Less" : "Show More"}
@@ -158,7 +157,7 @@ const Shop = () => {
           )}
 
           {/* Price Filter */}
-          <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mt-8 mb-6 text-white font-bold shadow-lg">
+          <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mt-8 mb-6 text-white font-bold shadow-lg cursor-default">
             Filter by Price
           </h2>
 
@@ -167,18 +166,18 @@ const Shop = () => {
             placeholder="Enter Price"
             value={priceFilter}
             onChange={(e) => setPriceFilter(e.target.value)}
-            className="w-full bg-[#1f1f1f] border border-pink-500 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="w-full bg-[#1f1f1f] border border-pink-500 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 cursor-text"
           />
 
           {/* Sort Products */}
-          <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mt-8 mb-6 text-white font-bold shadow-lg">
+          <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mt-8 mb-6 text-white font-bold shadow-lg cursor-default">
             Sort Products
           </h2>
 
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
-            className="w-full bg-[#1f1f1f] border border-pink-500 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+            className="w-full bg-[#1f1f1f] border border-pink-500 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 cursor-pointer"
           >
             <option value="">Sort By</option>
             <option value="low-high">Price: Low to High</option>
@@ -187,27 +186,37 @@ const Shop = () => {
 
           {/* Clear Filters */}
           <button
-            className="w-full bg-gradient-to-r from-pink-600 to-pink-500 text-white py-3 rounded-lg hover:brightness-110 mt-6 font-semibold transition"
+            className="w-full bg-gradient-to-r from-pink-600 to-pink-500 text-white py-3 rounded-lg hover:brightness-110 mt-6 font-semibold transition cursor-pointer"
             onClick={handleClearFilters}
           >
             Clear Filters
           </button>
-
         </aside>
 
         {/* Products Section */}
         <main className="flex-1">
-          <h2 className="text-white text-lg font-semibold mb-6">{products?.length} Products</h2>
+          <h2 className="text-white text-lg font-semibold mb-6 cursor-default">{products?.length} Products</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.length === 0 ? (
+            {filteredProductsQuery.isLoading ? (
               <Loader />
+            ) : products.length === 0 ? (
+              <div
+                role="alert"
+                aria-live="polite"
+                className="col-span-full text-center text-pink-400 font-semibold text-lg py-8 cursor-default"
+              >
+                Sorry, no products are available within your selected budget.
+              </div>
             ) : (
-              products.map((p) => <ProductCard p={p} key={p._id} />)
+              products.map((product) => (
+                <div key={product._id} className="cursor-pointer">
+                  <ProductCard p={product} />
+                </div>
+              ))
             )}
           </div>
         </main>
-
       </div>
     </div>
   );

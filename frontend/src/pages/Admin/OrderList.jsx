@@ -2,7 +2,6 @@ import Message from "../../components/Massage";
 import Loader from "../../components/Loader";
 import { Link } from "react-router-dom";
 import { useGetOrdersQuery, useDeleteOrderMutation } from "../../redux/api/orderApiSlice";
-import AdminMenu from "./AdminMenu";
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const OrderList = () => {
@@ -22,7 +21,6 @@ const OrderList = () => {
 
   return (
     <>
-      <AdminMenu />
 
       <section className="xl:ml-[4rem] md:ml-0 p-5">
         {isLoading ? (

@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -64,17 +63,16 @@ const PlaceOrder = () => {
                   <td className="px-1 py-2 text-left">Total</td>
                 </tr>
               </thead>
-
               <tbody>
                 {cart.cartItems.map((item, index) => (
                   <tr key={index}>
                     <td className="p-2">
                       <img
                         src={
-                          item.image?.startsWith('http')
+                          item.image?.startsWith("http")
                             ? item.image
                             : `${import.meta.env.VITE_API_URL}${item.image}`
-                        }                      
+                        }
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded"
                       />
@@ -84,7 +82,9 @@ const PlaceOrder = () => {
                     </td>
                     <td className="p-2">{item.qty}</td>
                     <td className="p-2">{item.price.toFixed(2)}</td>
-                    <td className="p-2">$ {(item.qty * item.price).toFixed(2)}</td>
+                    <td className="p-2">
+                      $ {(item.qty * item.price).toFixed(2)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -95,24 +95,24 @@ const PlaceOrder = () => {
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-5">Order Summary</h2>
           <div className="flex justify-between flex-wrap p-8 bg-[#181818]">
-          <ul className="text-lg">
-            <li>
-              <span className="font-semibold mb-4">Items:</span> $
-              {Number(cart.itemsPrice || 0).toFixed(2)}
-            </li>
-            <li>
-              <span className="font-semibold mb-4">Shipping:</span> $
-              {Number(cart.shippingPrice || 0).toFixed(2)}
-            </li>
-            <li>
-              <span className="font-semibold mb-4">Tax:</span> $
-              {Number(cart.taxPrice || 0).toFixed(2)}
-            </li>
-            <li>
-              <span className="font-semibold mb-4">Total:</span> $
-              {Number(cart.totalPrice || 0).toFixed(2)}
-            </li>
-          </ul>
+            <ul className="text-lg">
+              <li>
+                <span className="font-semibold mb-4">Items:</span> $
+                {Number(cart.itemsPrice || 0).toFixed(2)}
+              </li>
+              <li>
+                <span className="font-semibold mb-4">Shipping:</span> $
+                {Number(cart.shippingPrice || 0).toFixed(2)}
+              </li>
+              <li>
+                <span className="font-semibold mb-4">Tax:</span> $
+                {Number(cart.taxPrice || 0).toFixed(2)}
+              </li>
+              <li>
+                <span className="font-semibold mb-4">Total:</span> $
+                {Number(cart.totalPrice || 0).toFixed(2)}
+              </li>
+            </ul>
 
             {error && <Message variant="danger">{error.data.message}</Message>}
 
@@ -131,16 +131,19 @@ const PlaceOrder = () => {
             </div>
           </div>
 
+          {/* Submit Button with Loader inside */}
           <button
             type="button"
-            className="bg-pink-500 text-white py-2 px-4 rounded-full text-lg w-full mt-4"
+            className="bg-pink-500 hover:bg-pink-600 text-white py-2 px-4 rounded-full text-lg w-full mt-4 flex items-center justify-center transition duration-200 disabled:opacity-50"
             disabled={cart.cartItems.length === 0 || isLoading}
             onClick={placeOrderHandler}
           >
-            Place Order
+            {isLoading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              "Place Order"
+            )}
           </button>
-
-          {isLoading && <Loader />}
         </div>
       </div>
     </>

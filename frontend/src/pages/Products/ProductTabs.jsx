@@ -23,7 +23,7 @@ const ProductTabs = ({
   };
 
   const tabClasses = (num) =>
-    `transition-all duration-300 px-6 py-2 rounded-full text-sm font-medium ${
+    `transition-all duration-300 px-6 py-2 rounded-full text-sm font-medium cursor-pointer ${
       activeTab === num
         ? "bg-gradient-to-r from-pink-700 to-pink-600 text-white shadow-lg scale-105"
         : "bg-[#1f1f1f] text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
@@ -46,6 +46,7 @@ const ProductTabs = ({
 
       {/* Tab Content */}
       <div className="w-full max-w-5xl">
+        {/* Tab 1: Write Review */}
         {activeTab === 1 && (
           <div>
             {userInfo ? (
@@ -59,7 +60,7 @@ const ProductTabs = ({
                     value={rating}
                     onChange={(e) => setRating(e.target.value)}
                     required
-                    className="w-full p-2 rounded-md bg-[#0f0f0f] text-white focus:ring-2 ring-pink-500 outline-none"
+                    className="w-full p-2 rounded-md bg-[#0f0f0f] text-white focus:ring-2 ring-pink-500 outline-none cursor-pointer"
                   >
                     <option value="">Select</option>
                     <option value="1">Inferior</option>
@@ -76,21 +77,51 @@ const ProductTabs = ({
                     onChange={(e) => setComment(e.target.value)}
                     rows="4"
                     required
-                    className="w-full p-3 rounded-md bg-[#0f0f0f] text-white resize-none focus:ring-2 ring-purple-500 outline-none"
+                    className="w-full p-3 rounded-md bg-[#0f0f0f] text-white resize-none focus:ring-2 ring-purple-500 outline-none cursor-text"
                   ></textarea>
                 </div>
                 <button
                   type="submit"
                   disabled={loadingProductReview}
-                  className="self-start px-6 py-2 rounded-md bg-gradient-to-r from-pink-700 to-pink-600 text-white hover:opacity-90 transition"
+                  className={`self-start px-6 py-2 rounded-md bg-gradient-to-r from-pink-700 to-pink-600 text-white transition flex items-center justify-center gap-2 ${
+                    loadingProductReview
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:opacity-90 cursor-pointer"
+                  }`}
                 >
-                  Submit
+                  {loadingProductReview ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+                        ></path>
+                      </svg>
+                      Loading...
+                    </>
+                  ) : (
+                    "Submit"
+                  )}
                 </button>
               </form>
             ) : (
               <p className="text-gray-400">
                 Please{" "}
-                <Link to="/login" className="text-pink-500 underline">
+                <Link to="/login" className="text-pink-500 underline cursor-pointer">
                   sign in
                 </Link>{" "}
                 to write a review.
@@ -99,6 +130,7 @@ const ProductTabs = ({
           </div>
         )}
 
+        {/* Tab 2: All Reviews */}
         {activeTab === 2 && (
           <div className="grid gap-6 mt-4">
             {product.reviews.length === 0 ? (
@@ -121,6 +153,7 @@ const ProductTabs = ({
           </div>
         )}
 
+        {/* Tab 3: Related Products */}
         {activeTab === 3 && (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-4">
             {isLoading || !data ? (
@@ -132,7 +165,6 @@ const ProductTabs = ({
             )}
           </div>
         )}
-
       </div>
     </div>
   );
