@@ -8,12 +8,15 @@ import { CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Register = () => {
   const [username, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -54,7 +57,6 @@ const Register = () => {
     }
   };
 
-  // 🔐 Google Login Handler
   const googleSuccess = async (credentialResponse) => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
@@ -74,9 +76,7 @@ const Register = () => {
 
   return (
     <section className="flex flex-col md:flex-row items-center justify-center min-h-screen px-6 bg-gradient-to-tr from-[#0f0f0f] to-[#1a1a1a]">
-      
-      {/* Left Side - Form */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -109,28 +109,40 @@ const Register = () => {
             />
           </div>
 
-          <div>
+          <div className="relative">
             <label htmlFor="password" className="block text-sm text-gray-300 mb-2">Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
-              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none"
+              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none pr-10"
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <div
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-11.5 text-gray-300 cursor-pointer"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </div>
           </div>
 
-          <div>
+          <div className="relative">
             <label htmlFor="confirmPassword" className="block text-sm text-gray-300 mb-2">Confirm Password</label>
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               id="confirmPassword"
-              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none"
+              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none pr-10"
               placeholder="Confirm password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
+            <div
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute right-3 top-11.5 text-gray-300 cursor-pointer"
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </div>
           </div>
 
           <button
@@ -142,11 +154,25 @@ const Register = () => {
           </button>
         </form>
 
-        {/* Google Login Button */}
-        <div className="mt-6 flex justify-center">
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 text-gray-400 bg-[#1a1a1a]">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="mt-4">
           <GoogleLogin
             onSuccess={googleSuccess}
             onError={googleError}
+            theme="filled_black"
+            shape="pill"
+            size="large"
+            logo_alignment="center"
+            width="100%"
+            text="continue_with"
           />
         </div>
 
@@ -161,7 +187,6 @@ const Register = () => {
         </div>
       </motion.div>
 
-      {/* Right Side - Image */}
       <motion.img
         src="https://images.unsplash.com/photo-1576502200916-3808e07386a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2065&q=80"
         alt="Register Illustration"

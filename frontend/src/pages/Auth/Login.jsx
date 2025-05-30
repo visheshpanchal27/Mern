@@ -6,10 +6,14 @@ import { setCredentials } from "../../redux/features/auth/authSlice";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -39,11 +43,26 @@ const Login = () => {
     }
   };
 
+  const googleSuccess = async (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      const { name, email, picture } = decoded;
+
+      dispatch(setCredentials({ username: name, email, image: picture }));
+      navigate(redirect);
+      toast.success("Google login successful");
+    } catch (err) {
+      toast.error("Google login failed");
+    }
+  };
+
+  const googleError = () => {
+    toast.error("Google login failed");
+  };
+
   return (
     <section className="flex flex-col md:flex-row items-center justify-center min-h-screen px-6 bg-gradient-to-tr from-[#0f0f0f] to-[#1a1a1a]">
-      
-      {/* Left Side - Form */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -52,7 +71,6 @@ const Login = () => {
         <h1 className="text-3xl text-pink-500 font-bold mb-8 text-center">Sign In</h1>
 
         <form onSubmit={submitHandler} className="flex flex-col gap-6">
-          
           <div>
             <label htmlFor="email" className="block text-sm text-gray-300 mb-2">Email Address</label>
             <input
@@ -65,16 +83,22 @@ const Login = () => {
             />
           </div>
 
-          <div>
+          <div className="relative">
             <label htmlFor="password" className="block text-sm text-gray-300 mb-2">Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
-              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none"
+              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none pr-10"
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+            <div
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-11.5 text-gray-300 cursor-pointer"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </div>
           </div>
 
           <button
@@ -85,6 +109,28 @@ const Login = () => {
             {isLoading ? <CircularProgress size={24} color="inherit" /> : "Sign In"}
           </button>
         </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 text-gray-400 bg-[#1a1a1a]">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <GoogleLogin
+            onSuccess={googleSuccess}
+            onError={googleError}
+            theme="filled_black"
+            shape="pill"
+            size="large"
+            logo_alignment="center"
+            width="100%"
+            text="continue_with"
+          />
+        </div>
 
         <div className="text-gray-400 text-center mt-6">
           New Customer?{" "}
@@ -97,7 +143,6 @@ const Login = () => {
         </div>
       </motion.div>
 
-      {/* Right Side - Image */}
       <motion.img
         src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&auto=format&fit=crop&w=1964&q=80"
         alt="Login Illustration"
@@ -106,7 +151,6 @@ const Login = () => {
         transition={{ delay: 0.5, duration: 0.8 }}
         className="hidden md:block md:w-1/2 object-cover h-screen rounded-2xl ml-10"
       />
-
     </section>
   );
 };
