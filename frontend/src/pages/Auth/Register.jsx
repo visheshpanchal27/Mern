@@ -8,6 +8,9 @@ import { CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import { GoogleLogin } from "@react-oauth/google";
 import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+
+const decoded = jwtDecode(credentialResponse.credential);
 
 const Register = () => {
   const [username, setName] = useState("");
