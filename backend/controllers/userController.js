@@ -203,7 +203,7 @@ const googleAuth = asyncHandler(async (req, res) => {
     user = await User.create({
       username: name,
       email,
-      password: '', // No password for OAuth users
+      password: '',
     });
   }
 

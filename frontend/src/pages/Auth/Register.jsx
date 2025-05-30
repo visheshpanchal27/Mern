@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import { GoogleLogin } from "@react-oauth/google";
-import * as jwt_decode from "jwt-decode";
+import jwt_decode from "jwt-decode";
 
 const Register = () => {
   const [username, setName] = useState("");
@@ -57,7 +57,7 @@ const Register = () => {
   // 🔐 Google Login Handler
   const googleSuccess = async (credentialResponse) => {
     try {
-      const decoded = jwt_decode.default(credentialResponse.credential);
+      const decoded = jwt_decode(credentialResponse.credential);
       const { name, email, picture } = decoded;
 
       dispatch(setCredentials({ username: name, email, image: picture }));
