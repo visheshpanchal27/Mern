@@ -6,9 +6,10 @@ import { setCredentials } from "../../redux/features/auth/authSlice";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 
 const Register = () => {
   const [username, setName] = useState("");
@@ -22,7 +23,6 @@ const Register = () => {
   const navigate = useNavigate();
 
   const [register, { isLoading }] = useRegisterMutation();
-
   const { userInfo } = useSelector((state) => state.auth);
 
   const { search } = useLocation();
@@ -57,9 +57,9 @@ const Register = () => {
     }
   };
 
-  const googleSuccess = async (credentialResponse) => {
+  const googleSuccess = async (tokenResponse) => {
     try {
-      const decoded = jwtDecode(credentialResponse.credential);
+      const decoded = jwtDecode(tokenResponse.credential);
       const { name, email, picture } = decoded;
 
       dispatch(setCredentials({ username: name, email, image: picture }));
@@ -73,6 +73,12 @@ const Register = () => {
   const googleError = () => {
     toast.error("Google login failed");
   };
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: googleSuccess,
+    onError: googleError,
+    flow: "implicit", // you can also use "auth-code" if your backend handles token exchange
+  });
 
   return (
     <section className="flex flex-col md:flex-row items-center justify-center min-h-screen px-6 bg-gradient-to-tr from-[#0f0f0f] to-[#1a1a1a]">
@@ -163,18 +169,15 @@ const Register = () => {
           </div>
         </div>
 
-        <div className="mt-4">
-          <GoogleLogin
-            onSuccess={googleSuccess}
-            onError={googleError}
-            theme="filled_black"
-            shape="pill"
-            size="large"
-            logo_alignment="center"
-            width="100%"
-            text="continue_with"
-          />
-        </div>
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => loginWithGoogle()}
+          className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 rounded-lg hover:bg-gray-200 transition duration-200 shadow-lg"
+        >
+          <FcGoogle size={22} />
+          <span className="text-sm">Continue with Google</span>
+        </motion.button>
 
         <div className="text-gray-400 text-center mt-6">
           Already have an account?{" "}
