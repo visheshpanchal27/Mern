@@ -6,10 +6,9 @@ import { setCredentials } from "../../redux/features/auth/authSlice";
 import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
-import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -44,28 +43,21 @@ const Login = () => {
     }
   };
 
-  const googleSuccess = async (tokenResponse) => {
+  const handleGoogleSuccess = (credentialResponse) => {
     try {
-      const decoded = jwtDecode(tokenResponse.credential);
+      const decoded = jwtDecode(credentialResponse.credential);
       const { name, email, picture } = decoded;
-
       dispatch(setCredentials({ username: name, email, image: picture }));
       navigate(redirect);
       toast.success("Google login successful");
-    } catch (err) {
-      toast.error("Google login failed");
+    } catch (error) {
+      toast.error("Failed to decode Google token");
     }
   };
 
-  const googleError = () => {
+  const handleGoogleError = () => {
     toast.error("Google login failed");
   };
-
-  const loginWithGoogle = useGoogleLogin({
-    onSuccess: googleSuccess,
-    onError: googleError,
-    flow: "implicit",
-  });
 
   return (
     <section className="flex flex-col md:flex-row items-center justify-center min-h-screen px-6 bg-gradient-to-tr from-[#0f0f0f] to-[#1a1a1a]">
@@ -126,15 +118,15 @@ const Login = () => {
           </div>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => loginWithGoogle()}
-          className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 rounded-lg hover:bg-gray-200 transition duration-200 shadow-lg"
-        >
-          <FcGoogle size={22} />
-          <span className="text-sm">Continue with Google</span>
-        </motion.button>
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="filled_black"
+            width="100%"
+            size="large"
+          />
+        </div>
 
         <div className="text-gray-400 text-center mt-6">
           New Customer?{" "}
