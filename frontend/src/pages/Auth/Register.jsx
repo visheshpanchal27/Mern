@@ -59,9 +59,17 @@ const Register = () => {
 
   const googleSuccess = async (tokenResponse) => {
     try {
-      const decoded = jwtDecode(tokenResponse.credential);
-      const { name, email, picture } = decoded;
-
+      const accessToken = tokenResponse.access_token;
+  
+      const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+  
+      const data = await res.json();
+      const { name, email, picture } = data;
+  
       dispatch(setCredentials({ username: name, email, image: picture }));
       navigate(redirect);
       toast.success("Google login successful");
@@ -69,16 +77,16 @@ const Register = () => {
       toast.error("Google login failed");
     }
   };
-
+  
   const googleError = () => {
     toast.error("Google login failed");
   };
-
+  
   const loginWithGoogle = useGoogleLogin({
     onSuccess: googleSuccess,
     onError: googleError,
-    flow: "implicit", // you can also use "auth-code" if your backend handles token exchange
-  });
+    flow: "auth-code",
+  });  
 
   return (
     <section className="flex flex-col md:flex-row items-center justify-center min-h-screen px-6 bg-gradient-to-tr from-[#0f0f0f] to-[#1a1a1a]">
