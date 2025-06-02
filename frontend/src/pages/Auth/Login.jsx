@@ -47,24 +47,36 @@ const Login = () => {
   const googleSuccess = async (tokenResponse) => {
     try {
       if (!tokenResponse || !tokenResponse.credential) {
-        throw new Error("Missing Google token");
+        toast.error("Google token not received. Please try again.");
+        return;
       }
 
-      const decoded = jwtDecode(tokenResponse.credential);
+      let decoded;
+      try {
+        decoded = jwtDecode(tokenResponse.credential);
+      } catch (err) {
+        toast.error("Failed to decode Google token.");
+        return;
+      }
+
       const { name, email, picture } = decoded;
+
+      if (!name || !email) {
+        toast.error("Missing user information from Google account.");
+        return;
+      }
 
       dispatch(setCredentials({ username: name, email, image: picture }));
       navigate(redirect);
       toast.success("Google login successful");
     } catch (err) {
       console.error("Google login error:", err);
-      toast.error("Google login failed");
+      toast.error("Unexpected error during Google login");
     }
   };
 
-
   const googleError = () => {
-    toast.error("Google login failed");
+    toast.error("Google login was cancelled or failed. Please try again.");
   };
 
   const loginWithGoogle = useGoogleLogin({
