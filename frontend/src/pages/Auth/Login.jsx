@@ -46,10 +46,6 @@ const Login = () => {
 
   const googleSuccess = async (tokenResponse) => {
     try {
-      if (!tokenResponse || !tokenResponse.credential) {
-        throw new Error("Missing Google token");
-      }
-
       const decoded = jwtDecode(tokenResponse.credential);
       const { name, email, picture } = decoded;
 
@@ -57,11 +53,9 @@ const Login = () => {
       navigate(redirect);
       toast.success("Google login successful");
     } catch (err) {
-      console.error("Google login error:", err);
       toast.error("Google login failed");
     }
   };
-
 
   const googleError = () => {
     toast.error("Google login failed");
@@ -136,7 +130,7 @@ const Login = () => {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => loginWithGoogle()}
-          className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 rounded-lg hover:bg-gray-200 transition duration-200 shadow-lg cursor-pointer"
+          className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 rounded-lg hover:bg-gray-200 transition duration-200 shadow-lg"
         >
           <FcGoogle size={22} />
           <span className="text-sm">Continue with Google</span>
