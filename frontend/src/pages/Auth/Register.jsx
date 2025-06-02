@@ -59,20 +59,13 @@ const Register = () => {
 
   const googleSuccess = async (tokenResponse) => {
     try {
-      if (!tokenResponse || !tokenResponse.credential) {
-        throw new Error("Missing Google credential");
-      }
-
       const decoded = jwtDecode(tokenResponse.credential);
       const { name, email, picture } = decoded;
-
-      // You might want to also register this user in your DB here if needed.
 
       dispatch(setCredentials({ username: name, email, image: picture }));
       navigate(redirect);
       toast.success("Google login successful");
     } catch (err) {
-      console.error("Google login error:", err);
       toast.error("Google login failed");
     }
   };
@@ -84,7 +77,7 @@ const Register = () => {
   const loginWithGoogle = useGoogleLogin({
     onSuccess: googleSuccess,
     onError: googleError,
-    flow: "implicit",
+    flow: "implicit", // you can also use "auth-code" if your backend handles token exchange
   });
 
   return (
