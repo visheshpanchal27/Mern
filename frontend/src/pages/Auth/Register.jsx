@@ -180,12 +180,11 @@ const Register = () => {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => loginWithGoogle()}
-          className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 rounded-lg hover:bg-gray-200 transition duration-200 shadow-lg cursor-pointer"
+          className="w-full flex items-center justify-center gap-3 bg-white text-black font-medium py-3 rounded-lg hover:bg-gray-200 transition duration-200 shadow-lg"
         >
           <FcGoogle size={22} />
           <span className="text-sm">Continue with Google</span>
         </motion.button>
-
 
         <div className="text-gray-400 text-center mt-6">
           Already have an account?{" "}
