@@ -46,23 +46,22 @@ const Login = () => {
 
   const googleSuccess = async (tokenResponse) => {
     try {
-      if (!tokenResponse || !tokenResponse.credential) {
-        toast.error("Google token not received. Please try again.");
+      if (!tokenResponse || !tokenResponse.access_token) {
+        toast.error("Google access token not received. Please try again.");
         return;
       }
 
-      let decoded;
-      try {
-        decoded = jwtDecode(tokenResponse.credential);
-      } catch (err) {
-        toast.error("Failed to decode Google token.");
-        return;
-      }
+      const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: {
+          Authorization: `Bearer ${tokenResponse.access_token}`,
+        },
+      });
 
-      const { name, email, picture } = decoded;
+      const data = await res.json();
+      const { name, email, picture } = data;
 
-      if (!name || !email) {
-        toast.error("Missing user information from Google account.");
+      if (!email.endsWith("@gmail.com")) {
+        toast.error("Only Gmail accounts are allowed");
         return;
       }
 
@@ -74,6 +73,7 @@ const Login = () => {
       toast.error("Unexpected error during Google login");
     }
   };
+
 
   const googleError = () => {
     toast.error("Google login was cancelled or failed. Please try again.");
