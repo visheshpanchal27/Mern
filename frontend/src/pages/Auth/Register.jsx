@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 import { CircularProgress } from "@mui/material";
 import { motion } from "framer-motion";
 import { useGoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
@@ -57,33 +56,38 @@ const Register = () => {
     }
   };
 
-  const googleSuccess = async (tokenResponse) => {
-    try {
-      if (!tokenResponse || !tokenResponse.credential) {
-        throw new Error("Missing Google credential");
-      }
-
-      const decoded = jwtDecode(tokenResponse.credential);
-      const { name, email, picture } = decoded;
-
-      // You might want to also register this user in your DB here if needed.
-
-      dispatch(setCredentials({ username: name, email, image: picture }));
-      navigate(redirect);
-      toast.success("Google login successful");
-    } catch (err) {
-      console.error("Google login error:", err);
-      toast.error("Google login failed");
-    }
-  };
-
-  const googleError = () => {
-    toast.error("Google login failed");
-  };
-
   const loginWithGoogle = useGoogleLogin({
-    onSuccess: googleSuccess,
-    onError: googleError,
+    onSuccess: async (tokenResponse) => {
+      try {
+        if (!tokenResponse || !tokenResponse.access_token) {
+          throw new Error("Missing Google access token");
+        }
+
+        const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: {
+            Authorization: `Bearer ${tokenResponse.access_token}`,
+          },
+        });
+
+        const data = await res.json();
+        const { name, email, picture } = data;
+
+        if (!email.endsWith("@gmail.com")) {
+          toast.error("Only Gmail accounts are allowed");
+          return;
+        }
+
+        dispatch(setCredentials({ username: name, email, image: picture }));
+        navigate(redirect);
+        toast.success("Google login successful");
+      } catch (err) {
+        console.error("Google login error:", err);
+        toast.error("Google login failed");
+      }
+    },
+    onError: () => {
+      toast.error("Google login failed");
+    },
     flow: "implicit",
   });
 
@@ -185,7 +189,6 @@ const Register = () => {
           <FcGoogle size={22} />
           <span className="text-sm">Continue with Google</span>
         </motion.button>
-
 
         <div className="text-gray-400 text-center mt-6">
           Already have an account?{" "}
