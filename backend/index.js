@@ -26,6 +26,7 @@ const app = express();
 const allowedOrigins = [
     "https://mern-dvqh.onrender.com",
     "http://localhost:5173",
+    "https://shopping-canter.netlify.app/",
 ];
 
 app.use(cors({
