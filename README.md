@@ -1,6 +1,6 @@
 # MERN E-Commerce Project
 
-[**🌐 Live Demo**](https://mern-dvqh.onrender.com/)
+[**🌐 Live Demo**](https://shopping-canter.netlify.app/)
 
 A full-stack E-Commerce application built with the MERN stack (MongoDB, Express.js, React, Node.js). Features include user authentication, product management, order processing, admin dashboard, and more.
 
