@@ -230,8 +230,7 @@ const getOrderByTrackingId = async (req, res) => {
     const { trackingId } = req.params;
     const order = await Order.findOne({ trackingId }).populate("user", "username email");
     if (!order) {
-      res.status(404);
-      throw new Error("Order not found with given trackingId");
+      return res.status(404).json({ error: "Order not found with given trackingId" });
     }
     res.json(order);
   } catch (error) {
