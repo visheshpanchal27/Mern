@@ -10,10 +10,6 @@ import PaymentIcon from "@mui/icons-material/Payment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
-import HomeIcon from "@mui/icons-material/Home";
-import PhoneIcon from "@mui/icons-material/Phone";
-import EmailIcon from "@mui/icons-material/Email";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 
@@ -43,7 +39,7 @@ const OrderSummaryPage = () => {
     return (
       <div className="container mx-auto px-4 py-8" style={{ backgroundColor: "#0f0f10", color: "#fff", minHeight: "100vh" }}>
         <Message variant="danger">
-          {error?.data?.message || error.message}
+            { (error as any)?.data?.message || (error as any)?.message }
         </Message>
         <button
           onClick={() => navigate(-1)}
@@ -182,14 +178,15 @@ const OrderSummaryPage = () => {
                   src={
                     item.image.startsWith("http")
                       ? item.image
-                      : `${import.meta.env.VITE_API_URL}${item.image}`
+                      : `${process.env.REACT_APP_API_URL}${item.image}`
                   }
                   alt={item.name}
                   className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition duration-300"
-                  onError={(e) => {
-                    e.target.src = '/images/placeholder-product.png';
-                    e.target.className = 'w-full h-full object-cover rounded-lg group-hover:scale-105 transition duration-300';
-                  }}
+                    onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/images/placeholder-product.png';
+                        target.className = 'w-full h-full object-cover rounded-lg group-hover:scale-105 transition duration-300';
+                    }}
                 />
               </div>
               <div className="flex-1">
