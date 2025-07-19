@@ -31,7 +31,7 @@ import Order from './pages/Orders/Order.jsx';
 import UserOrder from './pages/User/UserOrder.jsx';
 import OrderList from './pages/Admin/OrderList.jsx';
 import AdminDashboard from './pages/Admin/AdminDashboard.jsx';
-
+import OrderSummaryPage from './pages/User/OrderSummaryPage.jsx';
 import ErrorPage from './components/ErrorPage.jsx';
 
 // Google Client ID from env
