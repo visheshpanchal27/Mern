@@ -52,7 +52,14 @@ const UserOrder = () => {
                 <tr
                   key={order._id}
                   className="border-t border-gray-700 hover:bg-gray-800 transition duration-200 cursor-pointer"
-                  onClick={() => navigate(`/order/summary/${order.customId}`)}
+                  onClick={() => {
+                    if (order.customId) {
+                      navigate(`/order/summary/${order.customId}`);
+                    } else {
+                      console.warn("Missing customId, fallback to _id:", order._id);
+                      navigate(`/order/summary/${order._id}`);
+                    }
+                  }}
                 >
                   <td className="p-3">
                     <img
