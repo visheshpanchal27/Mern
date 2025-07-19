@@ -69,6 +69,11 @@ export const orderApiSlice = apiSlice.injectEndpoints({
             method: "DELETE",
           }),
         }),
+
+        getOrderByTrackingId: builder.query({
+          query: (trackingId) => `/orders/track/${trackingId}`,
+        }),
+
     }),
 });
 
@@ -85,4 +90,5 @@ export const {
     useDeliverOrderMutation,
     useGetOrdersQuery,
     useDeleteOrderMutation,
+    useGetOrderByTrackingIdQuery,
   } = orderApiSlice;

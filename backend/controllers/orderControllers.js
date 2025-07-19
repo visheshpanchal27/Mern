@@ -1,6 +1,8 @@
 import Order from "../models/orderModel.js";
 import Product from "../models/productModal.js";
 import asyncHandler from 'express-async-handler';
+import { nanoid } from 'nanoid'; 
+import mongoose from "mongoose";
 
 // Utility Function
 function calcPrices(orderItems) {
@@ -31,55 +33,60 @@ function calcPrices(orderItems) {
 }
 
 const createOrder = async (req, res) => {
-    try {
-      const { orderItems, shippingAddress, paymentMethod } = req.body;
-  
-      if (orderItems && orderItems.length === 0) {
-        res.status(400);
-        throw new Error("No order items");
-      }
-  
-      const itemsFromDB = await Product.find({
-        _id: { $in: orderItems.map((x) => x._id) },
-      });
-  
-      const dbOrderItems = orderItems.map((itemFromClient) => {
-        const matchingItemFromDB = itemsFromDB.find(
-          (itemFromDB) => itemFromDB._id.toString() === itemFromClient._id
-        );
-  
-        if (!matchingItemFromDB) {
-          res.status(404);
-          throw new Error(`Product not found: ${itemFromClient._id}`);
-        }
-  
-        return {
-          ...itemFromClient,
-          product: itemFromClient._id,
-          price: matchingItemFromDB.price,
-          _id: undefined,
-        };
-      });
-  
-      const { itemsPrice, taxPrice, shippingPrice, totalPrice } =
-        calcPrices(dbOrderItems);
-  
-      const order = new Order({
-        orderItems: dbOrderItems,
-        user: req.user._id,
-        shippingAddress,
-        paymentMethod,
-        itemsPrice,
-        taxPrice,
-        shippingPrice,
-        totalPrice,
-      });
-  
-      const createdOrder = await order.save();
-      res.status(201).json(createdOrder);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+  try {
+    const { orderItems, shippingAddress, paymentMethod } = req.body;
+
+    if (orderItems && orderItems.length === 0) {
+      res.status(400);
+      throw new Error("No order items");
     }
+
+    const itemsFromDB = await Product.find({
+      _id: { $in: orderItems.map((x) => x._id) },
+    });
+
+    const dbOrderItems = orderItems.map((itemFromClient) => {
+      const matchingItemFromDB = itemsFromDB.find(
+        (itemFromDB) => itemFromDB._id.toString() === itemFromClient._id
+      );
+
+      if (!matchingItemFromDB) {
+        res.status(404);
+        throw new Error(`Product not found: ${itemFromClient._id}`);
+      }
+
+      return {
+        ...itemFromClient,
+        product: itemFromClient._id,
+        price: matchingItemFromDB.price,
+        _id: undefined,
+      };
+    });
+
+    const { itemsPrice, taxPrice, shippingPrice, totalPrice } =
+      calcPrices(dbOrderItems);
+
+    // ✅ Generate trackingId
+    const trackingId = nanoid(10);
+
+    // ✅ Create the order with trackingId
+    const order = new Order({
+      orderItems: dbOrderItems,
+      user: req.user._id,
+      shippingAddress,
+      paymentMethod,
+      itemsPrice,
+      taxPrice,
+      shippingPrice,
+      totalPrice,
+      trackingId, // ← Include here
+    });
+
+    const createdOrder = await order.save();
+    res.status(201).json(createdOrder);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 const getAllOrders = async (req, res) => {
@@ -218,6 +225,47 @@ const deleteOrder = asyncHandler(async (req, res) => {
   res.json({ message: "Order removed" });
 });
 
+const getOrderByTrackingId = async (req, res) => {
+  try {
+    const { trackingId } = req.params;
+    const order = await Order.findOne({ trackingId }).populate("user", "username email");
+    if (!order) {
+      res.status(404);
+      throw new Error("Order not found with given trackingId");
+    }
+    res.json(order);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const orderSchema = mongoose.Schema(
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
+    orderItems: [/* ... */],
+    shippingAddress: {/* ... */},
+    paymentMethod: { type: String, required: true },
+    paymentResult: {/* ... */},
+    itemsPrice: { type: Number, required: true, default: 0.0 },
+    taxPrice: { type: Number, required: true, default: 0.0 },
+    shippingPrice: { type: Number, required: true, default: 0.0 },
+    totalPrice: { type: Number, required: true, default: 0.0 },
+    isPaid: { type: Boolean, required: true, default: false },
+    paidAt: { type: Date },
+    isDelivered: { type: Boolean, required: true, default: false },
+    deliveredAt: { type: Date },
+
+    // ✅ New field
+    trackingId: {
+      type: String,
+      required: true,
+      unique: true,
+      default: () => shortid.generate(),
+    },
+  },
+  { timestamps: true }
+);
+
 export { 
     createOrder,
     getAllOrders, 
@@ -228,5 +276,7 @@ export {
     findOrderById,
     markOrderAsPaid,
     markOrderAsDelivered,
-    deleteOrder
+    deleteOrder,
+    getOrderByTrackingId,
+    orderSchema, 
 };

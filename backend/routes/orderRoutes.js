@@ -11,7 +11,8 @@ import {
     findOrderById,
     markOrderAsPaid,
     markOrderAsDelivered,
-    deleteOrder
+    deleteOrder,
+    getOrderByTrackingId
 } from "../controllers/orderControllers.js"
 
 import { 
@@ -30,6 +31,7 @@ router.route("/total-sales").get(calculateTotalSales);
 router.route("/total-sales-by-date").get(calcualteTotalSalesByDate);
 router.route("/:id").get(authentication, findOrderById);
 router.route("/:id/pay").put(authentication, markOrderAsPaid);
+router.get('/track/:trackingId', getOrderByTrackingId);
 router
   .route("/:id")
   .delete(authentication, authorizeAdmin, deleteOrder);

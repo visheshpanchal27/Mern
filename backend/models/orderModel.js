@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { nanoid } from "nanoid"; // ✅ use nanoid instead of shortid
 
 const orderSchema = mongoose.Schema(
   {
@@ -78,6 +79,13 @@ const orderSchema = mongoose.Schema(
 
     deliveredAt: {
       type: Date,
+    },
+
+    trackingId: {
+      type: String,
+      required: true,
+      unique: true,
+      default: () => nanoid(10), 
     },
   },
   {

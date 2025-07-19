@@ -1,6 +1,6 @@
 import Message from "../../components/Massage";
 import Loader from "../../components/Loader";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useGetMyOrdersQuery } from "../../redux/api/orderApiSlice";
 
 // Material UI icons
@@ -44,7 +44,6 @@ const UserOrder = () => {
                 <th className="text-left p-3">Total</th>
                 <th className="text-left p-3">Payment Method</th>
                 <th className="text-left p-3">Status</th>
-                <th className="text-center p-3">Action</th>
               </tr>
             </thead>
 
@@ -52,7 +51,8 @@ const UserOrder = () => {
               {[...orders].reverse().map((order) => (
                 <tr
                   key={order._id}
-                  className="border-t border-gray-700 hover:bg-gray-800 transition duration-200"
+                  className="border-t border-gray-700 hover:bg-gray-800 transition duration-200 cursor-pointer"
+                  onClick={() => navigate(`/order/summary/${order.customId}`)}
                 >
                   <td className="p-3">
                     <img
@@ -95,13 +95,6 @@ const UserOrder = () => {
                     >
                       {order.isDelivered ? "Delivered" : "Processing"}
                     </span>
-                  </td>
-                  <td className="p-3 text-center">
-                    <Link to={`/order/${order._id}`}>
-                      <button className="bg-pink-400 hover:bg-pink-500 text-black font-semibold py-1.5 px-4 rounded-full shadow transition">
-                        View Details
-                      </button>
-                    </Link>
                   </td>
                 </tr>
               ))}
