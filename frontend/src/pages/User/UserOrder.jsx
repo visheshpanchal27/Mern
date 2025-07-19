@@ -57,7 +57,7 @@ const UserOrder = () => {
                       navigate(`/order-summary/${order.customId}`);
                     } else {
                       console.warn("Missing customId, fallback to _id:", order._id);
-                      navigate(`/order-summary/${order._id}`);
+                      navigate(`/order-summary/${order.trackingId}`);
                     }
                   }}
                 >
