@@ -1,7 +1,9 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import Loader from "../../components/Loader";
 import Message from "../../components/Massage";
 import { useGetOrderByTrackingIdQuery } from "../../redux/api/orderApiSlice";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // MUI Icons
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -33,23 +35,140 @@ const OrderSummaryPage = () => {
     return order.isPaid || (order.isDelivered && order.paymentMethod === "CashOnDelivery");
   };
 
-  if (isLoading) return <Loader />;
+  const generateInvoice = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 14;
+    const currentDate = new Date();
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-8" style={{ backgroundColor: "#0f0f10", color: "#fff", minHeight: "100vh" }}>
-        <Message variant="danger">
-            { (error as any)?.data?.message || (error as any)?.message }
-        </Message>
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-gradient-to-r from-pink-600 to-pink-800 text-white py-2 px-4 rounded-lg mt-4 flex items-center gap-2 hover:from-pink-700 hover:to-pink-900 transition-all duration-300 shadow-md"
-        >
-          <ArrowBackIcon /> Go Back
-        </button>
-      </div>
-    );
-  }
+    const primaryColor = [216, 27, 96];
+    const secondaryColor = [60, 60, 60];
+    const lightColor = [245, 245, 245];
+
+    doc.setFontSize(20);
+    doc.setTextColor(...secondaryColor);
+    doc.setFont("helvetica", "bold");
+    doc.text("Vishesh WebStore", margin, 20);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("123 Business Street, City, Country", margin, 26);
+    doc.text("Phone: +1 (123) 456-7890 | Email: info@visheshwebstore.com", margin, 32);
+
+    doc.setDrawColor(...primaryColor);
+    doc.setLineWidth(0.5);
+    doc.line(margin, 36, pageWidth - margin, 36);
+
+    doc.setFontSize(16);
+    doc.setTextColor(...primaryColor);
+    doc.text("INVOICE", pageWidth - margin, 20, { align: "right" });
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Invoice #: ${order.trackingId}`, pageWidth - margin, 26, { align: "right" });
+    doc.text(`Date: ${currentDate.toLocaleDateString()}`, pageWidth - margin, 32, { align: "right" });
+
+    doc.setFontSize(12);
+    doc.setTextColor(...secondaryColor);
+    doc.setFont("helvetica", "bold");
+    doc.text("Order Information", margin, 48);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Order ID: ${order._id || "N/A"}`, margin, 56);
+    doc.text(`Tracking ID: ${order.trackingId}`, margin, 62);
+    doc.text(`Order Date: ${formatDate(order.createdAt)}`, margin, 68);
+    doc.text(`Payment Method: ${order.paymentMethod}`, margin, 74);
+    doc.text(`Payment Status: ${isPaymentComplete(order) ? "Paid" : "Pending"}`, margin, 80);
+
+    if (order.shippingAddress) {
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Customer Information", pageWidth / 2 + 10, 48);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text(`Address: ${order.shippingAddress?.address || "N/A"}`, pageWidth / 2 + 10, 62);
+      doc.text(`City: ${order.shippingAddress?.city || "N/A"}`, pageWidth / 2 + 10, 68);
+      doc.text(`Postal Code: ${order.shippingAddress?.postalCode || "N/A"}`, pageWidth / 2 + 10, 74);
+      doc.text(`Country: ${order.shippingAddress?.country || "N/A"}`, pageWidth / 2 + 10, 80);
+    }
+
+    autoTable(doc, {
+      head: [["Product", "Quantity", "Unit Price", "Total"]],
+      body: order.orderItems.map((item) => [
+        item.name,
+        item.qty,
+        `$${item.price.toFixed(2)}`,
+        `$${(item.price * item.qty).toFixed(2)}`,
+      ]),
+      startY: 90,
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+        lineColor: [220, 220, 220],
+        lineWidth: 0.2,
+        textColor: secondaryColor,
+      },
+      headStyles: {
+        fillColor: primaryColor,
+        textColor: [255, 255, 255],
+        fontSize: 11,
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: lightColor,
+      },
+      columnStyles: {
+        0: { cellWidth: 'auto', fontStyle: 'bold' },
+        1: { cellWidth: 20, halign: 'center' },
+        2: { cellWidth: 30, halign: 'right' },
+        3: { cellWidth: 30, halign: 'right' }
+      },
+      margin: { left: margin, right: margin }
+    });
+
+    const shipping = order.shippingPrice || 0;
+    const tax = order.taxPrice || 0;
+    const subtotal = order.totalPrice - tax - shipping;
+
+    const finalY = doc.lastAutoTable?.finalY || 90;
+    autoTable(doc, {
+      body: [
+        ["Subtotal", `$${subtotal.toFixed(2)}`],
+        ["Tax", `$${tax.toFixed(2)}`],
+        ["Shipping", `$${shipping.toFixed(2)}`],
+        ["Total", `$${order.totalPrice.toFixed(2)}`]
+      ],
+      startY: finalY + 10,
+      styles: {
+        fontSize: 10,
+        cellPadding: 5,
+        lineColor: [220, 220, 220],
+        lineWidth: 0.2,
+      },
+      columnStyles: {
+        0: { cellWidth: 'auto', fontStyle: 'bold', halign: 'right' },
+        1: { cellWidth: 30, halign: 'right' }
+      },
+      margin: { left: pageWidth - 100 }
+    });
+
+    if (!isPaymentComplete(order)) {
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text("Payment Instructions:", margin, finalY + 40);
+      doc.text("Please make payment within 7 days to avoid order cancellation.", margin, finalY + 46);
+    }
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Thank you for shopping with Vishesh WebStore!", pageWidth / 2, 280, { align: "center" });
+    doc.text("For any inquiries, please contact support@visheshwebstore.com", pageWidth / 2, 286, { align: "center" });
+    doc.text("Terms & Conditions apply", pageWidth / 2, 292, { align: "center" });
+
+    doc.save(`Invoice_${order.trackingId}.pdf`);
+  };
 
   if (!order) {
     return (
@@ -71,15 +190,15 @@ const OrderSummaryPage = () => {
       <div className="flex justify-between items-center mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 hover:from-gray-700 hover:to-gray-800 shadow-sm"
+          className="cursor-pointer flex items-center gap-2 mb-8 text-gray-300 hover:text-white bg-transparent border border-gray-600 hover:border-pink-500 rounded-full py-2 px-5 transition duration-300"
         >
-          <ArrowBackIcon /> Back
+          <ArrowBackIcon /> Go Back
         </button>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-pink-700 bg-clip-text text-transparent">
           Order Summary
         </h1>
         <button
-          onClick={() => alert("Download Invoice")}
+          onClick={generateInvoice}
           className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-pink-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 hover:from-pink-600 hover:to-pink-800 shadow-md"
         >
           <ReceiptIcon /> Invoice
@@ -182,16 +301,16 @@ const OrderSummaryPage = () => {
                   }
                   alt={item.name}
                   className="w-full h-full object-contain rounded-lg group-hover:scale-105 transition duration-300"
-                    onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/images/placeholder-product.png';
-                        target.className = 'w-full h-full object-cover rounded-lg group-hover:scale-105 transition duration-300';
-                    }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/images/placeholder-product.png';
+                    target.className = 'w-full h-full object-cover rounded-lg group-hover:scale-105 transition duration-300';
+                  }}
                 />
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-lg text-white group-hover:text-pink-400 transition duration-200">
-                  {item.name}
+                  <Link to={`/product/${item.product}`}>{item.name}</Link>
                 </h3>
                 <p className="font-bold text-lg text-pink-400">
                   ${(item.price * item.qty).toFixed(2)}
