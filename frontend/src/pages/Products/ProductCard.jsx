@@ -1,20 +1,24 @@
 import { Link } from "react-router-dom";
 import { AiOutlineShoppingCart } from "react-icons/ai";
-import { useDispatch } from "react-redux";
-import { addToCart } from "../../redux/features/Cart/CartSlice";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import HeartIcon from "./HeartIcon";
+import { useAddToCartMutation } from "../../redux/api/cartApiSlice"; // <-- Add this
 
 const ProductCard = ({ p }) => {
-  const dispatch = useDispatch();
+  const [addToCart] = useAddToCartMutation(); // <-- API Hook
 
-  const addToCartHandler = (product, qty) => {
-    dispatch(addToCart({ ...product, qty }));
-    toast.success("Item added to cart!", {
-      position: "top-right",
-      autoClose: 2000,
-    });
+  const addToCartHandler = async (product, qty) => {
+    try {
+      await addToCart({ _id: product._id, qty }).unwrap(); // Call backend
+      toast.success("Item added to cart!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    } catch (error) {
+      toast.error("Failed to add item to cart");
+      console.error(error);
+    }
   };
 
   return (
@@ -31,15 +35,15 @@ const ProductCard = ({ p }) => {
 
       {/* Product Image */}
       <Link to={`/product/${p._id}`}>
-      <img
-        src={
-          p.image.startsWith('http')
-            ? p.image
-            : `${import.meta.env.VITE_API_URL}${p.image}`
-        }        
-        alt={p.name}
-        className="w-full h-48 sm:h-52 md:h-56 object-contain p-2 bg-[#121212] rounded-t-2xl"
-      />
+        <img
+          src={
+            p.image.startsWith("http")
+              ? p.image
+              : `${import.meta.env.VITE_API_URL}${p.image}`
+          }
+          alt={p.name}
+          className="w-full h-48 sm:h-52 md:h-56 object-contain p-2 bg-[#121212] rounded-t-2xl"
+        />
       </Link>
 
       {/* Product Info */}

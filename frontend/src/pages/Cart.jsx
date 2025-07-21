@@ -1,30 +1,54 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useAddToCartMutation, useGetCartQuery, useUpdateCartMutation, useClearCartMutation } from "../redux/api/cartApiSlice";
 import { FaTrash, FaShoppingCart } from "react-icons/fa";
 import { IoArrowBackSharp } from "react-icons/io5";
 
-import {
-  addToCart,
-  removeFromCart,
-} from "../redux/features/Cart/CartSlice";
-
 const Cart = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { cartItems } = useSelector((state) => state.cart);
 
-  const addToCartHandler = (product, qty) => {
-    dispatch(addToCart({ ...product, qty }));
+  // RTK Query hooks for cart API
+  const { data: cart, isLoading, isError, refetch } = useGetCartQuery();
+  const [addToCart] = useAddToCartMutation();
+  const [updateCart] = useUpdateCartMutation();
+  const [clearCart] = useClearCartMutation();
+
+  const cartItems = cart?.items || [];
+
+  // Add/Update item quantity
+  const addToCartHandler = async (product, qty) => {
+    try {
+      await addToCart({ _id: product.product || product._id, qty }).unwrap();
+      refetch();
+    } catch (error) {
+      console.error("Add to cart failed", error);
+    }
   };
 
-  const removeFromCartHandler = (id) => {
-    dispatch(removeFromCart(id));
+  // Remove item from cart
+  const removeFromCartHandler = async (id) => {
+    try {
+      const updatedItems = cartItems.filter((item) => item.product._id !== id);
+      await updateCart(updatedItems).unwrap();
+      refetch();
+    } catch (error) {
+      console.error("Remove from cart failed", error);
+    }
   };
 
+  // Proceed to checkout
   const checkoutHandler = () => {
     navigate("/login?redirect=/shipping");
   };
+
+  // Clear entire cart
+  const clearCartHandler = async () => {
+    await clearCart();
+    refetch();
+  };
+
+  if (isLoading) return <div className="text-white p-6">Loading cart...</div>;
+  if (isError) return <div className="text-red-500 p-6">Failed to load cart</div>;
 
   return (
     <div className="w-full h-screen overflow-hidden px-4 pt-6">
@@ -57,32 +81,32 @@ const Cart = () => {
 
             {cartItems.map((item) => (
               <div
-                key={item._id}
+                key={item.product._id}
                 className="flex items-center mb-6 pb-4 border-b border-gray-700"
               >
                 <div className="w-[5rem] h-[5rem] flex-shrink-0">
                   <img
                     src={
-                      item.image?.startsWith("http")
-                        ? item.image
-                        : `${import.meta.env.VITE_API_URL}${item.image}`
+                      item.product.image?.startsWith("http")
+                        ? item.product.image
+                        : `${import.meta.env.VITE_API_URL}${item.product.image}`
                     }
-                    alt={item.name}
+                    alt={item.product.name}
                     className="w-full h-full object-cover rounded"
                   />
                 </div>
 
                 <div className="flex-1 ml-4">
                   <Link
-                    to={`/product/${item._id}`}
+                    to={`/product/${item.product._id}`}
                     className="text-pink-500 hover:underline cursor-pointer"
                   >
-                    {item.name}
+                    {item.product.name}
                   </Link>
-                  <div className="mt-1 text-white">{item.brand}</div>
-                  <div className="mt-1 font-bold text-white">${item.price}</div>
+                  <div className="mt-1 text-white">{item.product.brand}</div>
+                  <div className="mt-1 font-bold text-white">${item.product.price}</div>
                   <div className="text-sm text-gray-400">
-                    Subtotal: ${(item.qty * item.price).toFixed(2)}
+                    Subtotal: ${(item.qty * item.product.price).toFixed(2)}
                   </div>
                 </div>
 
@@ -91,10 +115,10 @@ const Cart = () => {
                     className="w-full p-1 rounded bg-[#1f1f1f] border border-gray-600 text-white focus:ring-2 focus:ring-pink-500 focus:outline-none cursor-pointer"
                     value={item.qty}
                     onChange={(e) =>
-                      addToCartHandler(item, Number(e.target.value))
+                      addToCartHandler(item.product, Number(e.target.value))
                     }
                   >
-                    {[...Array(item.countInStock).keys()].map((x) => (
+                    {[...Array(item.product.countInStock).keys()].map((x) => (
                       <option key={x + 1} value={x + 1}>
                         {x + 1}
                       </option>
@@ -105,7 +129,7 @@ const Cart = () => {
                 <button
                   className="text-red-500 hover:text-white ml-6 cursor-pointer"
                   title="Remove item"
-                  onClick={() => removeFromCartHandler(item._id)}
+                  onClick={() => removeFromCartHandler(item.product._id)}
                 >
                   <FaTrash className="text-lg" />
                 </button>
@@ -122,7 +146,7 @@ const Cart = () => {
               <div className="text-2xl font-bold mb-4">
                 $
                 {cartItems
-                  .reduce((acc, item) => acc + item.qty * item.price, 0)
+                  .reduce((acc, item) => acc + item.qty * item.product.price, 0)
                   .toFixed(2)}
               </div>
 
@@ -132,6 +156,13 @@ const Cart = () => {
                 onClick={checkoutHandler}
               >
                 Proceed To Checkout
+              </button>
+
+              <button
+                className="bg-red-600 w-full py-2 mt-4 rounded-full text-sm hover:bg-red-700 transition-colors duration-200 cursor-pointer"
+                onClick={clearCartHandler}
+              >
+                Clear Cart
               </button>
             </div>
           </div>
