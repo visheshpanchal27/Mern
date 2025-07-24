@@ -36,6 +36,8 @@ const OrderSummaryPage = () => {
   };
 
   const generateInvoice = () => {
+    if (!order) return;
+
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const margin = 14;
@@ -170,6 +172,9 @@ const OrderSummaryPage = () => {
     doc.save(`Invoice_${order.trackingId}.pdf`);
   };
 
+  if (isLoading) return <Loader />;
+  if (error) return <Message variant="danger">Something went wrong!</Message>;
+
   if (!order) {
     return (
       <div className="container mx-auto px-4 py-8" style={{ backgroundColor: "#0f0f10", color: "#fff", minHeight: "100vh" }}>
@@ -194,12 +199,12 @@ const OrderSummaryPage = () => {
         >
           <ArrowBackIcon /> Go Back
         </button>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-pink-700 bg-clip-text text-transparent">
+        <h1 className="cursor-default text-3xl font-bold bg-gradient-to-r from-pink-500 to-pink-700 bg-clip-text text-transparent">
           Order Summary
         </h1>
         <button
           onClick={generateInvoice}
-          className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-pink-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 hover:from-pink-600 hover:to-pink-800 shadow-md"
+          className="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-pink-500 to-pink-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 hover:from-pink-600 hover:to-pink-800 shadow-md"
         >
           <ReceiptIcon /> Invoice
         </button>
@@ -325,13 +330,13 @@ const OrderSummaryPage = () => {
       <div className="flex flex-wrap gap-4 justify-center mt-8">
         <button
           onClick={() => navigate("/shop")}
-          className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-pink-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 hover:from-pink-600 hover:to-pink-800 shadow-md"
+          className="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-pink-500 to-pink-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 hover:from-pink-600 hover:to-pink-800 shadow-md"
         >
           Continue Shopping
         </button>
         <button
           onClick={() => navigate("/user-orders")}
-          className="flex items-center gap-2 bg-gradient-to-r from-gray-700 to-gray-900 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 hover:from-gray-800 hover:to-gray-950 shadow-md"
+          className="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-gray-700 to-gray-900 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 hover:from-gray-800 hover:to-gray-950 shadow-md"
         >
           View All Orders
         </button>

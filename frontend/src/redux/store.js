@@ -6,6 +6,7 @@ import favoriteReducer from "./features/favorites/favoriteSlice";
 import  cartSliceReducer  from "./features/Cart/CartSlice";  
 import shopReducer from "./features/Shop/shopSlice"
 import { getFavoritesFromLocalStorage } from "../Utils/localStorage";
+import orderReducer from "./features/Orders/orderSlice";
 
 
 const initialFavorites = getFavoritesFromLocalStorage() || [];
@@ -17,6 +18,7 @@ const store = configureStore({
         favorites: favoriteReducer,
         cart:cartSliceReducer,
         shop:shopReducer,
+        orderCreate: orderReducer,
     },
 
     preloadedState: {

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import {
   useGetProductDetailsQuery,
   useCreateReviewMutation,
 } from "../../redux/api/productApiSlice";
+import { useAddToCartMutation } from "../../redux/api/cartApiSlice";
 import Loader from "../../components/Loader";
 import Massage from "../../components/Massage";
 import {
@@ -19,12 +20,10 @@ import moment from "moment";
 import HeartIcon from "./HeartIcon";
 import Ratings from "./Ratings";
 import ProductTabs from "./ProductTabs";
-import { addToCart } from "../../redux/features/Cart/CartSlice";
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const [qty, setQty] = useState(1);
   const [rating, setRating] = useState(0);
@@ -35,6 +34,7 @@ const ProductDetails = () => {
   const { userInfo } = useSelector((state) => state.auth);
 
   const [createReview, { isLoading: loadingProductReview }] = useCreateReviewMutation();
+  const [addToCart] = useAddToCartMutation();
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -47,9 +47,14 @@ const ProductDetails = () => {
     }
   };
 
-  const addToCartHandler = () => {
-    dispatch(addToCart({ ...product, qty }));
-    navigate("/cart");
+  const addToCartHandler = async () => {
+    try {
+      await addToCart({ _id: product._id, qty }).unwrap();
+      toast.success("Product added to cart");
+      navigate("/cart");
+    } catch (err) {
+      toast.error(err?.data || "Failed to add product to cart");
+    }
   };
 
   // Close zoom on Escape key
@@ -68,13 +73,7 @@ const ProductDetails = () => {
           onClick={() => navigate(-1)}
           className="cursor-pointer flex items-center gap-2 mb-8 text-gray-300 hover:text-white bg-transparent border border-gray-600 hover:border-pink-500 rounded-full py-2 px-5 transition duration-300"
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
           Go Back
@@ -116,26 +115,21 @@ const ProductDetails = () => {
                       <FaStore className="mr-2 text-pink-300" /> Brand: {product.brand}
                     </p>
                     <p className="flex items-center">
-                      <FaClock className="mr-2 text-yellow-300" />
-                      Added: {moment(product.createdAt).fromNow()}
+                      <FaClock className="mr-2 text-yellow-300" /> Added: {moment(product.createdAt).fromNow()}
                     </p>
                     <p className="flex items-center">
-                      <FaStar className="mr-2 text-green-400" />
-                      Reviews: {product.numReviews}
+                      <FaStar className="mr-2 text-green-400" /> Reviews: {product.numReviews}
                     </p>
                   </div>
                   <div>
                     <p className="flex items-center">
-                      <FaStar className="mr-2 text-yellow-400" /> Rating:{" "}
-                      {Math.round(product.rating)}
+                      <FaStar className="mr-2 text-yellow-400" /> Rating: {Math.round(product.rating)}
                     </p>
                     <p className="flex items-center">
-                      <FaShoppingCart className="mr-2 text-blue-400" /> Quantity:{" "}
-                      {product.quantity}
+                      <FaShoppingCart className="mr-2 text-blue-400" /> Quantity: {product.quantity}
                     </p>
                     <p className="flex items-center">
-                      <FaBox className="mr-2 text-purple-400" /> In Stock:{" "}
-                      {product.countInStock}
+                      <FaBox className="mr-2 text-purple-400" /> In Stock: {product.countInStock}
                     </p>
                   </div>
                 </div>
@@ -157,11 +151,7 @@ const ProductDetails = () => {
                         ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
-                        <svg
-                          className="fill-current h-4 w-4"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                        >
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                           <path d="M5.516 7.548a.625.625 0 0 1 .884-.036L10 10.829l3.6-3.317a.625.625 0 0 1 .848.92l-4.042 3.723a.625.625 0 0 1-.848 0L5.552 8.43a.625.625 0 0 1-.036-.882z" />
                         </svg>
                       </div>

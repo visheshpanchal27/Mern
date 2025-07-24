@@ -71,7 +71,7 @@ export const orderApiSlice = apiSlice.injectEndpoints({
         }),
 
         getOrderByTrackingId: builder.query({
-          query: (trackingId) => `/orders/track/${trackingId}`,
+          query: (trackingId) => `/api/orders/track/${trackingId}`,
         }),
 
     }),

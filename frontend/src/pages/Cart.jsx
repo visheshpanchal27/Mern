@@ -1,57 +1,86 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAddToCartMutation, useGetCartQuery, useUpdateCartMutation, useClearCartMutation } from "../redux/api/cartApiSlice";
+import {
+  useGetCartQuery,
+  useUpdateCartMutation,
+  useClearCartMutation,
+} from "../redux/api/cartApiSlice";
 import { FaTrash, FaShoppingCart } from "react-icons/fa";
 import { IoArrowBackSharp } from "react-icons/io5";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Cart = () => {
   const navigate = useNavigate();
-
-  // RTK Query hooks for cart API
-  const { data: cart, isLoading, isError, refetch } = useGetCartQuery();
-  const [addToCart] = useAddToCartMutation();
+  const { data: cart, isLoading, isError } = useGetCartQuery();
   const [updateCart] = useUpdateCartMutation();
-  const [clearCart] = useClearCartMutation();
+  const [clearCart, { isLoading: isClearing }] = useClearCartMutation();
 
   const cartItems = cart?.items || [];
 
-  // Add/Update item quantity
-  const addToCartHandler = async (product, qty) => {
+  // Separate states for loaders
+  const [updatingQtyId, setUpdatingQtyId] = useState(null);
+  const [removingItemId, setRemovingItemId] = useState(null);
+
+  // Update item quantity
+  const updateCartHandler = async (product, qty) => {
     try {
-      await addToCart({ _id: product.product || product._id, qty }).unwrap();
-      refetch();
+      setUpdatingQtyId(product._id);
+      const updatedItems = cartItems.map((i) =>
+        i.product._id === product._id
+          ? { product: product._id, qty }
+          : { product: i.product._id, qty: i.qty }
+      );
+      await updateCart(updatedItems).unwrap();
+      setTimeout(() => setUpdatingQtyId(null), 300);
     } catch (error) {
-      console.error("Add to cart failed", error);
+      alert("Update cart failed: " + (error?.data || error.message));
+      setUpdatingQtyId(null);
     }
   };
 
   // Remove item from cart
   const removeFromCartHandler = async (id) => {
     try {
-      const updatedItems = cartItems.filter((item) => item.product._id !== id);
+      setRemovingItemId(id);
+      const updatedItems = cartItems
+        .filter((item) => item.product._id !== id)
+        .map((i) => ({ product: i.product._id, qty: i.qty }));
       await updateCart(updatedItems).unwrap();
-      refetch();
+      setTimeout(() => setRemovingItemId(null), 300);
     } catch (error) {
-      console.error("Remove from cart failed", error);
+      alert("Remove from cart failed: " + (error?.data || error.message));
+      setRemovingItemId(null);
     }
   };
 
-  // Proceed to checkout
   const checkoutHandler = () => {
     navigate("/login?redirect=/shipping");
   };
 
-  // Clear entire cart
   const clearCartHandler = async () => {
-    await clearCart();
-    refetch();
+    try {
+      await clearCart().unwrap();
+    } catch (error) {
+      alert("Clear cart failed: " + (error?.data || error.message));
+    }
   };
 
-  if (isLoading) return <div className="text-white p-6">Loading cart...</div>;
-  if (isError) return <div className="text-red-500 p-6">Failed to load cart</div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-screen bg-black text-white">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-pink-500"></div>
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="flex justify-center items-center h-screen bg-black text-red-500">
+        Failed to load cart.
+      </div>
+    );
 
   return (
-    <div className="w-full h-screen overflow-hidden px-4 pt-6">
+    <div className="w-full h-screen overflow-hidden px-4 pt-6 bg-black">
       {/* Go Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -79,62 +108,79 @@ const Cart = () => {
           <div className="flex-1 pr-4 overflow-y-auto scroll-smooth custom-scroll max-h-[calc(100vh-6rem)]">
             <h1 className="text-2xl font-semibold mb-4 text-white">Shopping Cart</h1>
 
-            {cartItems.map((item) => (
-              <div
-                key={item.product._id}
-                className="flex items-center mb-6 pb-4 border-b border-gray-700"
-              >
-                <div className="w-[5rem] h-[5rem] flex-shrink-0">
-                  <img
-                    src={
-                      item.product.image?.startsWith("http")
-                        ? item.product.image
-                        : `${import.meta.env.VITE_API_URL}${item.product.image}`
-                    }
-                    alt={item.product.name}
-                    className="w-full h-full object-cover rounded"
-                  />
-                </div>
-
-                <div className="flex-1 ml-4">
-                  <Link
-                    to={`/product/${item.product._id}`}
-                    className="text-pink-500 hover:underline cursor-pointer"
-                  >
-                    {item.product.name}
-                  </Link>
-                  <div className="mt-1 text-white">{item.product.brand}</div>
-                  <div className="mt-1 font-bold text-white">${item.product.price}</div>
-                  <div className="text-sm text-gray-400">
-                    Subtotal: ${(item.qty * item.product.price).toFixed(2)}
-                  </div>
-                </div>
-
-                <div className="w-24">
-                  <select
-                    className="w-full p-1 rounded bg-[#1f1f1f] border border-gray-600 text-white focus:ring-2 focus:ring-pink-500 focus:outline-none cursor-pointer"
-                    value={item.qty}
-                    onChange={(e) =>
-                      addToCartHandler(item.product, Number(e.target.value))
-                    }
-                  >
-                    {[...Array(item.product.countInStock).keys()].map((x) => (
-                      <option key={x + 1} value={x + 1}>
-                        {x + 1}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <button
-                  className="text-red-500 hover:text-white ml-6 cursor-pointer"
-                  title="Remove item"
-                  onClick={() => removeFromCartHandler(item.product._id)}
+            <AnimatePresence>
+              {cartItems.map((item) => (
+                <motion.div
+                  key={item.product._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center mb-6 pb-4 border-b border-gray-700"
                 >
-                  <FaTrash className="text-lg" />
-                </button>
-              </div>
-            ))}
+                  <div className="w-[5rem] h-[5rem] flex-shrink-0">
+                    <img
+                      src={
+                        item.product.image?.startsWith("http")
+                          ? item.product.image
+                          : `${import.meta.env.VITE_API_URL}${item.product.image}`
+                      }
+                      alt={item.product.name}
+                      className="w-full h-full object-cover rounded"
+                    />
+                  </div>
+
+                  <div className="flex-1 ml-4">
+                    <Link
+                      to={`/product/${item.product._id}`}
+                      className="text-pink-500 hover:underline cursor-pointer"
+                    >
+                      {item.product.name}
+                    </Link>
+                    <div className="mt-1 text-white">{item.product.brand}</div>
+                    <div className="mt-1 font-bold text-white">${item.product.price}</div>
+                    <div className="text-sm text-gray-400">
+                      Subtotal: ${(item.qty * item.product.price).toFixed(2)}
+                    </div>
+                  </div>
+
+                  <div className="w-24 relative">
+                    {updatingQtyId === item.product._id ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-[#1f1f1f] rounded">
+                        <div className="animate-spin h-5 w-5 border-2 border-pink-500 border-t-transparent rounded-full"></div>
+                      </div>
+                    ) : (
+                      <select
+                        className="w-full p-1 rounded bg-[#1f1f1f] border border-gray-600 text-white focus:ring-2 focus:ring-pink-500 focus:outline-none cursor-pointer"
+                        value={item.qty}
+                        onChange={(e) =>
+                          updateCartHandler(item.product, Number(e.target.value))
+                        }
+                      >
+                        {[...Array(item.product.countInStock).keys()].map((x) => (
+                          <option key={x + 1} value={x + 1}>
+                            {x + 1}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  <button
+                    className="text-red-500 hover:text-white ml-6 cursor-pointer"
+                    title="Remove item"
+                    onClick={() => removeFromCartHandler(item.product._id)}
+                    disabled={removingItemId === item.product._id}
+                  >
+                    {removingItemId === item.product._id ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-red-500"></div>
+                    ) : (
+                      <FaTrash className="text-lg" />
+                    )}
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
 
           {/* Sticky Checkout Summary */}
@@ -161,8 +207,9 @@ const Cart = () => {
               <button
                 className="bg-red-600 w-full py-2 mt-4 rounded-full text-sm hover:bg-red-700 transition-colors duration-200 cursor-pointer"
                 onClick={clearCartHandler}
+                disabled={isClearing}
               >
-                Clear Cart
+                {isClearing ? "Clearing..." : "Clear Cart"}
               </button>
             </div>
           </div>
