@@ -153,7 +153,7 @@ const OrderSummaryPage = () => {
         0: { cellWidth: 'auto', fontStyle: 'bold', halign: 'right' },
         1: { cellWidth: 30, halign: 'right' }
       },
-      margin: { left: pageWidth - 100 }
+      margin: { left: pageWidth - 94 }
     });
 
     if (!isPaymentComplete(order)) {
