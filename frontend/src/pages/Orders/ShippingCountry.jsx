@@ -37,8 +37,15 @@ const ShippingCountry = () => {
     e.preventDefault();
     if (!isFormValid) return;
 
-    dispatch(saveShippingAddress({ address, city, postalCode, country }));
+    const shippingData = { address, city, postalCode, country };
+
+    dispatch(saveShippingAddress(shippingData));
     dispatch(savePaymentMethod(paymentMethod));
+
+    // Save shipping address and payment method to localStorage
+    localStorage.setItem("shippingAddress", JSON.stringify(shippingData));
+    localStorage.setItem("paymentMethod", paymentMethod);
+
     navigate("/placeorder");
   };
 
