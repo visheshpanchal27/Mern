@@ -33,29 +33,37 @@ const PlaceOrder = () => {
 
   // Place Order Handler
   const placeOrderHandler = async () => {
-    try {
-      const res = await createOrder({
-        orderItems: cartItems.map((item) => ({
-          _id: item.product._id || item.product,
-          qty: item.qty,
-          price: item.product.price || item.product,
-          name: item.product.name || item.product,
-          image: item.product.image || item.product,
-        })),
-        shippingAddress,     
-        paymentMethod,       
-        itemsPrice,
-        shippingPrice,
-        taxPrice,
-        totalPrice,
-      }).unwrap();
+  // Validate shipping address
+  const { address, city, postalCode, country } = shippingAddress || {};
+  if (!address || !city || !postalCode || !country) {
+    toast.error("Please complete your shipping address before placing the order.");
+    return;
+  }
 
-      await clearCart().unwrap();
-      navigate(`/order-summary/${res.trackingId}`);
-    } catch (err) {
-      toast.error(err?.data?.error || "Something went wrong");
-    }
-  };
+  try {
+    const res = await createOrder({
+      orderItems: cartItems.map((item) => ({
+        _id: item.product._id || item.product,
+        qty: item.qty,
+        price: item.product.price || item.product,
+        name: item.product.name || item.product,
+        image: item.product.image || item.product,
+      })),
+      shippingAddress,
+      paymentMethod,
+      itemsPrice,
+      shippingPrice,
+      taxPrice,
+      totalPrice,
+    }).unwrap();
+
+    await clearCart().unwrap();
+    navigate(`/order-summary/${res.trackingId}`);
+  } catch (err) {
+    toast.error(err?.data?.error || "Something went wrong");
+  }
+};
+
 
   if (cartLoading) return <Loader />;
   if (isError) return <Message variant="danger">Failed to load cart</Message>;
