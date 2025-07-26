@@ -39,7 +39,7 @@ const createUser = asyncHandler(async (req, res) => {
     username: newUser.username,
     email: newUser.email,
     isAdmin: newUser.isAdmin,
-    token // For header-based auth
+    token 
   });
 });
 
