@@ -207,13 +207,18 @@ const googleAuth = asyncHandler(async (req, res) => {
     });
   }
 
+  // ✅ Generate token and set it in cookie
+  const token = createToken(res, user._id);
+
   res.status(200).json({
     _id: user._id,
     username: user.username,
     email: user.email,
     isAdmin: user.isAdmin,
+    token, // ✅ Send it in response for localStorage
   });
-}); 
+});
+
 
 
 export {
