@@ -10,14 +10,23 @@ const ProductCard = ({ p }) => {
 
   const addToCartHandler = async (product, qty) => {
     try {
-      await addToCart({ _id: product._id, qty }).unwrap(); // Call backend
-      toast.success("Item added to cart!", {
+      await addToCart({ _id: product._id, qty }).unwrap();
+
+      toast.success("✅ Item added to cart!", {
         position: "top-right",
         autoClose: 2000,
       });
     } catch (error) {
-      toast.error("Failed to add item to cart");
-      console.error(error);
+      const status = error?.status;
+      const message = error?.data?.message;
+
+      if (status === 401) {
+        toast.error("🔒 Please login to add items to your cart.");
+      } else if (message) {
+        toast.error(`⚠️ ${message}`);
+      } else {
+        toast.error("❌ Failed to add item. Try again.");
+      }
     }
   };
 

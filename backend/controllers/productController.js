@@ -6,25 +6,42 @@ import path from "path";
 // ADD PRODUCT
 const addProduct = asyncHandler(async (req, res) => {
   try {
-    const { name, description, price, category, quantity, brand, image } = req.fields;
+    const {
+      name,
+      description,
+      price,
+      category,
+      countInStock,
+      brand,
+      image,
+    } = req.fields;
 
-    if (!name) throw new Error('Name is required');
-    if (!brand) throw new Error('Brand is required');
-    if (!description) throw new Error('Description is required');
-    if (!price) throw new Error('Price is required');
-    if (!category) throw new Error('Category is required');
-    if (!quantity) throw new Error('Quantity is required');
-    if (!image) throw new Error('Image is required');
+    if (!name) throw new Error("Name is required");
+    if (!brand) throw new Error("Brand is required");
+    if (!description) throw new Error("Description is required");
+    if (!price) throw new Error("Price is required");
+    if (!category) throw new Error("Category is required");
+    if (!countInStock) throw new Error("countInStock is required");
+    if (!image) throw new Error("Image is required");
 
-    const product = new Product({ ...req.fields });
+    const product = new Product({
+      name,
+      description,
+      price,
+      category,
+      countInStock,
+      brand,
+      image,
+    });
+
     await product.save();
-    res.json(product);
-
+    res.status(201).json(product);
   } catch (error) {
     console.error(error);
     res.status(400).json({ message: error.message });
   }
 });
+
 
 // UPDATE PRODUCT
 const updateProductDetails = asyncHandler(async (req, res) => {
