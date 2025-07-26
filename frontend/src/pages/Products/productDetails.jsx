@@ -34,7 +34,7 @@ const ProductDetails = () => {
   const { userInfo } = useSelector((state) => state.auth);
 
   const [createReview, { isLoading: loadingProductReview }] = useCreateReviewMutation();
-  const [addToCart] = useAddToCartMutation();
+  const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -43,21 +43,41 @@ const ProductDetails = () => {
       refetch();
       toast.success("Review created successfully");
     } catch (error) {
-      toast.error(error?.data || error.message);
+      if (error?.status === 401) {
+        toast.error("You must be logged in to review.");
+        navigate("/login");
+      } else {
+        toast.error(error?.data?.message || error.message || "Failed to submit review");
+      }
     }
   };
 
-  const addToCartHandler = async () => {
+    const addToCartHandler = async () => {
     try {
       await addToCart({ _id: product._id, qty }).unwrap();
-      toast.success("Product added to cart");
+      toast.success("🛒 Product added to cart successfully!");
       navigate("/cart");
     } catch (err) {
-      toast.error(err?.data || "Failed to add product to cart");
+      const status = err?.status;
+      const serverMessage = err?.data?.message;
+
+      if (status === 401) {
+        toast.error("🔐 Please login to add items to your cart.");
+        navigate("/login");
+      } else if (status === 404) {
+        toast.error("📦 Product not found — it might have been removed.");
+      } else if (status === 400) {
+        toast.error(serverMessage || "⚠️ Invalid request. Please review your action.");
+      } else if (status === 500) {
+        toast.error("🛠️ Server error — try again shortly.");
+      } else {
+        toast.error(serverMessage || "🌐 Failed to add to cart. Check your connection.");
+      }
+
+      console.error("🧨 Add to cart error:", err);
     }
   };
 
-  // Close zoom on Escape key
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") setZoomImage(false);
@@ -67,26 +87,27 @@ const ProductDetails = () => {
   }, []);
 
   return (
-    <>
-      <div className="p-4 xl:px-20">
-        <button
-          onClick={() => navigate(-1)}
-          className="cursor-pointer flex items-center gap-2 mb-8 text-gray-300 hover:text-white bg-transparent border border-gray-600 hover:border-pink-500 rounded-full py-2 px-5 transition duration-300"
-        >
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          Go Back
-        </button>
+    <div className="p-4 xl:px-20">
+      <button
+        onClick={() => navigate(-1)}
+        className="cursor-pointer flex items-center gap-2 mb-8 text-gray-300 hover:text-white bg-transparent border border-gray-600 hover:border-pink-500 rounded-full py-2 px-5 transition duration-300"
+      >
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Go Back
+      </button>
 
-        {isLoading ? (
-          <Loader />
-        ) : error ? (
-          <Massage variant="danger">{error?.data?.message || error.message}</Massage>
-        ) : (
+      {isLoading ? (
+        <Loader />
+      ) : error ? (
+        <Massage variant="danger">
+          {error?.data?.message || error.error || "Product not found"}
+        </Massage>
+      ) : (
+        product && (
           <>
             <div className="flex flex-col xl:flex-row gap-10">
-              {/* Product Image */}
               <div className="w-full xl:w-1/2">
                 <img
                   onClick={() => setZoomImage(true)}
@@ -100,13 +121,10 @@ const ProductDetails = () => {
                 />
               </div>
 
-              {/* Details Section */}
               <div className="w-full xl:w-1/2 xl:sticky xl:top-20 space-y-6">
                 <HeartIcon product={product} className="cursor-pointer" />
-
                 <h2 className="text-3xl font-bold">{product.name}</h2>
                 <p className="text-gray-400">{product.description}</p>
-
                 <p className="text-4xl font-extrabold text-pink-600">$ {product.price}</p>
 
                 <div className="flex flex-col sm:flex-row justify-between gap-6">
@@ -151,7 +169,7 @@ const ProductDetails = () => {
                         ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
                           <path d="M5.516 7.548a.625.625 0 0 1 .884-.036L10 10.829l3.6-3.317a.625.625 0 0 1 .848.92l-4.042 3.723a.625.625 0 0 1-.848 0L5.552 8.43a.625.625 0 0 1-.036-.882z" />
                         </svg>
                       </div>
@@ -160,20 +178,19 @@ const ProductDetails = () => {
 
                   <button
                     onClick={addToCartHandler}
-                    disabled={product.countInStock === 0}
-                    className={`${
-                      product.countInStock === 0
-                        ? "cursor-not-allowed opacity-50"
-                        : "cursor-pointer"
-                    } bg-pink-600 text-white py-2 px-4 rounded-lg hover:bg-pink-700 transition`}
+                    disabled={isAddingToCart}
+                    className="bg-pink-600 px-6 py-2 rounded-lg text-white hover:bg-pink-700 transition"
                   >
-                    Add To Cart
+                    {isAddingToCart ? (
+                      <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mx-auto" />
+                    ) : (
+                      "Add to Cart"
+                    )}
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Reviews */}
             <div className="mt-12 xl:mx-20">
               <ProductTabs
                 loadingProductReview={loadingProductReview}
@@ -187,10 +204,9 @@ const ProductDetails = () => {
               />
             </div>
           </>
-        )}
-      </div>
+        )
+      )}
 
-      {/* Image Zoom Modal */}
       {zoomImage && (
         <div
           onClick={() => setZoomImage(false)}
@@ -207,7 +223,7 @@ const ProductDetails = () => {
           />
         </div>
       )}
-    </>
+    </div>
   );
 };
 
