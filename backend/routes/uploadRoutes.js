@@ -3,7 +3,7 @@ import cloudinary from '../config/cloudinary.js';
 import multer from 'multer';
 
 const router = express.Router();
-const storage = multer.memoryStorage(); // store file in memory
+const storage = multer.memoryStorage();
 
 const upload = multer({ storage });
 
@@ -11,7 +11,7 @@ router.post('/', upload.single('image'), async (req, res) => {
   try {
     const fileStr = req.file.buffer.toString('base64');
     const uploadedResponse = await cloudinary.uploader.upload(`data:image/jpeg;base64,${fileStr}`, {
-      folder: 'vishesh-store', // optional: cloudinary folder
+      folder: 'vishesh-store',
     });
 
     res.json({ image: uploadedResponse.secure_url });

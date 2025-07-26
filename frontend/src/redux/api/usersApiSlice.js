@@ -41,7 +41,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: userData,
       }),
+      transformResponse: (response) => {
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
+        return response;
+      },
     }),
+
 
     profile: builder.mutation({
       query: (userData) => ({

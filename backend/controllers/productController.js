@@ -249,7 +249,7 @@ const filterProducts = asyncHandler(async (req, res) => {
 // FETCH RANDOM PRODUCTS
 const fetchRandomProducts = asyncHandler(async (req, res) => {
   try {
-    const products = await Product.find(); // or use aggregate to shuffle
+    const products = await Product.find();
     res.json(products);
   } catch (error) {
     console.error('Error fetching random products:', error);
@@ -257,8 +257,6 @@ const fetchRandomProducts = asyncHandler(async (req, res) => {
   }
 });
 
-
-// ✅ EXPORT ALL FUNCTIONS TOGETHER
 export {
   addProduct,
   updateProductDetails,
