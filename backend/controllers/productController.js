@@ -12,6 +12,7 @@ const addProduct = asyncHandler(async (req, res) => {
       price,
       category,
       countInStock,
+      quantity,
       brand,
       image,
     } = req.fields;
@@ -30,6 +31,7 @@ const addProduct = asyncHandler(async (req, res) => {
       price,
       category,
       countInStock,
+      quantity,
       brand,
       image,
     });
