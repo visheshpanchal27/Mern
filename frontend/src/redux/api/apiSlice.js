@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'https://mernbackend-tmp5.onrender.com',
+    baseUrl: 'https://mern-u0bv.onrender.com/api',
     credentials: 'include',
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth?.token || localStorage.getItem('token');

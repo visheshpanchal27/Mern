@@ -6,8 +6,6 @@ import {
 } from '../../redux/api/productApiSlice';
 import { useFetchCategoriesQuery } from '../../redux/api/categoryApiSlice';
 import { toast } from 'react-toastify';
-
-// ✅ Material UI Imports (Only added lines)
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -35,7 +33,12 @@ const ProductList = () => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData({ ...formData, [id]: value });
+    const numericFields = ['price', 'quantity', 'stock'];
+
+    setFormData({
+      ...formData,
+      [id]: numericFields.includes(id) ? Number(value) : value,
+    });
   };
 
   const uploadFileHandler = (e) => {
@@ -43,7 +46,7 @@ const ProductList = () => {
     if (!file) return;
 
     setImage(file);
-    
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result);
@@ -73,12 +76,14 @@ const ProductList = () => {
 
     try {
       setCreatingProduct(true);
-
       setUploading(true);
+
       const uploadForm = new FormData();
       uploadForm.append('image', image);
+
       const uploadRes = await uploadProductImage(uploadForm).unwrap();
       const uploadedImageUrl = uploadRes.image;
+
       setUploading(false);
 
       const productData = {
@@ -92,13 +97,22 @@ const ProductList = () => {
         image: uploadedImageUrl,
       };
 
-      await createProduct(productData).unwrap();
+      console.log('➡️ Creating product with:', productData);
+
+      const timeout = setTimeout(() => {
+        setCreatingProduct(false);
+        toast.error('⏳ Server taking too long. Try again.');
+      }, 10000);
+
+      const res = await createProduct(productData).unwrap();
+      clearTimeout(timeout);
+
+      console.log('✅ Product created:', res);
       toast.success('Product created successfully!');
       setFormData(initialFormState);
       setImage(null);
       setImagePreview('');
-      navigate('/');
-
+      navigate('/admin/productlist');
     } catch (err) {
       console.error('❌ Product Error:', err);
       toast.error(err?.data?.message || err?.message || 'Failed to create product');
@@ -114,7 +128,6 @@ const ProductList = () => {
         <div className="md:w-3/4 p-3">
           <div className="h-12 text-xl font-semibold mb-6">Create Product</div>
 
-          {/* Image Preview and Upload */}
           <div className="mb-8 relative">
             {imagePreview && (
               <div className="text-center mb-4 relative">
@@ -145,7 +158,6 @@ const ProductList = () => {
                 >
                   <CloseIcon fontSize="small" />
                 </IconButton>
-
               </div>
             )}
             <label
@@ -164,9 +176,8 @@ const ProductList = () => {
             </label>
           </div>
 
-          {/* Input Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {[ 
+            {[
               { label: 'Name', id: 'name', type: 'text' },
               { label: 'Price', id: 'price', type: 'number' },
               { label: 'Quantity', id: 'quantity', type: 'number' },
@@ -187,7 +198,9 @@ const ProductList = () => {
               </div>
             ))}
             <div>
-              <label htmlFor="category" className="block text-sm font-medium mb-2">Category</label>
+              <label htmlFor="category" className="block text-sm font-medium mb-2">
+                Category
+              </label>
               <select
                 id="category"
                 value={formData.category}
@@ -204,9 +217,10 @@ const ProductList = () => {
             </div>
           </div>
 
-          {/* Description */}
           <div className="mb-8">
-            <label htmlFor="description" className="block text-sm font-medium mb-2">Description</label>
+            <label htmlFor="description" className="block text-sm font-medium mb-2">
+              Description
+            </label>
             <textarea
               id="description"
               rows="4"
@@ -216,7 +230,6 @@ const ProductList = () => {
             />
           </div>
 
-          {/* Submit Button */}
           <div className="mb-6">
             <button
               type="submit"
