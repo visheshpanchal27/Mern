@@ -7,7 +7,7 @@ export const fetchCart = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     try {
       const API_URL =
-        import.meta.env.VITE_API_URL || "https://mern-u0bv.onrender.com";
+        import.meta.env.VITE_API_URL || "https://mernbackend-tmp5.onrender.com";
 
       const {
         auth: { userInfo },
@@ -37,7 +37,7 @@ export const addToCartBackend = createAsyncThunk(
   async (item, { getState, rejectWithValue }) => {
     try {
       const API_URL =
-        import.meta.env.VITE_API_URL || "https://mern-u0bv.onrender.com";
+        import.meta.env.VITE_API_URL || "https://mernbackend-tmp5.onrender.com";
 
       const {
         auth: { userInfo },
@@ -73,7 +73,7 @@ export const removeFromCartBackend = createAsyncThunk(
   async (productId, { getState, rejectWithValue }) => {
     try {
       const API_URL =
-        import.meta.env.VITE_API_URL || "https://mern-u0bv.onrender.com";
+        import.meta.env.VITE_API_URL || "https://mernbackend-tmp5.onrender.com";
 
       const {
         auth: { userInfo },
@@ -109,7 +109,7 @@ export const createOrder = createAsyncThunk(
   async (orderData, { getState, rejectWithValue }) => {
     try {
       const API_URL =
-        import.meta.env.VITE_API_URL || "https://mern-u0bv.onrender.com";
+        import.meta.env.VITE_API_URL || "https://mernbackend-tmp5.onrender.com";
 
       const {
         auth: { userInfo },

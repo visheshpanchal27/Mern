@@ -11,7 +11,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://mern-u0bv.onrender.com",
+        target: "https://mernbackend-tmp5.onrender.com",
         changeOrigin: true,
         secure: false,
       },
