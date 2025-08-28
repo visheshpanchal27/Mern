@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { BASE_URL } from "../../constants";
 
 // ---------------------- Fetch Cart ----------------------
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (_, { getState, rejectWithValue }) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      console.log("API_URL from Vite =>", import.meta.env.VITE_API_URL);
+      const API_URL = BASE_URL;
+      console.log("API_URL from BASE_URL =>", BASE_URL);
 
       const {
         auth: { userInfo },
@@ -36,7 +37,7 @@ export const addToCartBackend = createAsyncThunk(
   "cart/addToCartBackend",
   async (item, { getState, rejectWithValue }) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const API_URL = BASE_URL;
 
       const {
         auth: { userInfo },
@@ -71,7 +72,7 @@ export const removeFromCartBackend = createAsyncThunk(
   "cart/removeFromCartBackend",
   async (productId, { getState, rejectWithValue }) => {
     try {
-        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const API_URL = BASE_URL;
 
       const {
         auth: { userInfo },
@@ -106,7 +107,7 @@ export const createOrder = createAsyncThunk(
   "cart/createOrder",
   async (orderData, { getState, rejectWithValue }) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const API_URL = BASE_URL;
 
       const {
         auth: { userInfo },
