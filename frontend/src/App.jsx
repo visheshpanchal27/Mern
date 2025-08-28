@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css'
 
 
 function App() {
+  console.log("API_URL from Vite =>", import.meta.env.VITE_API_URL);
 
   return<>
     <ToastContainer/>

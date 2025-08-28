@@ -7,6 +7,7 @@ export const fetchCart = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      console.log("API_URL from Vite =>", import.meta.env.VITE_API_URL);
 
       const {
         auth: { userInfo },
