@@ -23,6 +23,7 @@ import HeartIcon from "./HeartIcon";
 import Ratings from "./Ratings";
 import ProductTabs from "./ProductTabs";
 import ProductImageGallery from "../../components/ProductImageGallery";
+import { ProductDetailsSkeleton } from "../../components/Skeletons";
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
@@ -123,6 +124,8 @@ const ProductDetails = () => {
     }
   }, [product?._id]);
 
+  if (isLoading) return <ProductDetailsSkeleton />;
+  
   return (
     <div className="p-4 xl:px-20">
       <button
@@ -135,9 +138,7 @@ const ProductDetails = () => {
         Go Back
       </button>
 
-      {isLoading ? (
-        <Loader />
-      ) : error ? (
+      {error ? (
         <Massage variant="danger">
           {error?.data?.message || error.error || "Product not found"}
         </Massage>
@@ -149,6 +150,7 @@ const ProductDetails = () => {
                 <ProductImageGallery 
                   product={product} 
                   onImageClick={() => setZoomImage(true)}
+                  isLoading={isLoading}
                 />
               </div>
 

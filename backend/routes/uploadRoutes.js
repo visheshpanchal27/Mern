@@ -46,4 +46,25 @@ router.post('/multiple', upload.array('images', 5), async (req, res) => {
   }
 });
 
+// Delete image from Cloudinary
+router.delete('/image', async (req, res) => {
+  try {
+    const { imageUrl } = req.body;
+    
+    if (!imageUrl || !imageUrl.includes('res.cloudinary.com')) {
+      return res.status(400).json({ message: 'Invalid image URL' });
+    }
+
+    // Extract public ID from Cloudinary URL
+    const publicId = imageUrl.split('/').pop().split('.')[0];
+    
+    await cloudinary.uploader.destroy(`vishesh-store/${publicId}`);
+    
+    res.json({ message: 'Image deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server Error: ' + error.message);
+  }
+});
+
 export default router;

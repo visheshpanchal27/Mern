@@ -1,9 +1,36 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
+import { MultiImageUploadSkeleton } from "./Skeletons";
 
-const MultiImageUpload = ({ onImagesUploaded, existingImages = [] }) => {
+const MultiImageUpload = ({ onImagesUploaded, existingImages = [], isLoading = false, onImageDeleted }) => {
   const [uploading, setUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [deleting, setDeleting] = useState(null);
+
+  if (isLoading) return <MultiImageUploadSkeleton />;
+
+  const deleteImage = async (imageUrl, index) => {
+    setDeleting(index);
+    try {
+      const response = await fetch('/api/uploads/image', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl }),
+      });
+      
+      if (response.ok) {
+        onImageDeleted && onImageDeleted(imageUrl, index);
+        toast.success('Image deleted successfully!');
+      } else {
+        throw new Error('Failed to delete image');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete image');
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
@@ -75,6 +102,7 @@ const MultiImageUpload = ({ onImagesUploaded, existingImages = [] }) => {
                   src={URL.createObjectURL(file)}
                   alt={`Preview ${index + 1}`}
                   className="w-full h-20 object-cover rounded border"
+                  loading="lazy"
                 />
                 <button
                   onClick={() => setSelectedFiles(files => files.filter((_, i) => i !== index))}
@@ -88,8 +116,11 @@ const MultiImageUpload = ({ onImagesUploaded, existingImages = [] }) => {
           <button
             onClick={uploadImages}
             disabled={uploading}
-            className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded disabled:opacity-50"
+            className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded disabled:opacity-50 flex items-center gap-2"
           >
+            {uploading && (
+              <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+            )}
             {uploading ? 'Uploading...' : 'Upload Images'}
           </button>
         </div>
@@ -100,12 +131,27 @@ const MultiImageUpload = ({ onImagesUploaded, existingImages = [] }) => {
           <p className="text-sm font-medium text-gray-300 mb-2">Existing Images:</p>
           <div className="grid grid-cols-4 gap-2">
             {existingImages.map((img, index) => (
-              <img
-                key={index}
-                src={img}
-                alt={`Existing ${index + 1}`}
-                className="w-full h-20 object-cover rounded border"
-              />
+              <div key={index} className="relative group">
+                <img
+                  src={img}
+                  alt={`Existing ${index + 1}`}
+                  className="w-full h-20 object-cover rounded border"
+                  loading="lazy"
+                />
+                {onImageDeleted && (
+                  <button
+                    onClick={() => deleteImage(img, index)}
+                    disabled={deleting === index}
+                    className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                  >
+                    {deleting === index ? (
+                      <div className="animate-spin h-3 w-3 border border-white border-t-transparent rounded-full"></div>
+                    ) : (
+                      '×'
+                    )}
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </div>

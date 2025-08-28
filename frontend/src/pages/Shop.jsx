@@ -5,7 +5,7 @@ import { useFetchCategoriesQuery } from "../redux/api/categoryApiSlice";
 import { setCategories, setChecked } from "../redux/features/Shop/shopSlice";
 import Loader from "../components/Loader";
 import ProductCard from "./Products/ProductCard";
-import ProductSkeleton from "../components/ProductSkeleton";
+import { ProductCardSkeleton } from "../components/Skeletons";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch, FaFilter, FaTimes, FaTh, FaList, FaRedo } from "react-icons/fa";
 
@@ -461,7 +461,7 @@ const Shop = () => {
             >
               {isLoading ? (
                 Array.from({ length: 8 }).map((_, i) => (
-                  <ProductSkeleton key={i} viewMode={viewMode} />
+                  <ProductCardSkeleton key={i} viewMode={viewMode} />
                 ))
               ) : !allProducts.length ? (
                 <motion.div className="col-span-full text-center py-12">

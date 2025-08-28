@@ -8,6 +8,7 @@ import {
 } from "../../redux/api/productApiSlice";
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
+import MultiImageUpload from "../../components/MultiImageUpload";
 
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -28,6 +29,7 @@ const ProductUpdate = () => {
   const [quantity, setQuantity] = useState("");
   const [brand, setBrand] = useState("");
   const [countInStock, setCountInStock] = useState("");
+  const [additionalImages, setAdditionalImages] = useState([]);
 
   const [uploadProductImage] = useUploadProductImageMutation();
   const [updateProduct] = useUpdateProductMutation();
@@ -50,6 +52,11 @@ useEffect(() => {
         ? productData.image
         : `${import.meta.env.VITE_API_URL}${productData.image}`
     );
+  }
+
+  // Set additional images
+  if (productData.images && productData.images.length > 0) {
+    setAdditionalImages(productData.images);
   }
 }, [productData]);
 
@@ -92,6 +99,11 @@ const submitHandler = async (e) => {
 
     if (image && image instanceof File) {
       formData.append("image", image);
+    }
+
+    // Add additional images info (they're already uploaded)
+    if (additionalImages.length > 0) {
+      formData.append("images", JSON.stringify(additionalImages));
     }
 
     toast.info("⏳ Updating product...");
@@ -255,6 +267,20 @@ const submitHandler = async (e) => {
               className="w-full p-4 rounded-lg bg-[#101011] border border-gray-700 resize-none"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          {/* Multiple Images Upload */}
+          <div className="mb-6">
+            <MultiImageUpload
+              onImagesUploaded={(newImages) => {
+                setAdditionalImages(prev => [...prev, ...newImages]);
+                toast.success(`${newImages.length} additional images uploaded!`);
+              }}
+              onImageDeleted={(imageUrl, index) => {
+                setAdditionalImages(prev => prev.filter((_, i) => i !== index));
+              }}
+              existingImages={additionalImages}
             />
           </div>
 

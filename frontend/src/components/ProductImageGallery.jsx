@@ -1,10 +1,12 @@
 import { useState, useMemo } from "react";
+import { ImageGallerySkeleton } from "./Skeletons";
 
 const ProductImageGallery = ({ 
   product, 
   className = "", 
   showThumbnails = true, 
-  onImageClick = null 
+  onImageClick = null,
+  isLoading = false 
 }) => {
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -33,6 +35,7 @@ const ProductImageGallery = ({
     return images;
   }, [product]);
 
+  if (isLoading) return <ImageGallerySkeleton />;
   if (!allImages.length) return null;
 
   const handleImageClick = () => {

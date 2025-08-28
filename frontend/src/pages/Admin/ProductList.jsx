@@ -6,6 +6,7 @@ import {
 } from "../../redux/api/productApiSlice";
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
+import MultiImageUpload from "../../components/MultiImageUpload";
 
 // Material UI
 import IconButton from "@mui/material/IconButton";
@@ -27,6 +28,7 @@ const ProductList = () => {
   const [formData, setFormData] = useState(initialFormState);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [additionalImages, setAdditionalImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [creatingProduct, setCreatingProduct] = useState(false);
 
@@ -82,6 +84,11 @@ const ProductList = () => {
         );
       });
       formDataToSend.append("image", image);
+      
+      // Add additional images
+      if (additionalImages.length > 0) {
+        formDataToSend.append("images", JSON.stringify(additionalImages));
+      }
 
       console.log("Submitting product data:", [...formDataToSend]);
 
@@ -221,6 +228,17 @@ const ProductList = () => {
               value={formData.description}
               onChange={handleChange}
               className="p-4 w-full border border-gray-700 rounded-lg bg-[#101011] resize-none"
+            />
+          </div>
+
+          {/* Multiple Images Upload */}
+          <div className="mb-8">
+            <MultiImageUpload
+              onImagesUploaded={(newImages) => {
+                setAdditionalImages(prev => [...prev, ...newImages]);
+                toast.success(`${newImages.length} additional images uploaded!`);
+              }}
+              existingImages={additionalImages}
             />
           </div>
 

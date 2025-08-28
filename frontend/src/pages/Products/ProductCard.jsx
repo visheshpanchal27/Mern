@@ -2,13 +2,17 @@ import { Link } from "react-router-dom";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import HeartIcon from "./HeartIcon";
 import { useAddToCartMutation } from "../../redux/api/cartApiSlice";
+import { ProductCardSkeleton } from "../../components/Skeletons";
 
-const ProductCard = ({ p, viewMode = 'grid' }) => {
+const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
   const [addToCart] = useAddToCartMutation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  if (isLoading || !p) return <ProductCardSkeleton viewMode={viewMode} />;
 
   // Get all product images
   const allImages = useMemo(() => {
@@ -27,6 +31,29 @@ const ProductCard = ({ p, viewMode = 'grid' }) => {
     }
     return images;
   }, [p.image, p.images]);
+
+  // Random image on page refresh/reload (unique per product)
+  useEffect(() => {
+    if (allImages.length > 1 && p?._id) {
+      // Use product ID to create unique seed for each product
+      const seed = parseInt(p._id.slice(-4), 16) || Math.floor(Math.random() * 1000);
+      const randomIndex = Math.floor((seed + Date.now() + refreshKey) % allImages.length);
+      setCurrentImageIndex(randomIndex);
+    }
+  }, [allImages.length, refreshKey, p?._id]);
+
+  // Auto-cycle images with unique timing per product
+  useEffect(() => {
+    if (allImages.length > 1 && p?._id) {
+      // Different interval for each product based on ID
+      const baseInterval = 4000;
+      const productOffset = (parseInt(p._id.slice(-2), 16) % 1000) || 0;
+      const interval = setInterval(() => {
+        setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+      }, baseInterval + productOffset);
+      return () => clearInterval(interval);
+    }
+  }, [allImages.length, p?._id]);
 
   const currentImage = allImages[currentImageIndex] || allImages[0];
 
@@ -61,17 +88,24 @@ const ProductCard = ({ p, viewMode = 'grid' }) => {
             src={currentImage}
             alt={p.name}
             className="w-full h-full object-cover rounded-lg"
-            onMouseEnter={() => {
-              if (allImages.length > 1) {
-                setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
-              }
-            }}
-            onMouseLeave={() => setCurrentImageIndex(0)}
+            loading="lazy"
           />
           {allImages.length > 1 && (
-            <div className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-1 rounded">
-              {currentImageIndex + 1}/{allImages.length}
-            </div>
+            <>
+              <div className="absolute bottom-1 right-1 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                {currentImageIndex + 1}/{allImages.length}
+              </div>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setRefreshKey(prev => prev + 1);
+                }}
+                className="absolute top-1 right-1 bg-black/70 hover:bg-pink-600/70 text-white text-xs p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                🎲
+              </button>
+            </>
           )}
         </div>
         
@@ -133,17 +167,24 @@ const ProductCard = ({ p, viewMode = 'grid' }) => {
           src={currentImage}
           alt={p.name}
           className="w-full h-40 sm:h-48 md:h-52 lg:h-56 object-contain p-1 sm:p-2 bg-[#121212] rounded-t-xl sm:rounded-t-2xl transition-all duration-300"
-          onMouseEnter={() => {
-            if (allImages.length > 1) {
-              setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
-            }
-          }}
-          onMouseLeave={() => setCurrentImageIndex(0)}
+          loading="lazy"
         />
         {allImages.length > 1 && (
-          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-            {currentImageIndex + 1}/{allImages.length}
-          </div>
+          <>
+            <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+              {currentImageIndex + 1}/{allImages.length}
+            </div>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setRefreshKey(prev => prev + 1);
+              }}
+              className="absolute top-2 right-2 bg-black/70 hover:bg-pink-600/70 text-white text-xs p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            >
+              🎲
+            </button>
+          </>
         )}
       </Link>
 

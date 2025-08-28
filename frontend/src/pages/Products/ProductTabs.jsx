@@ -4,6 +4,7 @@ import Ratings from "./Ratings";
 import { useGetTopProductsQuery } from "../../redux/api/productApiSlice";
 import SmallProduct from "./SmallProduct";
 import Loader from "../../components/Loader";
+import { ProductTabsSkeleton, SmallProductSkeleton } from "../../components/Skeletons";
 
 const ProductTabs = ({
   loadingProductReview,
@@ -189,7 +190,9 @@ const ProductTabs = ({
               </button>
             </div>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {isLoading || !randomizedProducts.length ? (
+              {isLoading ? (
+                Array(8).fill(0).map((_, i) => <SmallProductSkeleton key={i} />)
+              ) : !randomizedProducts.length ? (
                 <Loader />
               ) : (
                 randomizedProducts.map((relatedProduct) => (

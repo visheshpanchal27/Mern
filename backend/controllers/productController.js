@@ -52,23 +52,15 @@ const addProduct = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Image is required" });
     }
 
-    // ✅ Handle additional images if provided
-    if (req.files && req.files.additionalImages) {
+    // ✅ Handle additional images from frontend (already uploaded URLs)
+    if (req.fields && req.fields.images) {
       try {
-        const files = Array.isArray(req.files.additionalImages) 
-          ? req.files.additionalImages 
-          : [req.files.additionalImages];
-        
-        for (const file of files) {
-          const result = await cloudinary.uploader.upload(file.path, {
-            folder: "mern-products",
-          });
-          additionalImages.push(result.secure_url);
-          fs.unlinkSync(file.path); // cleanup temp file
+        const imagesData = JSON.parse(req.fields.images);
+        if (Array.isArray(imagesData)) {
+          additionalImages = imagesData;
         }
       } catch (err) {
-        console.error("❌ Additional images upload failed:", err);
-        // Don't fail the entire request for additional images
+        console.error("❌ Failed to parse images data:", err);
       }
     }
 
@@ -135,29 +127,15 @@ export const updateProductDetails = async (req, res) => {
       product.image = uploadResult.secure_url;
     }
 
-    // ✅ Handle additional images update
-    if (files.additionalImages) {
+    // ✅ Handle additional images update from frontend
+    if (fields.images) {
       try {
-        const files_array = Array.isArray(files.additionalImages) 
-          ? files.additionalImages 
-          : [files.additionalImages];
-        
-        const newImages = [];
-        for (const file of files_array) {
-          const result = await cloudinary.uploader.upload(file.path, {
-            folder: "mern_products",
-          });
-          newImages.push(result.secure_url);
-        }
-        
-        // Replace or append to existing images
-        if (fields.replaceImages === 'true') {
-          product.images = newImages;
-        } else {
-          product.images = [...(product.images || []), ...newImages];
+        const imagesData = JSON.parse(fields.images);
+        if (Array.isArray(imagesData)) {
+          product.images = imagesData;
         }
       } catch (err) {
-        console.error("❌ Additional images upload failed:", err);
+        console.error("❌ Failed to parse images data:", err);
       }
     }
 
