@@ -4,6 +4,7 @@ import User from '../models/userModels.js';
 import bcrypt from 'bcryptjs';
 import createToken from '../utils/createToken.js';
 import jwt from 'jsonwebtoken';
+import { validateEmail, validatePassword, sanitizeInput } from '../utils/validation.js';
 
 // Enhanced Register User
 const createUser = asyncHandler(async (req, res) => {
@@ -15,8 +16,24 @@ const createUser = asyncHandler(async (req, res) => {
     throw new Error("Please fill in all inputs");
   }
 
+  // Sanitize inputs
+  const sanitizedUsername = sanitizeInput(username);
+  const sanitizedEmail = sanitizeInput(email);
+
+  // Validate email format
+  if (!validateEmail(sanitizedEmail)) {
+    res.status(400);
+    throw new Error("Please enter a valid email");
+  }
+
+  // Validate password strength
+  if (!validatePassword(password)) {
+    res.status(400);
+    throw new Error("Password must be at least 8 characters with uppercase, lowercase, and number");
+  }
+
   // Check existing user
-  const existingUser = await User.findOne({ email });
+  const existingUser = await User.findOne({ email: sanitizedEmail });
   if (existingUser) {
     res.status(400);
     throw new Error("Email already exists");
@@ -26,8 +43,8 @@ const createUser = asyncHandler(async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   const newUser = await User.create({ 
-    username, 
-    email, 
+    username: sanitizedUsername, 
+    email: sanitizedEmail, 
     password: hashedPassword 
   });
 
@@ -47,8 +64,21 @@ const createUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
+  // Validate inputs
+  if (!email || !password) {
+    res.status(400);
+    throw new Error("Please provide email and password");
+  }
+
+  const sanitizedEmail = sanitizeInput(email);
+
+  if (!validateEmail(sanitizedEmail)) {
+    res.status(400);
+    throw new Error("Please enter a valid email");
+  }
+
   // Find user
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: sanitizedEmail });
   if (!user) {
     res.status(401);
     throw new Error("Invalid email or password");
@@ -112,8 +142,24 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
-    user.username = req.body.username || user.username;
-    user.email = req.body.email || user.email;
+    // Sanitize inputs
+    const sanitizedUsername = req.body.username ? sanitizeInput(req.body.username) : user.username;
+    const sanitizedEmail = req.body.email ? sanitizeInput(req.body.email) : user.email;
+
+    // Validate email if provided
+    if (req.body.email && !validateEmail(sanitizedEmail)) {
+      res.status(400);
+      throw new Error("Please enter a valid email");
+    }
+
+    // Validate password if provided
+    if (req.body.password && !validatePassword(req.body.password)) {
+      res.status(400);
+      throw new Error("Password must be at least 8 characters with uppercase, lowercase, and number");
+    }
+
+    user.username = sanitizedUsername;
+    user.email = sanitizedEmail;
 
     if (req.body.password) {
       const salt = await bcrypt.genSalt(10);
@@ -186,6 +232,11 @@ const updateUserById = asyncHandler(async (req, res) => {
 
 const googleAuth = asyncHandler(async (req, res) => {
   const { tokenId } = req.body;
+
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    res.status(500);
+    throw new Error('Google Client ID not configured');
+  }
 
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 

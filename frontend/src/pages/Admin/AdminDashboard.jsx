@@ -108,19 +108,19 @@ const AdminDashboard = () => {
   }, [salesDetail]);
 
   const StatCard = ({ icon, title, value }) => (
-    <div className="rounded-xl bg-black/50 backdrop-blur-md p-6 w-[18rem] mt-5 shadow-md border border-gray-700 transition transform hover:-translate-y-1 hover:shadow-lg">
-      <div className="bg-pink-500 text-white w-12 h-12 flex items-center justify-center rounded-full text-xl">
+    <div className="rounded-xl bg-black/50 backdrop-blur-md p-4 sm:p-6 w-full sm:w-[16rem] lg:w-[18rem] mt-3 sm:mt-5 shadow-md border border-gray-700 transition transform hover:-translate-y-1 hover:shadow-lg">
+      <div className="bg-pink-500 text-white w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full text-lg sm:text-xl">
         {icon}
       </div>
-      <p className="mt-4 text-gray-300">{title}</p>
-      <h1 className="text-2xl font-bold text-white mt-1">{value}</h1>
+      <p className="mt-3 sm:mt-4 text-gray-300 text-sm sm:text-base">{title}</p>
+      <h1 className="text-xl sm:text-2xl font-bold text-white mt-1">{value}</h1>
     </div>
   );
 
   return (
     <>
-      <section className="xl:ml-[4rem] md:ml-0 p-5">
-        <div className="flex justify-center flex-wrap gap-8">
+      <section className="ml-12 sm:ml-16 lg:ml-20 p-3 sm:p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
           <StatCard
             icon={<FaDollarSign />}
             title="Sales"
@@ -140,18 +140,18 @@ const AdminDashboard = () => {
           />
         </div>
 
-        <div className="mt-12 flex justify-center">
-          <div className="bg-black/60 p-6 rounded-xl shadow-md border border-gray-700 w-full max-w-[1000px]">
+        <div className="mt-8 sm:mt-12 col-span-full">
+          <div className="bg-black/60 p-4 sm:p-6 rounded-xl shadow-md border border-gray-700 w-full overflow-x-auto">
             <Chart
               options={state.options}
               series={state.series}
               type="bar"
-              height={350}
+              height={window.innerWidth < 640 ? 250 : 350}
             />
           </div>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-6 sm:mt-10 col-span-full">
           <OrderList />
         </div>
       </section>

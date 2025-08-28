@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Ratings from "./Ratings";
 import { useGetTopProductsQuery } from "../../redux/api/productApiSlice";
@@ -17,6 +17,15 @@ const ProductTabs = ({
 }) => {
   const { data, isLoading } = useGetTopProductsQuery();
   const [activeTab, setActiveTab] = useState(1);
+  const [randomizedProducts, setRandomizedProducts] = useState([]);
+
+  // Shuffle products when data changes
+  useEffect(() => {
+    if (data && data.length > 0) {
+      const shuffled = [...data].sort(() => Math.random() - 0.5);
+      setRandomizedProducts(shuffled.slice(0, 8)); // Show 8 random products
+    }
+  }, [data]);
 
   const handleTabClick = (tabNumber) => {
     setActiveTab(tabNumber);
@@ -155,14 +164,30 @@ const ProductTabs = ({
 
         {/* Tab 3: Related Products */}
         {activeTab === 3 && (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 mt-4">
-            {isLoading || !data ? (
-              <Loader />
-            ) : (
-              data.map((relatedProduct) => (
-                <SmallProduct key={relatedProduct._id} product={relatedProduct} />
-              ))
-            )}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-white">Related Products</h3>
+              <button
+                onClick={() => {
+                  if (data && data.length > 0) {
+                    const shuffled = [...data].sort(() => Math.random() - 0.5);
+                    setRandomizedProducts(shuffled.slice(0, 8));
+                  }
+                }}
+                className="text-pink-500 hover:text-pink-400 text-sm font-medium transition-colors"
+              >
+                🎲 Shuffle Products
+              </button>
+            </div>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+              {isLoading || !randomizedProducts.length ? (
+                <Loader />
+              ) : (
+                randomizedProducts.map((relatedProduct) => (
+                  <SmallProduct key={relatedProduct._id} product={relatedProduct} />
+                ))
+              )}
+            </div>
           </div>
         )}
       </div>

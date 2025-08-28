@@ -1,0 +1,59 @@
+/* Responsive Utilities */
+
+/* Container with navigation offset */
+.main-container {
+  @apply ml-12 sm:ml-16 lg:ml-20 px-2 sm:px-4 lg:px-6;
+}
+
+/* Responsive grid layouts */
+.product-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6;
+}
+
+/* Responsive text sizes */
+.heading-responsive {
+  @apply text-xl sm:text-2xl lg:text-3xl font-bold;
+}
+
+.body-responsive {
+  @apply text-sm sm:text-base;
+}
+
+/* Responsive buttons */
+.btn-responsive {
+  @apply px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-sm sm:text-base;
+}
+
+/* Responsive spacing */
+.section-spacing {
+  @apply py-8 sm:py-12 lg:py-16;
+}
+
+/* Responsive cards */
+.card-responsive {
+  @apply p-3 sm:p-4 lg:p-6 rounded-lg sm:rounded-xl;
+}
+
+/* Mobile-first form elements */
+.form-input-responsive {
+  @apply w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-md sm:rounded-lg;
+}
+
+/* Custom scrollbar */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #ec4899 #1f1f1f;
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: #1f1f1f;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #ec4899;
+  border-radius: 2px;
+}

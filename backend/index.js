@@ -13,6 +13,8 @@ import orderRoutes from './routes/orderRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 
 import connectDB from './config/db.js';
+import { rateLimit } from './middlewares/rateLimiter.js';
+import { validateEnvironment } from './config/validateEnv.js';
 
 // ES module dirname setup
 const __filename = fileURLToPath(import.meta.url);
@@ -20,6 +22,9 @@ const __dirname = path.dirname(__filename);
 
 // Load .env
 dotenv.config({ path: path.join(__dirname, '.env') });
+
+// Validate environment variables
+validateEnvironment();
 
 // Debug ENV loading
 console.log("Loading ENV:", {
@@ -63,8 +68,14 @@ app.use(cors({
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
   res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
   next();
 });
+
+// Rate limiting
+app.use('/api/', rateLimit(100, 15 * 60 * 1000)); // 100 requests per 15 minutes
 
 // Middlewares
 app.use(express.json());

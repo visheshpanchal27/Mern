@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useLoginMutation } from "../../redux/api/usersApiSlice";
@@ -10,11 +10,22 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { useFormValidation } from "../../components/FormValidation";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const validationRules = {
+    email: { required: true, email: true },
+    password: { required: true }
+  };
+
+  const { values, errors, handleChange, validateAll } = useFormValidation(
+    { email: '', password: '' },
+    validationRules
+  );
+
+  const { email, password } = values;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -32,8 +43,14 @@ const Login = () => {
     }
   }, [navigate, redirect, userInfo]);
 
-  const submitHandler = async (e) => {
+  const submitHandler = useCallback(async (e) => {
     e.preventDefault();
+    
+    if (!validateAll()) {
+      toast.error("Please fix the validation errors");
+      return;
+    }
+
     try {
       const res = await login({ email, password }).unwrap();
       dispatch(setCredentials({ ...res }));
@@ -42,7 +59,7 @@ const Login = () => {
     } catch (err) {
       toast.error(err?.data?.message || "Invalid email or password");
     }
-  };
+  }, [email, password, login, dispatch, navigate, redirect, validateAll]);
 
   const googleSuccess = async (tokenResponse) => {
     try {
@@ -101,11 +118,15 @@ const Login = () => {
             <input
               type="email"
               id="email"
-              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none"
+              name="email"
+              className={`w-full p-3 bg-[#0f0f0f] border rounded-lg text-white focus:ring-2 outline-none ${
+                errors.email ? 'border-red-500 ring-red-500' : 'border-pink-500 ring-pink-500'
+              }`}
               placeholder="Enter email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleChange}
             />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
           <div className="relative">
@@ -113,10 +134,13 @@ const Login = () => {
             <input
               type={showPassword ? "text" : "password"}
               id="password"
-              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none pr-10"
+              name="password"
+              className={`w-full p-3 bg-[#0f0f0f] border rounded-lg text-white focus:ring-2 outline-none pr-10 ${
+                errors.password ? 'border-red-500 ring-red-500' : 'border-pink-500 ring-pink-500'
+              }`}
               placeholder="Enter password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handleChange}
             />
             <div
               onClick={() => setShowPassword((prev) => !prev)}
@@ -124,6 +148,7 @@ const Login = () => {
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </div>
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
 
           <button

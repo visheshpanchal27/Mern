@@ -9,14 +9,25 @@ import { motion } from "framer-motion";
 import { useGoogleLogin } from "@react-oauth/google";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import { useFormValidation, validateEmail, validatePassword } from "../../components/FormValidation";
 
 const Register = () => {
-  const [username, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const validationRules = {
+    username: { required: true, minLength: 2 },
+    email: { required: true, email: true },
+    password: { required: true, password: true },
+    confirmPassword: { required: true }
+  };
+
+  const { values, errors, handleChange, validateAll } = useFormValidation(
+    { username: '', email: '', password: '', confirmPassword: '' },
+    validationRules
+  );
+
+  const { username, email, password, confirmPassword } = values;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -37,22 +48,23 @@ const Register = () => {
   const submitHandler = async (e) => {
     e.preventDefault();
 
-    if (!email.endsWith("@gmail.com")) {
-      toast.error("Email must end with @gmail.com");
+    if (!validateAll()) {
+      toast.error("Please fix the validation errors");
       return;
     }
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
-    } else {
-      try {
-        const res = await register({ username, email, password }).unwrap();
-        dispatch(setCredentials({ ...res }));
-        navigate(redirect);
-        toast.success("User successfully registered");
-      } catch (err) {
-        toast.error(err?.data?.message || "Something went wrong");
-      }
+      return;
+    }
+
+    try {
+      const res = await register({ username, email, password }).unwrap();
+      dispatch(setCredentials({ ...res }));
+      navigate(redirect);
+      toast.success("User successfully registered");
+    } catch (err) {
+      toast.error(err?.data?.message || "Something went wrong");
     }
   };
 
@@ -103,15 +115,19 @@ const Register = () => {
 
         <form onSubmit={submitHandler} className="flex flex-col gap-6">
           <div>
-            <label htmlFor="name" className="block text-sm text-gray-300 mb-2">Name</label>
+            <label htmlFor="username" className="block text-sm text-gray-300 mb-2">Name</label>
             <input
               type="text"
-              id="name"
-              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none"
+              id="username"
+              name="username"
+              className={`w-full p-3 bg-[#0f0f0f] border rounded-lg text-white focus:ring-2 outline-none ${
+                errors.username ? 'border-red-500 ring-red-500' : 'border-pink-500 ring-pink-500'
+              }`}
               placeholder="Enter name"
               value={username}
-              onChange={(e) => setName(e.target.value)}
+              onChange={handleChange}
             />
+            {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
           </div>
 
           <div>
@@ -119,11 +135,15 @@ const Register = () => {
             <input
               type="email"
               id="email"
-              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none"
+              name="email"
+              className={`w-full p-3 bg-[#0f0f0f] border rounded-lg text-white focus:ring-2 outline-none ${
+                errors.email ? 'border-red-500 ring-red-500' : 'border-pink-500 ring-pink-500'
+              }`}
               placeholder="Enter email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleChange}
             />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
           <div className="relative">
@@ -131,10 +151,13 @@ const Register = () => {
             <input
               type={showPassword ? "text" : "password"}
               id="password"
-              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none pr-10"
-              placeholder="Enter password"
+              name="password"
+              className={`w-full p-3 bg-[#0f0f0f] border rounded-lg text-white focus:ring-2 outline-none pr-10 ${
+                errors.password ? 'border-red-500 ring-red-500' : 'border-pink-500 ring-pink-500'
+              }`}
+              placeholder="Enter password (8+ chars, uppercase, lowercase, number)"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handleChange}
             />
             <div
               onClick={() => setShowPassword((prev) => !prev)}
@@ -142,6 +165,7 @@ const Register = () => {
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </div>
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
 
           <div className="relative">
@@ -149,10 +173,13 @@ const Register = () => {
             <input
               type={showConfirmPassword ? "text" : "password"}
               id="confirmPassword"
-              className="w-full p-3 bg-[#0f0f0f] border border-pink-500 rounded-lg text-white focus:ring-2 ring-pink-500 outline-none pr-10"
+              name="confirmPassword"
+              className={`w-full p-3 bg-[#0f0f0f] border rounded-lg text-white focus:ring-2 outline-none pr-10 ${
+                errors.confirmPassword || (confirmPassword && password !== confirmPassword) ? 'border-red-500 ring-red-500' : 'border-pink-500 ring-pink-500'
+              }`}
               placeholder="Confirm password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={handleChange}
             />
             <div
               onClick={() => setShowConfirmPassword((prev) => !prev)}
@@ -160,6 +187,8 @@ const Register = () => {
             >
               {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
             </div>
+            {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+            {confirmPassword && password !== confirmPassword && <p className="text-red-500 text-sm mt-1">Passwords do not match</p>}
           </div>
 
           <button

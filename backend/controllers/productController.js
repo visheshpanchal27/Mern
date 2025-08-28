@@ -189,16 +189,38 @@ const fetchProductById = asyncHandler(async (req, res) => {
   }
 });
 
-// FETCH ALL PRODUCTS
+// FETCH ALL PRODUCTS (Optimized)
 const fetchAllProducts = asyncHandler(async (req, res) => {
   try {
-    const products = await Product.find({})
-      .populate('category')
-      .sort({ createdAt: -1 });
-    res.json(products);
+    const { page = 1, limit = 0, sort = 'createdAt', order = 'desc' } = req.query;
+    
+    const sortOrder = order === 'desc' ? -1 : 1;
+    const sortObj = { [sort]: sortOrder };
+    
+    let query = Product.find({})
+      .populate('category', 'name')
+      .select('name description price category brand image rating numReviews countInStock createdAt')
+      .sort(sortObj);
+    
+    // Apply pagination only if limit is specified
+    if (limit > 0) {
+      const skip = (page - 1) * limit;
+      query = query.skip(skip).limit(parseInt(limit));
+    }
+    
+    const products = await query.lean(); // Use lean() for better performance
+    const total = await Product.countDocuments({});
+    
+    res.json({
+      products,
+      total,
+      page: parseInt(page),
+      pages: limit > 0 ? Math.ceil(total / limit) : 1,
+      hasMore: limit > 0 ? page * limit < total : false
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server Error" });
+    console.error('Error fetching all products:', error);
+    res.status(500).json({ error: "Failed to fetch products" });
   }
 });
 

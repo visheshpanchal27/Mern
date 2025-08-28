@@ -20,9 +20,19 @@ export const productApiSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, productId) => [{ type: "Product", id: productId }],
     }),
 
-    // 🔹 Get all products (admin use)
+    // 🔹 Get all products (optimized)
     allProducts: builder.query({
-      query: () => `${PRODUCTS_URL}/allProducts`,
+      query: (params = {}) => ({
+        url: `${PRODUCTS_URL}/allProducts`,
+        params: {
+          limit: params.limit || 0, // 0 means no limit
+          page: params.page || 1,
+          sort: params.sort || 'createdAt',
+          order: params.order || 'desc'
+        }
+      }),
+      keepUnusedDataFor: 300, // Cache for 5 minutes
+      providesTags: ['Product'],
     }),
 
     // 🔹 Get product details

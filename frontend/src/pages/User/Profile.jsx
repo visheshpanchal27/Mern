@@ -46,68 +46,68 @@ const Profile = () => {
     };
 
     return (
-        <div className="container mx-auto p-4 mt-[8rem]">
-            <div className="flex justify-center align-center md:flex md:space-x-4">
-                <div className="md:w-1/3">
-                    <h2 className="text-2xl font-semibold mb-4">Update Profile</h2>
+        <div className="container mx-auto p-3 sm:p-4 mt-16 sm:mt-20 lg:mt-24 ml-12 sm:ml-16 lg:ml-20">
+            <div className="flex justify-center">
+                <div className="w-full max-w-md sm:max-w-lg">
+                    <h2 className="text-xl sm:text-2xl font-semibold mb-4 sm:mb-6 text-white text-center">Update Profile</h2>
                     <form onSubmit={submitHandler}>
                         <div className="mb-4">
-                            <label className="block text-white mb-2">Name</label>
+                            <label className="block text-white mb-2 text-sm sm:text-base">Name</label>
                             <input
                                 type="text"
                                 placeholder="Enter name"
-                                className="form-input p-4 rounded-sm w-full border border-gray-500 bg-black text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                                className="form-input p-3 sm:p-4 rounded-lg w-full border border-gray-500 bg-black text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500 text-sm sm:text-base"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                             />
                         </div>
                         <div className="mb-4">
-                            <label className="block text-white mb-2">Email</label>
+                            <label className="block text-white mb-2 text-sm sm:text-base">Email</label>
                             <input
                                 type="email"
                                 placeholder="Enter email"
-                                className="form-input p-4 rounded-sm w-full border border-gray-500 bg-black text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                                className="form-input p-3 sm:p-4 rounded-lg w-full border border-gray-500 bg-black text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500 text-sm sm:text-base"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
                         <div className="mb-4">
-                            <label className="block text-white mb-2">Password</label>
+                            <label className="block text-white mb-2 text-sm sm:text-base">Password</label>
                             <input
                                 type="password"
                                 placeholder="Enter password"
-                                className="form-input p-4 rounded-sm w-full border border-gray-500 bg-black text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                                className="form-input p-3 sm:p-4 rounded-lg w-full border border-gray-500 bg-black text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500 text-sm sm:text-base"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-white mb-2">Confirm Password</label>
+                        <div className="mb-6">
+                            <label className="block text-white mb-2 text-sm sm:text-base">Confirm Password</label>
                             <input
                                 type="password"
                                 placeholder="Confirm password"
-                                className="form-input p-4 rounded-sm w-full border border-gray-500 bg-black text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                                className="form-input p-3 sm:p-4 rounded-lg w-full border border-gray-500 bg-black text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500 text-sm sm:text-base"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                             />
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                             <button
                                 type="submit"
-                                className="bg-pink-500 text-white py-2 px-4 rounded hover:bg-pink-600"
+                                className="bg-pink-500 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-pink-600 transition-colors text-sm sm:text-base font-medium flex-1"
+                                disabled={loadingUpdateProfile}
                             >
-                                Update
+                                {loadingUpdateProfile ? 'Updating...' : 'Update Profile'}
                             </button>
                             <Link
                                 to="/user-orders"
-                                className="bg-pink-600 text-white py-2 px-4 rounded hover:bg-pink-700"
+                                className="bg-pink-600 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-pink-700 transition-colors text-sm sm:text-base font-medium text-center flex-1"
                             >
                                 My Orders
                             </Link>
                         </div>
                     </form>
                 </div>
-                {loadingUpdateProfile && <Loader />}
             </div>
         </div>
     );
