@@ -44,7 +44,7 @@ const app = express();
 // CORS setup
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://shopping-canter.netlify.app",
+  "https://mern-j0z9.onrender.com"
 ];
 app.use(cors({
   origin: (origin, callback) => {
@@ -83,6 +83,23 @@ app.use('/api/cart', cartRoutes);
 app.get("/api/config/paypal", (req, res) => {
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
 });
+
+// --------------------------------
+// ✅ Serve React frontend in production
+// --------------------------------
+if (process.env.NODE_ENV === "production") {
+  const frontendPath = path.join(__dirname, "/frontend/dist");
+  app.use(express.static(frontendPath));
+
+  // fallback: send index.html for unknown routes
+  app.get("*", (req, res) =>
+    res.sendFile(path.resolve(frontendPath, "index.html"))
+  );
+} else {
+  app.get("/", (req, res) => {
+    res.send("API is running...");
+  });
+}
 
 // Start server
 app.listen(port, () => console.log(`✅ Server running on port ${port}`));

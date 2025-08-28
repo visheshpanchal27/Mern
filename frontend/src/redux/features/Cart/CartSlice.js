@@ -6,8 +6,7 @@ export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (_, { getState, rejectWithValue }) => {
     try {
-      const API_URL =
-        import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
       const {
         auth: { userInfo },
@@ -36,8 +35,7 @@ export const addToCartBackend = createAsyncThunk(
   "cart/addToCartBackend",
   async (item, { getState, rejectWithValue }) => {
     try {
-      const API_URL =
-        import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
       const {
         auth: { userInfo },
@@ -72,8 +70,7 @@ export const removeFromCartBackend = createAsyncThunk(
   "cart/removeFromCartBackend",
   async (productId, { getState, rejectWithValue }) => {
     try {
-      const API_URL =
-        import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
       const {
         auth: { userInfo },
@@ -108,8 +105,7 @@ export const createOrder = createAsyncThunk(
   "cart/createOrder",
   async (orderData, { getState, rejectWithValue }) => {
     try {
-      const API_URL =
-        import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
       const {
         auth: { userInfo },
