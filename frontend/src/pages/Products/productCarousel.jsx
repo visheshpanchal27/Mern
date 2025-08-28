@@ -36,8 +36,8 @@ const ProductCarousel = () => {
   useEffect(() => {
     const fetchRandomProducts = async () => {
       try {
-        const { data } = await axios.get(`${PRODUCTS_URL}/new`);
-        setProducts(data);
+        const { data } = await axios.get(`${PRODUCTS_URL}`);
+        setProducts(data.products || data);
         setIsLoading(false);
       } catch (error) {
         console.error(error);
