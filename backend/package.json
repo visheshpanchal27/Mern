@@ -15,6 +15,7 @@
     "cloudinary": "^2.6.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "formidable": "^3.5.4",
     "google-auth-library": "^9.15.1",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",

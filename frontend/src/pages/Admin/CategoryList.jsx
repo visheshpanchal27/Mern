@@ -86,7 +86,7 @@ const CategoryList = () => {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success(`${result.name} is deleted.`);
+        toast.success(`${selectedCategory.name} is deleted.`);
         setSelectedCategory(null);
         setModalVisible(false);
       }

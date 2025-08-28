@@ -9,7 +9,6 @@ import {
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
 
-// ✅ Material UI
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -18,7 +17,7 @@ const ProductUpdate = () => {
   const navigate = useNavigate();
 
   const { data: productData } = useGetProductByIdQuery(id);
-  const { data: categories = [] } = useFetchCategoriesQuery();
+  const { data: categories = [], isLoading: catLoading, error: catError } = useFetchCategoriesQuery();2
 
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -28,32 +27,31 @@ const ProductUpdate = () => {
   const [category, setCategory] = useState("");
   const [quantity, setQuantity] = useState("");
   const [brand, setBrand] = useState("");
-  const [stock, setStock] = useState("");
-  const [uploading, setUploading] = useState(false);
+  const [countInStock, setCountInStock] = useState("");
 
   const [uploadProductImage] = useUploadProductImageMutation();
   const [updateProduct] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
 
-  useEffect(() => {
-    if (!productData) return;
+useEffect(() => {
+  if (!productData) return;
 
-    setName(productData.name || "");
-    setDescription(productData.description || "");
-    setPrice(productData.price || "");
-    setCategory(productData.category?._id || "");
-    setQuantity(productData.quantity || "");
-    setBrand(productData.brand || "");
-    setStock(productData.countInStock || "");
+  setName(productData.name || "");
+  setDescription(productData.description || "");
+  setPrice(productData.price || "");
+  setCategory(productData.category?._id || "");  // ✅ this sets existing category
+  setQuantity(productData.quantity || "");
+  setBrand(productData.brand || "");
+  setCountInStock(productData.countInStock || "");
 
-    if (productData.image) {
-      setImagePreview(
-        productData.image.startsWith("http")
-          ? productData.image
-          : `${import.meta.env.VITE_API_URL}${productData.image}`
-      );
-    }
-  }, [productData]);
+  if (productData.image) {
+    setImagePreview(
+      productData.image.startsWith("http")
+        ? productData.image
+        : `${import.meta.env.VITE_API_URL}${productData.image}`
+    );
+  }
+}, [productData]);
 
   const uploadFileHandler = (e) => {
     const file = e.target.files[0];
@@ -73,47 +71,54 @@ const ProductUpdate = () => {
     setImagePreview("");
   };
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
+  
+const submitHandler = async (e) => {
+  e.preventDefault();
 
-    if (!name || !description || !price || !category || !quantity || !brand || !stock) {
-      toast.error("Please fill in all required fields");
-      return;
+  if (!name.trim() || !price || !category) {
+    toast.error("⚠️ Please fill in all required fields: Name, Price, Category");
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("name", name.trim());
+    formData.append("description", description?.trim() || "");
+    formData.append("category", category.toString()); // ✅ ensure string
+    formData.append("brand", brand?.trim() || "");
+    formData.append("price", Number(price));
+    formData.append("quantity", Number(quantity) || 0);
+    formData.append("countInStock", Number(countInStock) || 0);
+
+    if (image && image instanceof File) {
+      formData.append("image", image);
     }
 
-    try {
-      setUploading(true);
+    toast.info("⏳ Updating product...");
 
-      let imageUrl = productData?.image || "";
+    await updateProduct({
+      productId: id,
+      formData, // ✅ correct key
+    }).unwrap();
 
-      if (image instanceof File) {
-        const uploadForm = new FormData();
-        uploadForm.append("image", image);
-        const res = await uploadProductImage(uploadForm).unwrap();
-        imageUrl = res.image;
-      }
+    toast.dismiss();
+    toast.success("✅ Product updated successfully");
 
-      const productData = {
-        name,
-        description,
-        price,
-        category,
-        quantity,
-        brand,
-        countInStock: stock,
-        image: imageUrl,
-      };
-
-      await updateProduct({ productId: id, formData: productData }).unwrap();
-
-      toast.success("Product updated successfully!");
+    setTimeout(() => {
       navigate("/admin/allproductslist");
-    } catch (err) {
-      toast.error(err?.data?.message || "Failed to update product");
-    } finally {
-      setUploading(false);
-    }
-  };
+    }, 800);
+  } catch (err) {
+    console.error("❌ Update error:", err);
+    toast.dismiss();
+    toast.error(
+      err?.data?.message ||
+        err?.error ||
+        err?.message ||
+        "❌ Failed to update product. Please try again."
+    );
+  }
+};
+
 
   const deleteHandler = async () => {
     const confirmed = window.confirm("Are you sure you want to delete this product?");
@@ -121,10 +126,17 @@ const ProductUpdate = () => {
 
     try {
       await deleteProduct(id).unwrap();
-      toast.success("Product deleted successfully");
+      toast.success("🗑️ Product deleted successfully");
       navigate("/admin/allproductslist");
     } catch (err) {
-      toast.error(err?.data?.message || "Delete failed");
+      console.error("Delete Error:", err);
+
+      const errorMessage =
+        err?.data?.message ||
+        err?.error ||
+        err?.message ||
+        "❌ Failed to delete product. Please try again.";
+      toast.error(errorMessage);
     }
   };
 
@@ -134,7 +146,6 @@ const ProductUpdate = () => {
         <form onSubmit={submitHandler} className="md:w-3/4 p-4">
           <h2 className="text-xl font-semibold mb-6">Update / Delete Product</h2>
 
-          {/* Image Preview */}
           {imagePreview && (
             <div className="text-center mb-4 relative">
               <img
@@ -157,9 +168,7 @@ const ProductUpdate = () => {
           )}
 
           <label
-            className={`border px-4 block w-full text-center rounded-lg cursor-pointer font-bold py-11 border-gray-700 hover:border-pink-500 transition mb-6 ${
-              uploading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className="border px-4 block w-full text-center rounded-lg cursor-pointer font-bold py-11 border-gray-700 hover:border-pink-500 transition mb-6"
           >
             {image ? "Change Image" : "Upload Image"}
             <input
@@ -167,7 +176,6 @@ const ProductUpdate = () => {
               accept="image/*"
               onChange={uploadFileHandler}
               className="hidden"
-              disabled={uploading}
             />
           </label>
 
@@ -234,8 +242,8 @@ const ProductUpdate = () => {
               <input
                 type="number"
                 className="w-full p-4 rounded-lg bg-[#101011] border border-gray-700"
-                value={stock}
-                onChange={(e) => setStock(e.target.value)}
+                value={countInStock}
+                onChange={(e) => setCountInStock(e.target.value)}
               />
             </div>
           </div>
@@ -254,15 +262,13 @@ const ProductUpdate = () => {
             <button
               type="submit"
               className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold"
-              disabled={uploading}
             >
-              {uploading ? "Updating..." : "Update"}
+              Update
             </button>
             <button
               type="button"
               onClick={deleteHandler}
               className="bg-pink-600 hover:bg-pink-700 px-6 py-3 rounded-lg font-semibold"
-              disabled={uploading}
             >
               Delete
             </button>

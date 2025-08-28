@@ -1,11 +1,15 @@
 import asyncHandler from "../middlewares/asyncHandler.js";
 import Product from '../models/productModal.js';
+import cloudinary from '../config/cloudinary.js'; 
 import fs from 'fs';
 import path from "path";
+import formidable from "formidable";
 
-// ADD PRODUCT
 const addProduct = asyncHandler(async (req, res) => {
   try {
+    console.log("📥 Incoming fields:", req.fields);
+    console.log("📥 Incoming files:", req.files);
+
     const {
       name,
       description,
@@ -14,17 +18,40 @@ const addProduct = asyncHandler(async (req, res) => {
       countInStock,
       quantity,
       brand,
-      image,
     } = req.fields;
 
-    if (!name) throw new Error("Name is required");
-    if (!brand) throw new Error("Brand is required");
-    if (!description) throw new Error("Description is required");
-    if (!price) throw new Error("Price is required");
-    if (!category) throw new Error("Category is required");
-    if (!countInStock) throw new Error("countInStock is required");
-    if (!image) throw new Error("Image is required");
+    // ✅ Required checks
+    if (!name) return res.status(400).json({ message: "Name is required" });
+    if (!brand) return res.status(400).json({ message: "Brand is required" });
+    if (!description)
+      return res.status(400).json({ message: "Description is required" });
+    if (!price) return res.status(400).json({ message: "Price is required" });
+    if (!category)
+      return res.status(400).json({ message: "Category is required" });
+    if (!countInStock)
+      return res.status(400).json({ message: "countInStock is required" });
 
+    let imageUrl = "";
+
+    // ✅ If image provided, upload to Cloudinary
+    if (req.files && req.files.image) {
+      try {
+        const file = req.files.image;
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "mern-products",
+        });
+
+        imageUrl = result.secure_url;
+        fs.unlinkSync(file.path); // cleanup temp file
+      } catch (err) {
+        console.error("❌ Cloudinary upload failed:", err);
+        return res.status(500).json({ message: "Image upload failed" });
+      }
+    } else {
+      return res.status(400).json({ message: "Image is required" });
+    }
+
+    // ✅ Create product
     const product = new Product({
       name,
       description,
@@ -33,78 +60,67 @@ const addProduct = asyncHandler(async (req, res) => {
       countInStock,
       quantity,
       brand,
-      image,
+      image: imageUrl,
     });
 
-    await product.save();
-    res.status(201).json(product);
+    const saved = await product.save();
+    res.status(201).json({
+      message: "✅ Product created successfully",
+      product: saved,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(400).json({ message: error.message });
+    console.error("❌ Error creating product:", error);
+    res.status(500).json({ message: error.message });
   }
 });
 
-
-// UPDATE PRODUCT
-const updateProductDetails = asyncHandler(async (req, res) => {
+export const updateProductDetails = async (req, res) => {
   try {
-    const {
-      name,
-      description,
-      price,
-      category,
-      quantity,
-      brand,
-      countInStock,
-      image,
-    } = req.fields;
+    const { id } = req.params;
+    const product = await Product.findById(id);
 
-    switch (true) {
-      case !name:
-        return res.json({ error: "Name is required" });
-      case !brand:
-        return res.json({ error: "Brand is required" });
-      case !description:
-        return res.json({ error: "Description is required" });
-      case !price:
-        return res.json({ error: "Price is required" });
-      case !category:
-        return res.json({ error: "Category is required" });
-      case !quantity:
-        return res.json({ error: "Quantity is required" });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ error: "Product not found" });
+    const fields = req.fields || {};
+    const files = req.files || {};
 
-    if (image && image !== product.image) {
-      const oldImagePath = path.join(path.resolve(), product.image);
-      fs.unlink(oldImagePath, (err) => {
-        if (err) {
-          console.error("❌ Failed to delete old image:", err.message);
-        } else {
-          console.log("🧼 Old image deleted:", product.image);
+    // ✅ Update fields if provided
+    if (fields.name) product.name = fields.name;
+    if (fields.description) product.description = fields.description;
+    if (fields.category) product.category = fields.category;
+    if (fields.brand) product.brand = fields.brand;
+    if (fields.price) product.price = Number(fields.price);
+    if (fields.quantity) product.quantity = Number(fields.quantity);
+    if (fields.countInStock) product.countInStock = Number(fields.countInStock);
+
+    // ✅ Handle Cloudinary upload
+    if (files.image) {
+      // (Optional) Delete old image from Cloudinary if stored there
+      if (product.image && product.image.includes("res.cloudinary.com")) {
+        const publicId = product.image.split("/").pop().split(".")[0]; // crude extract
+        try {
+          await cloudinary.uploader.destroy(`mern_products/${publicId}`);
+        } catch (err) {
+          console.warn("⚠️ Failed to delete old Cloudinary image:", err.message);
         }
+      }
+
+      const uploadResult = await cloudinary.uploader.upload(files.image.path, {
+        folder: "mern_products",
       });
+      product.image = uploadResult.secure_url;
     }
 
-    product.name = name;
-    product.description = description;
-    product.price = price;
-    product.category = category;
-    product.quantity = quantity;
-    product.brand = brand;
-    product.countInStock = countInStock || product.countInStock;
-    product.image = image || product.image;
+    const updatedProduct = await product.save();
 
-    const updated = await product.save();
-    res.json({ message: "Product updated", product: updated });
-
+    res.json(updatedProduct); // ✅ frontend gets full updated product
   } catch (error) {
-    console.error(error);
-    res.status(404).json({ error: error.message });
+    console.error("Update error:", error);
+    res.status(500).json({ message: "❌ Failed to update product" });
   }
-});
+};
 
 // DELETE PRODUCT
 const removeProduct = asyncHandler(async (req, res) => {
@@ -278,7 +294,6 @@ const fetchRandomProducts = asyncHandler(async (req, res) => {
 
 export {
   addProduct,
-  updateProductDetails,
   removeProduct,
   fetchProducts,
   fetchProductById,

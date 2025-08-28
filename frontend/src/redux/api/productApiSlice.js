@@ -3,24 +3,29 @@ import { apiSlice } from "./apiSlice";
 
 export const productApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+
+    // 🔹 Get products (with optional search keyword)
     getProducts: builder.query({
       query: ({ keyword }) => ({
-        url: `${PRODUCTS_URL}`,
+        url: PRODUCTS_URL,
         params: { keyword },
       }),
       keepUnusedDataFor: 5,
       providesTags: ["Product"],
     }),
 
+    // 🔹 Get single product by ID
     getProductById: builder.query({
       query: (productId) => `${PRODUCTS_URL}/${productId}`,
       providesTags: (result, error, productId) => [{ type: "Product", id: productId }],
     }),
 
+    // 🔹 Get all products (admin use)
     allProducts: builder.query({
       query: () => `${PRODUCTS_URL}/allProducts`,
     }),
 
+    // 🔹 Get product details
     getProductDetails: builder.query({
       query: (productId) => ({
         url: `${PRODUCTS_URL}/${productId}`,
@@ -28,41 +33,48 @@ export const productApiSlice = apiSlice.injectEndpoints({
       keepUnusedDataFor: 5,
     }),
 
+    // 🔹 Create product
     createProduct: builder.mutation({
       query: (formData) => ({
-        url: `${PRODUCTS_URL}`,
+        url: "/api/products",
         method: "POST",
-        body: formData,
+        body: formData, // ✅ send as multipart/form-data
       }),
-      invalidatesTags: ["Product"],
     }),
-    
+    fetchCategories: builder.query({
+      query: () => "/api/categories",
+    }),
 
+    // 🔹 Update product
     updateProduct: builder.mutation({
       query: ({ productId, formData }) => ({
         url: `${PRODUCTS_URL}/${productId}`,
         method: "PUT",
         body: formData,
+        headers: formData instanceof FormData ? {} : { "Content-Type": "application/json" },
       }),
       invalidatesTags: ["Product"],
-    }),    
+    }),
 
+    // 🔹 Upload product image
     uploadProductImage: builder.mutation({
-      query: (data) => ({
-        url: `${UPLOAD_URL}`,
+      query: (formData) => ({
+        url: UPLOAD_URL,
         method: "POST",
-        body: data,
+        body: formData,
       }),
     }),
 
+    // 🔹 Delete product
     deleteProduct: builder.mutation({
       query: (productId) => ({
         url: `${PRODUCTS_URL}/${productId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Product"],
-    }),    
+    }),
 
+    // 🔹 Create review
     createReview: builder.mutation({
       query: (data) => ({
         url: `${PRODUCTS_URL}/${data.productId}/reviews`,
@@ -71,16 +83,19 @@ export const productApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    // 🔹 Get top products
     getTopProducts: builder.query({
       query: () => `${PRODUCTS_URL}/top`,
       keepUnusedDataFor: 5,
     }),
 
+    // 🔹 Get new products
     getNewProducts: builder.query({
       query: () => `${PRODUCTS_URL}/new`,
       keepUnusedDataFor: 5,
     }),
 
+    // 🔹 Filtered products (category, price)
     getFilteredProducts: builder.query({
       query: ({ checked, radio }) => ({
         url: `${PRODUCTS_URL}/filtered-products`,

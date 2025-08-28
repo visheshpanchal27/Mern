@@ -1,28 +1,32 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   useCreateProductMutation,
   useUploadProductImageMutation,
-} from '../../redux/api/productApiSlice';
-import { useFetchCategoriesQuery } from '../../redux/api/categoryApiSlice';
-import { toast } from 'react-toastify';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
+} from "../../redux/api/productApiSlice";
+import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
+import { toast } from "react-toastify";
+
+// Material UI
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import ErrorIcon from "@mui/icons-material/Error";
 
 const initialFormState = {
-  name: '',
-  description: '',
-  price: '',
-  category: '',
-  quantity: '',
-  brand: '',
-  stock: '',
+  name: "",
+  description: "",
+  price: "",
+  category: "",
+  quantity: "",
+  brand: "",
+  stock: "",
 };
 
 const ProductList = () => {
   const [formData, setFormData] = useState(initialFormState);
   const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [imagePreview, setImagePreview] = useState("");
   const [uploading, setUploading] = useState(false);
   const [creatingProduct, setCreatingProduct] = useState(false);
 
@@ -31,20 +35,20 @@ const ProductList = () => {
   const [createProduct] = useCreateProductMutation();
   const { data: categories } = useFetchCategoriesQuery();
 
+  // handle input change
   const handleChange = (e) => {
     const { id, value } = e.target;
-    const numericFields = ['price', 'quantity', 'stock'];
-
-    setFormData({
-      ...formData,
+    const numericFields = ["price", "quantity", "stock"];
+    setFormData((prev) => ({
+      ...prev,
       [id]: numericFields.includes(id) ? Number(value) : value,
-    });
+    }));
   };
 
+  // preview image
   const uploadFileHandler = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setImage(file);
 
     const reader = new FileReader();
@@ -56,69 +60,47 @@ const ProductList = () => {
 
   const removeImageHandler = () => {
     setImage(null);
-    setImagePreview('');
+    setImagePreview("");
   };
 
+  // form submit
   const submitHandler = async (e) => {
     e.preventDefault();
-
-    const { name, description, price, category, quantity, brand, stock } = formData;
-
-    if (!name || !description || !price || !category || !quantity || !brand || !stock) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
     if (!image) {
-      toast.error('Please select an image');
+      toast.error("Please select an image", { icon: <ErrorIcon /> });
       return;
     }
 
     try {
       setCreatingProduct(true);
-      setUploading(true);
 
-      const uploadForm = new FormData();
-      uploadForm.append('image', image);
+      const formDataToSend = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataToSend.append(
+          key === "stock" ? "countInStock" : key,
+          value
+        );
+      });
+      formDataToSend.append("image", image);
 
-      const uploadRes = await uploadProductImage(uploadForm).unwrap();
-      const uploadedImageUrl = uploadRes.image;
+      console.log("Submitting product data:", [...formDataToSend]);
 
-      setUploading(false);
+      const res = await createProduct(formDataToSend).unwrap();
 
-      const productData = {
-        name,
-        description,
-        price,
-        category,
-        quantity,
-        brand,
-        countInStock: stock,
-        image: uploadedImageUrl,
-      };
+      console.log("✅ Product created:", res);
 
-      console.log('➡️ Creating product with:', productData);
+      toast.success("Product created successfully!", {
+        icon: <CheckCircleIcon style={{ color: "green" }} />,
+      });
 
-      const timeout = setTimeout(() => {
-        setCreatingProduct(false);
-        toast.error('⏳ Server taking too long. Try again.');
-      }, 10000);
-
-      const res = await createProduct(productData).unwrap();
-      clearTimeout(timeout);
-
-      console.log('✅ Product created:', res);
-      toast.success('Product created successfully!');
-      setFormData(initialFormState);
-      setImage(null);
-      setImagePreview('');
-      navigate('/admin/productlist');
+      navigate("/admin/productlist");
     } catch (err) {
-      console.error('❌ Product Error:', err);
-      toast.error(err?.data?.message || err?.message || 'Failed to create product');
+      console.error("❌ Error creating product:", err);
+      toast.error(err?.data?.message || "Failed to create product", {
+        icon: <ErrorIcon style={{ color: "red" }} />,
+      });
     } finally {
       setCreatingProduct(false);
-      setUploading(false);
     }
   };
 
@@ -128,6 +110,7 @@ const ProductList = () => {
         <div className="md:w-3/4 p-3">
           <div className="h-12 text-xl font-semibold mb-6">Create Product</div>
 
+          {/* Image upload + preview */}
           <div className="mb-8 relative">
             {imagePreview && (
               <div className="text-center mb-4 relative">
@@ -142,14 +125,14 @@ const ProductList = () => {
                     removeImageHandler();
                   }}
                   sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     right: 0,
-                    transform: 'translate(50%, -50%)',
-                    bgcolor: 'error.main',
-                    color: 'white',
-                    '&:hover': {
-                      bgcolor: 'error.dark',
+                    transform: "translate(50%, -50%)",
+                    bgcolor: "error.main",
+                    color: "white",
+                    "&:hover": {
+                      bgcolor: "error.dark",
                     },
                     width: 24,
                     height: 24,
@@ -162,10 +145,10 @@ const ProductList = () => {
             )}
             <label
               className={`border px-4 block w-full text-center rounded-lg cursor-pointer font-bold py-11 border-gray-700 hover:border-pink-500 transition ${
-                uploading ? 'opacity-50 cursor-not-allowed' : ''
+                uploading ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
-              {image ? 'Change Image' : 'Upload Image'}
+              {image ? "Change Image" : "Upload Image"}
               <input
                 type="file"
                 accept="image/*"
@@ -176,16 +159,20 @@ const ProductList = () => {
             </label>
           </div>
 
+          {/* Input fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {[
-              { label: 'Name', id: 'name', type: 'text' },
-              { label: 'Price', id: 'price', type: 'number' },
-              { label: 'Quantity', id: 'quantity', type: 'number' },
-              { label: 'Brand', id: 'brand', type: 'text' },
-              { label: 'Stock', id: 'stock', type: 'number' },
+              { label: "Name", id: "name", type: "text" },
+              { label: "Price", id: "price", type: "number" },
+              { label: "Quantity", id: "quantity", type: "number" },
+              { label: "Brand", id: "brand", type: "text" },
+              { label: "Stock", id: "stock", type: "number" },
             ].map((field) => (
               <div key={field.id}>
-                <label htmlFor={field.id} className="block text-sm font-medium mb-2">
+                <label
+                  htmlFor={field.id}
+                  className="block text-sm font-medium mb-2"
+                >
                   {field.label}
                 </label>
                 <input
@@ -198,7 +185,10 @@ const ProductList = () => {
               </div>
             ))}
             <div>
-              <label htmlFor="category" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="category"
+                className="block text-sm font-medium mb-2"
+              >
                 Category
               </label>
               <select
@@ -217,8 +207,12 @@ const ProductList = () => {
             </div>
           </div>
 
+          {/* Description */}
           <div className="mb-8">
-            <label htmlFor="description" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium mb-2"
+            >
               Description
             </label>
             <textarea
@@ -230,19 +224,22 @@ const ProductList = () => {
             />
           </div>
 
+          {/* Submit button */}
           <div className="mb-6">
             <button
               type="submit"
               disabled={uploading || creatingProduct}
               className={`w-full bg-pink-500 text-white py-3 rounded-lg font-semibold transition ${
-                uploading || creatingProduct ? 'cursor-not-allowed opacity-50' : 'hover:bg-pink-700'
+                uploading || creatingProduct
+                  ? "cursor-not-allowed opacity-50"
+                  : "hover:bg-pink-700"
               }`}
             >
               {uploading
-                ? 'Uploading Image...'
+                ? "Uploading Image..."
                 : creatingProduct
-                ? 'Creating Product...'
-                : 'Submit Product'}
+                ? "Creating Product..."
+                : "Submit Product"}
             </button>
           </div>
         </div>
