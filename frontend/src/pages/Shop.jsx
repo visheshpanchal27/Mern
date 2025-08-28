@@ -65,11 +65,10 @@ const Shop = () => {
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [showAllBrands, setShowAllBrands] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState([0, 50000]);
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(12);
+
 
   // Load categories
   useEffect(() => {
@@ -80,10 +79,7 @@ const Shop = () => {
 
 
 
-  // Reset page on filters/search
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, checked, priceRange, sortOrder]);
+
 
   const handleCheck = (value, id) => {
     const updatedChecked = value
@@ -97,12 +93,12 @@ const Shop = () => {
     setPriceFilter("");
     setSortOrder("");
     setSearchTerm("");
-    setPriceRange([0, 1000]);
-    setCurrentPage(1);
+    setPriceRange([0, 50000]);
+
   }, [dispatch]);
 
-  const handleRefresh = useCallback(() => {
-    refetch();
+  const handleRefresh = useCallback(async () => {
+    await refetch();
   }, [refetch]);
 
   // Debounced search
@@ -113,25 +109,21 @@ const Shop = () => {
 
   // Extract products from API response
   const allProducts = useMemo(() => {
-    const products = productsData?.products || [];
-    console.log('📦 Total products from API:', products.length);
-    console.log('📊 Products data:', productsData);
-    return products;
+    return productsData?.products || [];
   }, [productsData]);
 
   // Filtered Products
   const filteredProducts = useMemo(() => {
-    if (!allProducts?.length) {
-      console.log('⚠️ No products available');
-      return [];
-    }
+    if (!allProducts?.length) return [];
 
     let filtered = [...allProducts];
-    console.log('🔍 Starting with', allProducts.length, 'products');
 
     // Category filter
     if (checked.length > 0) {
-      filtered = filtered.filter(product => checked.includes(product.category));
+      filtered = filtered.filter(product => {
+        const categoryId = product.category?._id || product.category;
+        return checked.includes(categoryId);
+      });
     }
 
     // Search filter
@@ -163,16 +155,10 @@ const Shop = () => {
     else if (sortOrder === "name-desc") filtered.sort((a,b) => b.name.localeCompare(a.name));
     else if (sortOrder === "newest") filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    console.log('✅ Filtered to', filtered.length, 'products');
     return filtered;
   }, [allProducts, searchTerm, priceRange, priceFilter, sortOrder, checked]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredProducts, currentPage, itemsPerPage]);
+
 
   const uniqueBrands = useMemo(() => {
     return [...new Set(allProducts.map(p => p.brand).filter(Boolean))];
@@ -207,10 +193,10 @@ const Shop = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f] relative">
-      <div className="max-w-screen-2xl mx-auto px-2 sm:px-4 py-4 sm:py-6 ml-12 sm:ml-16 lg:ml-20">
+      <div className="max-w-screen-2xl mx-auto px-2 sm:px-4 py-4 sm:py-6 ml-12">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">
+        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-1">
           Shop Collection
         </h1>
         <p className="text-gray-400 text-sm md:text-base">Discover amazing products at great prices</p>
@@ -236,7 +222,7 @@ const Shop = () => {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="bg-gradient-to-b from-[#1a1a1a] to-[#151515] p-4 lg:p-6 rounded-2xl w-full lg:w-[300px] xl:w-[320px] shrink-0 shadow-2xl border border-gray-800/50 lg:sticky lg:top-4 max-h-screen overflow-y-auto backdrop-blur-sm"
+              className="bg-gradient-to-b from-[#1a1a1a] to-[#151515] p-4 lg:p-6 rounded-2xl w-full lg:w-[300px] xl:w-[320px] shrink-0 shadow-2xl border border-gray-800/50 lg:sticky lg:top-4 backdrop-blur-sm"
             >
               {/* Search */}
               <div className="mb-8 relative">
@@ -253,21 +239,66 @@ const Shop = () => {
               {/* Price Range */}
               <div className="mb-8">
                 <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full"></span>
+                  <span className="w-3 h-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full animate-pulse"></span>
                   Price Range
                 </h3>
-                <div className="bg-[#0f0f0f] p-4 rounded-xl border border-gray-800/50">
-                  <input
-                    type="range"
-                    min="0"
-                    max="1000"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-                    className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer slider"
-                  />
-                  <div className="flex justify-between text-sm text-gray-400 mt-3">
-                    <span className="bg-gray-800 px-2 py-1 rounded">$0</span>
-                    <span className="bg-gradient-to-r from-pink-600 to-purple-600 text-white px-2 py-1 rounded">${priceRange[1]}</span>
+                <div className="bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] p-6 rounded-2xl border border-gray-700/30 shadow-inner">
+                  {/* Min Price Input */}
+                  <div className="mb-4">
+                    <label className="text-xs text-gray-400 mb-2 block">Minimum Price</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={priceRange[1]}
+                      value={priceRange[0]}
+                      onChange={(e) => setPriceRange([parseInt(e.target.value) || 0, priceRange[1]])}
+                      className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-600/50 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
+                      placeholder="0"
+                    />
+                  </div>
+                  
+                  {/* Max Price Slider */}
+                  <div className="mb-4">
+                    <label className="text-xs text-gray-400 mb-2 block">Maximum Price</label>
+                    <div className="relative">
+                      <input
+                        type="range"
+                        min={priceRange[0]}
+                        max="50000"
+                        value={priceRange[1]}
+                        onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                        className="w-full h-3 bg-gradient-to-r from-gray-700 to-gray-600 rounded-full appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #374151 0%, #374151 ${((priceRange[1] - priceRange[0]) / 50000) * 100}%, #ec4899 ${((priceRange[1] - priceRange[0]) / 50000) * 100}%, #8b5cf6 100%)`
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Price Display */}
+                  <div className="flex justify-between items-center">
+                    <div className="bg-gradient-to-r from-gray-800 to-gray-700 px-3 py-2 rounded-lg border border-gray-600/30">
+                      <span className="text-xs text-gray-400">Min</span>
+                      <div className="text-white font-semibold">${priceRange[0].toLocaleString()}</div>
+                    </div>
+                    <div className="w-8 h-px bg-gradient-to-r from-pink-500 to-purple-500"></div>
+                    <div className="bg-gradient-to-r from-pink-600 to-purple-600 px-3 py-2 rounded-lg shadow-lg">
+                      <span className="text-xs text-pink-100">Max</span>
+                      <div className="text-white font-semibold">${priceRange[1].toLocaleString()}</div>
+                    </div>
+                  </div>
+                  
+                  {/* Quick Price Buttons */}
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    {[1000, 5000, 10000].map(price => (
+                      <button
+                        key={price}
+                        onClick={() => setPriceRange([0, price])}
+                        className="px-2 py-1 text-xs bg-gray-800/50 hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-purple-600/20 text-gray-300 hover:text-white rounded-lg transition-all duration-300 border border-gray-700/30 hover:border-pink-500/30"
+                      >
+                        ${price.toLocaleString()}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -418,7 +449,7 @@ const Shop = () => {
           {/* Products Grid/List */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={viewMode + currentPage} 
+              key={viewMode} 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -429,7 +460,7 @@ const Shop = () => {
               }
             >
               {isLoading ? (
-                Array.from({ length: itemsPerPage }).map((_, i) => (
+                Array.from({ length: 8 }).map((_, i) => (
                   <ProductSkeleton key={i} viewMode={viewMode} />
                 ))
               ) : !allProducts.length ? (
@@ -438,14 +469,15 @@ const Shop = () => {
                     <h3 className="text-xl font-semibold text-white mb-2">No Products Available</h3>
                     <p className="text-gray-400 mb-4">Check back later for new products</p>
                     <button
-                      onClick={() => refetch()}
-                      className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      onClick={handleRefresh}
+                      className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
                     >
+                      <FaRedo size={14} />
                       Refresh
                     </button>
                   </div>
                 </motion.div>
-              ) : paginatedProducts.length === 0 ? (
+              ) : filteredProducts.length === 0 ? (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}

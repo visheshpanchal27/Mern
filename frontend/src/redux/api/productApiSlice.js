@@ -28,11 +28,13 @@ export const productApiSlice = apiSlice.injectEndpoints({
           limit: params.limit || 0, // 0 means no limit
           page: params.page || 1,
           sort: params.sort || 'createdAt',
-          order: params.order || 'desc'
+          order: params.order || 'desc',
+          _t: Date.now() // Cache busting
         }
       }),
-      keepUnusedDataFor: 300, // Cache for 5 minutes
+      keepUnusedDataFor: 0, // Don't cache
       providesTags: ['Product'],
+      forceRefetch: ({ currentArg, previousArg }) => true,
     }),
 
     // 🔹 Get product details

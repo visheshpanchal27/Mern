@@ -2,11 +2,33 @@ import { Link } from "react-router-dom";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useState, useMemo } from "react";
 import HeartIcon from "./HeartIcon";
-import { useAddToCartMutation } from "../../redux/api/cartApiSlice"; // <-- Add this
+import { useAddToCartMutation } from "../../redux/api/cartApiSlice";
 
 const ProductCard = ({ p, viewMode = 'grid' }) => {
-  const [addToCart] = useAddToCartMutation(); // <-- API Hook
+  const [addToCart] = useAddToCartMutation();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Get all product images
+  const allImages = useMemo(() => {
+    const images = [];
+    if (p.image) {
+      const mainImageUrl = p.image.startsWith("http")
+        ? p.image
+        : `${import.meta.env.VITE_API_URL}${p.image}`;
+      images.push(mainImageUrl);
+    }
+    if (p.images?.length) {
+      const additionalImages = p.images.map(img => 
+        img.startsWith("http") ? img : `${import.meta.env.VITE_API_URL}${img}`
+      );
+      images.push(...additionalImages);
+    }
+    return images;
+  }, [p.image, p.images]);
+
+  const currentImage = allImages[currentImageIndex] || allImages[0];
 
   const addToCartHandler = async (product, qty) => {
     try {
@@ -34,16 +56,23 @@ const ProductCard = ({ p, viewMode = 'grid' }) => {
     return (
       <div className="relative bg-[#1A1A1A] rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col sm:flex-row gap-4 p-4">
         {/* Image */}
-        <div className="w-full sm:w-32 h-32 flex-shrink-0">
+        <div className="w-full sm:w-32 h-32 flex-shrink-0 relative group">
           <img
-            src={
-              p.image.startsWith("http")
-                ? p.image
-                : `${import.meta.env.VITE_API_URL}${p.image}`
-            }
+            src={currentImage}
             alt={p.name}
             className="w-full h-full object-cover rounded-lg"
+            onMouseEnter={() => {
+              if (allImages.length > 1) {
+                setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+              }
+            }}
+            onMouseLeave={() => setCurrentImageIndex(0)}
           />
+          {allImages.length > 1 && (
+            <div className="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-1 rounded">
+              {currentImageIndex + 1}/{allImages.length}
+            </div>
+          )}
         </div>
         
         {/* Content */}
@@ -99,16 +128,23 @@ const ProductCard = ({ p, viewMode = 'grid' }) => {
       </div>
 
       {/* Product Image */}
-      <Link to={`/product/${p._id}`}>
+      <Link to={`/product/${p._id}`} className="relative group">
         <img
-          src={
-            p.image.startsWith("http")
-              ? p.image
-              : `${import.meta.env.VITE_API_URL}${p.image}`
-          }
+          src={currentImage}
           alt={p.name}
-          className="w-full h-40 sm:h-48 md:h-52 lg:h-56 object-contain p-1 sm:p-2 bg-[#121212] rounded-t-xl sm:rounded-t-2xl"
+          className="w-full h-40 sm:h-48 md:h-52 lg:h-56 object-contain p-1 sm:p-2 bg-[#121212] rounded-t-xl sm:rounded-t-2xl transition-all duration-300"
+          onMouseEnter={() => {
+            if (allImages.length > 1) {
+              setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+            }
+          }}
+          onMouseLeave={() => setCurrentImageIndex(0)}
         />
+        {allImages.length > 1 && (
+          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+            {currentImageIndex + 1}/{allImages.length}
+          </div>
+        )}
       </Link>
 
       {/* Product Info */}

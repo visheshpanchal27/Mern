@@ -14,7 +14,8 @@ const reviewSchema = mongoose.Schema({
 
 const ProductSchema = mongoose.Schema({
     name:{type:String, required:true},
-    image:{type:String, required:true},
+    image:{type:String, required:true}, // Main image (backward compatibility)
+    images:[{type:String}], // Multiple images array
     brand:{type:String, required:true},
     quantity:{type:Number, required:true},
     category:{type:ObjectId, ref:"Category", required:true},

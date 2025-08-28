@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -15,11 +15,14 @@ import {
   FaShoppingCart,
   FaStar,
   FaStore,
+  FaShare,
+  FaEye,
 } from "react-icons/fa";
 import moment from "moment";
 import HeartIcon from "./HeartIcon";
 import Ratings from "./Ratings";
 import ProductTabs from "./ProductTabs";
+import ProductImageGallery from "../../components/ProductImageGallery";
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
@@ -29,6 +32,7 @@ const ProductDetails = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [zoomImage, setZoomImage] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
 
   const { data: product, isLoading, refetch, error } = useGetProductDetailsQuery(productId);
   const { userInfo } = useSelector((state) => state.auth);
@@ -52,7 +56,11 @@ const ProductDetails = () => {
     }
   };
 
-    const addToCartHandler = async () => {
+  const addToCartHandler = async () => {
+    if (!product?._id) {
+      toast.error("Product not available");
+      return;
+    }
     try {
       await addToCart({ _id: product._id, qty }).unwrap();
       toast.success("🛒 Product added to cart successfully!");
@@ -78,6 +86,25 @@ const ProductDetails = () => {
     }
   };
 
+  // Memoize quantity options
+  const qtyOptions = useMemo(() => {
+    if (!product?.countInStock) return [];
+    return Array.from({ length: product.countInStock }, (_, i) => i + 1);
+  }, [product?.countInStock]);
+
+  const shareProduct = () => {
+    if (navigator.share && product) {
+      navigator.share({
+        title: product.name,
+        text: product.description,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success("Product link copied to clipboard!");
+    }
+  };
+
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === "Escape") setZoomImage(false);
@@ -85,6 +112,16 @@ const ProductDetails = () => {
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, []);
+
+  // Track recently viewed products
+  useEffect(() => {
+    if (product?._id) {
+      const viewed = JSON.parse(localStorage.getItem("recentlyViewed") || "[]");
+      const updated = [product._id, ...viewed.filter(id => id !== product._id)].slice(0, 5);
+      localStorage.setItem("recentlyViewed", JSON.stringify(updated));
+      setRecentlyViewed(updated);
+    }
+  }, [product?._id]);
 
   return (
     <div className="p-4 xl:px-20">
@@ -109,23 +146,39 @@ const ProductDetails = () => {
           <>
             <div className="flex flex-col xl:flex-row gap-10">
               <div className="w-full xl:w-1/2">
-                <img
-                  onClick={() => setZoomImage(true)}
-                  src={
-                    product.image?.startsWith("http")
-                      ? product.image
-                      : `${import.meta.env.VITE_API_URL}${product.image}`
-                  }
-                  alt={product.name}
-                  className="w-full max-h-[50rem] object-contain rounded cursor-zoom-in"
+                <ProductImageGallery 
+                  product={product} 
+                  onImageClick={() => setZoomImage(true)}
                 />
               </div>
 
               <div className="w-full xl:w-1/2 xl:sticky xl:top-20 space-y-6">
-                <HeartIcon product={product} className="cursor-pointer" />
+                <div className="flex items-center justify-between">
+                  <HeartIcon product={product} className="cursor-pointer" />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={shareProduct}
+                      className="p-2 bg-gray-700 hover:bg-gray-600 rounded-full transition"
+                      title="Share Product"
+                    >
+                      <FaShare className="text-white" />
+                    </button>
+                    <div className="flex items-center gap-1 text-gray-400 text-sm">
+                      <FaEye />
+                      <span>{recentlyViewed.length} recently viewed</span>
+                    </div>
+                  </div>
+                </div>
                 <h2 className="text-3xl font-bold">{product.name}</h2>
                 <p className="text-gray-400">{product.description}</p>
-                <p className="text-4xl font-extrabold text-pink-600">$ {product.price}</p>
+                <div className="flex items-center gap-4">
+                  <p className="text-4xl font-extrabold text-pink-600">$ {product.price}</p>
+                  {product.countInStock > 0 && (
+                    <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm">
+                      In Stock
+                    </span>
+                  )}
+                </div>
 
                 <div className="flex flex-col sm:flex-row justify-between gap-6">
                   <div>
@@ -162,9 +215,9 @@ const ProductDetails = () => {
                         onChange={(e) => setQty(Number(e.target.value))}
                         className="cursor-pointer w-full appearance-none bg-[#1a1a1a] border border-gray-500/40 text-white py-2 px-4 pr-8 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-pink-600"
                       >
-                        {[...Array(product.countInStock).keys()].map((x) => (
-                          <option key={x + 1} value={x + 1}>
-                            {x + 1}
+                        {qtyOptions.map((x) => (
+                          <option key={x} value={x}>
+                            {x}
                           </option>
                         ))}
                       </select>
@@ -178,11 +231,17 @@ const ProductDetails = () => {
 
                   <button
                     onClick={addToCartHandler}
-                    disabled={isAddingToCart}
-                    className="bg-pink-600 px-6 py-2 rounded-lg text-white hover:bg-pink-700 transition"
+                    disabled={isAddingToCart || product.countInStock === 0}
+                    className={`px-6 py-2 rounded-lg text-white transition ${
+                      product.countInStock === 0
+                        ? "bg-gray-600 cursor-not-allowed"
+                        : "bg-pink-600 hover:bg-pink-700"
+                    }`}
                   >
                     {isAddingToCart ? (
                       <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mx-auto" />
+                    ) : product.countInStock === 0 ? (
+                      "Out of Stock"
                     ) : (
                       "Add to Cart"
                     )}
@@ -207,19 +266,15 @@ const ProductDetails = () => {
         )
       )}
 
-      {zoomImage && (
+      {zoomImage && product && (
         <div
           onClick={() => setZoomImage(false)}
           className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50"
         >
-          <img
-            src={
-              product.image?.startsWith("http")
-                ? product.image
-                : `${import.meta.env.VITE_API_URL}${product.image}`
-            }
-            alt="Zoomed"
-            className="max-w-full max-h-full object-contain rounded"
+          <ProductImageGallery 
+            product={product} 
+            showThumbnails={false}
+            className="max-w-full max-h-full"
           />
         </div>
       )}

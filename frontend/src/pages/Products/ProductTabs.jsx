@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import Ratings from "./Ratings";
 import { useGetTopProductsQuery } from "../../redux/api/productApiSlice";
@@ -19,13 +19,27 @@ const ProductTabs = ({
   const [activeTab, setActiveTab] = useState(1);
   const [randomizedProducts, setRandomizedProducts] = useState([]);
 
+  // Fisher-Yates shuffle algorithm for better randomization
+  const shuffleArray = useCallback((array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, []);
+
+  const shuffleProducts = useCallback(() => {
+    if (data && data.length > 0) {
+      const shuffled = shuffleArray(data);
+      setRandomizedProducts(shuffled.slice(0, 8));
+    }
+  }, [data, shuffleArray]);
+
   // Shuffle products when data changes
   useEffect(() => {
-    if (data && data.length > 0) {
-      const shuffled = [...data].sort(() => Math.random() - 0.5);
-      setRandomizedProducts(shuffled.slice(0, 8)); // Show 8 random products
-    }
-  }, [data]);
+    shuffleProducts();
+  }, [shuffleProducts]);
 
   const handleTabClick = (tabNumber) => {
     setActiveTab(tabNumber);
@@ -142,7 +156,7 @@ const ProductTabs = ({
         {/* Tab 2: All Reviews */}
         {activeTab === 2 && (
           <div className="grid gap-6 mt-4">
-            {product.reviews.length === 0 ? (
+            {!product?.reviews?.length ? (
               <p className="text-gray-400">No Reviews</p>
             ) : (
               product.reviews.map((review) => (
@@ -168,12 +182,7 @@ const ProductTabs = ({
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold text-white">Related Products</h3>
               <button
-                onClick={() => {
-                  if (data && data.length > 0) {
-                    const shuffled = [...data].sort(() => Math.random() - 0.5);
-                    setRandomizedProducts(shuffled.slice(0, 8));
-                  }
-                }}
+                onClick={shuffleProducts}
                 className="text-pink-500 hover:text-pink-400 text-sm font-medium transition-colors"
               >
                 🎲 Shuffle Products

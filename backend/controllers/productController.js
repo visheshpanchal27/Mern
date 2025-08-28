@@ -32,8 +32,9 @@ const addProduct = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "countInStock is required" });
 
     let imageUrl = "";
+    let additionalImages = [];
 
-    // ✅ If image provided, upload to Cloudinary
+    // ✅ If main image provided, upload to Cloudinary
     if (req.files && req.files.image) {
       try {
         const file = req.files.image;
@@ -51,6 +52,26 @@ const addProduct = asyncHandler(async (req, res) => {
       return res.status(400).json({ message: "Image is required" });
     }
 
+    // ✅ Handle additional images if provided
+    if (req.files && req.files.additionalImages) {
+      try {
+        const files = Array.isArray(req.files.additionalImages) 
+          ? req.files.additionalImages 
+          : [req.files.additionalImages];
+        
+        for (const file of files) {
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: "mern-products",
+          });
+          additionalImages.push(result.secure_url);
+          fs.unlinkSync(file.path); // cleanup temp file
+        }
+      } catch (err) {
+        console.error("❌ Additional images upload failed:", err);
+        // Don't fail the entire request for additional images
+      }
+    }
+
     // ✅ Create product
     const product = new Product({
       name,
@@ -61,6 +82,7 @@ const addProduct = asyncHandler(async (req, res) => {
       quantity,
       brand,
       image: imageUrl,
+      images: additionalImages,
     });
 
     const saved = await product.save();
@@ -95,7 +117,7 @@ export const updateProductDetails = async (req, res) => {
     if (fields.quantity) product.quantity = Number(fields.quantity);
     if (fields.countInStock) product.countInStock = Number(fields.countInStock);
 
-    // ✅ Handle Cloudinary upload
+    // ✅ Handle main image update
     if (files.image) {
       // (Optional) Delete old image from Cloudinary if stored there
       if (product.image && product.image.includes("res.cloudinary.com")) {
@@ -111,6 +133,32 @@ export const updateProductDetails = async (req, res) => {
         folder: "mern_products",
       });
       product.image = uploadResult.secure_url;
+    }
+
+    // ✅ Handle additional images update
+    if (files.additionalImages) {
+      try {
+        const files_array = Array.isArray(files.additionalImages) 
+          ? files.additionalImages 
+          : [files.additionalImages];
+        
+        const newImages = [];
+        for (const file of files_array) {
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: "mern_products",
+          });
+          newImages.push(result.secure_url);
+        }
+        
+        // Replace or append to existing images
+        if (fields.replaceImages === 'true') {
+          product.images = newImages;
+        } else {
+          product.images = [...(product.images || []), ...newImages];
+        }
+      } catch (err) {
+        console.error("❌ Additional images upload failed:", err);
+      }
     }
 
     const updatedProduct = await product.save();
@@ -131,15 +179,28 @@ const removeProduct = asyncHandler(async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    if (product.image) {
-      const imagePath = path.join(path.resolve(), product.image);
-      fs.unlink(imagePath, (err) => {
-        if (err) {
-          console.error('❌ Failed to delete image file:', err.message);
-        } else {
-          console.log('🧼 Image deleted:', product.image);
+    // Delete images from Cloudinary if they exist
+    if (product.image && product.image.includes("res.cloudinary.com")) {
+      try {
+        const publicId = product.image.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`mern_products/${publicId}`);
+      } catch (err) {
+        console.warn("⚠️ Failed to delete main image from Cloudinary:", err.message);
+      }
+    }
+
+    // Delete additional images from Cloudinary
+    if (product.images && product.images.length > 0) {
+      for (const imageUrl of product.images) {
+        if (imageUrl.includes("res.cloudinary.com")) {
+          try {
+            const publicId = imageUrl.split("/").pop().split(".")[0];
+            await cloudinary.uploader.destroy(`mern_products/${publicId}`);
+          } catch (err) {
+            console.warn("⚠️ Failed to delete additional image from Cloudinary:", err.message);
+          }
         }
-      });
+      }
     }
 
     await product.deleteOne();

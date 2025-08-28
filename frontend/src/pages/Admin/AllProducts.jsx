@@ -4,7 +4,8 @@ import { useAllProductsQuery } from "../../redux/api/productApiSlice";
 import Loader from "../../components/Loader";
 
 const AllProducts = () => {
-  const { data: products, isLoading, isError } = useAllProductsQuery();
+  const { data: productsData, isLoading, isError } = useAllProductsQuery();
+  const products = productsData?.products || [];
 
   if (isLoading) {
     return (
@@ -27,7 +28,7 @@ const AllProducts = () => {
       {/* Main content */}
       <div className="container mx-auto px-4 md:px-6 py-6 md:ml-20">
         <h1 className="text-2xl font-bold mb-6 text-white">
-          All Products ({products.length})
+          All Products ({products?.length || 0})
         </h1>
 
         {/* Responsive grid */}
