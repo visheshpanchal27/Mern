@@ -1,4 +1,4 @@
-import { PRODUCTS_URL, UPLOAD_URL } from "../constants";
+import { PRODUCTS_URL, UPLOAD_URL, CATEGORY_URL } from "../constants";
 import { apiSlice } from "./apiSlice";
 
 export const productApiSlice = apiSlice.injectEndpoints({
@@ -36,13 +36,13 @@ export const productApiSlice = apiSlice.injectEndpoints({
     // 🔹 Create product
     createProduct: builder.mutation({
       query: (formData) => ({
-        url: "/api/products",
+        url: PRODUCTS_URL,
         method: "POST",
         body: formData, // ✅ send as multipart/form-data
       }),
     }),
     fetchCategories: builder.query({
-      query: () => "/api/categories",
+      query: () => CATEGORY_URL,
     }),
 
     // 🔹 Update product
