@@ -34,10 +34,17 @@ const ProductCarousel = () => {
   };
 
   useEffect(() => {
-    const fetchRandomProducts = async () => {
+    const fetchAllProducts = async () => {
       try {
-        const { data } = await axios.get(`${PRODUCTS_URL}`);
-        setProducts(data.products || data);
+        const { data } = await axios.get(`${PRODUCTS_URL}/allProducts`);
+        const allProducts = data.products || data;
+        
+        // Shuffle and select 10-15 products randomly
+        const shuffled = [...allProducts].sort(() => 0.5 - Math.random());
+        const randomCount = Math.floor(Math.random() * 6) + 10; // 10-15 products
+        const selectedProducts = shuffled.slice(0, randomCount);
+        
+        setProducts(selectedProducts);
         setIsLoading(false);
       } catch (error) {
         console.error(error);
@@ -45,7 +52,7 @@ const ProductCarousel = () => {
         setIsLoading(false);
       }
     };
-    fetchRandomProducts();
+    fetchAllProducts();
   }, []);
 
   // Improved BigProductSkeleton with image + details placeholders, matching real card size

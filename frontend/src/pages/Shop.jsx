@@ -7,7 +7,7 @@ import Loader from "../components/Loader";
 import ProductCard from "./Products/ProductCard";
 import ProductSkeleton from "../components/ProductSkeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaSearch, FaFilter, FaTimes, FaTh, FaList, FaRefresh } from "react-icons/fa";
+import { FaSearch, FaFilter, FaTimes, FaTh, FaList, FaRedo } from "react-icons/fa";
 
 // Custom CSS for slider
 const sliderStyles = `
@@ -113,14 +113,21 @@ const Shop = () => {
 
   // Extract products from API response
   const allProducts = useMemo(() => {
-    return productsData?.products || [];
+    const products = productsData?.products || [];
+    console.log('📦 Total products from API:', products.length);
+    console.log('📊 Products data:', productsData);
+    return products;
   }, [productsData]);
 
   // Filtered Products
   const filteredProducts = useMemo(() => {
-    if (!allProducts?.length) return [];
+    if (!allProducts?.length) {
+      console.log('⚠️ No products available');
+      return [];
+    }
 
     let filtered = [...allProducts];
+    console.log('🔍 Starting with', allProducts.length, 'products');
 
     // Category filter
     if (checked.length > 0) {
@@ -156,6 +163,7 @@ const Shop = () => {
     else if (sortOrder === "name-desc") filtered.sort((a,b) => b.name.localeCompare(a.name));
     else if (sortOrder === "newest") filtered.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+    console.log('✅ Filtered to', filtered.length, 'products');
     return filtered;
   }, [allProducts, searchTerm, priceRange, priceFilter, sortOrder, checked]);
 
@@ -189,7 +197,7 @@ const Shop = () => {
             onClick={handleRefresh}
             className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 mx-auto"
           >
-            <FaRefresh size={16} />
+            <FaRedo size={16} />
             Try Again
           </button>
         </div>
@@ -461,7 +469,7 @@ const Shop = () => {
                   </div>
                 </motion.div>
               ) : (
-                paginatedProducts.map((product, index) => (
+                filteredProducts.map((product, index) => (
                   <MemoizedProductCard
                     key={product._id}
                     product={product}
@@ -473,41 +481,7 @@ const Shop = () => {
             </motion.div>
           </AnimatePresence>
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-12">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(prev => Math.max(prev-1, 1))}
-                className="px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 disabled:hover:bg-[#0f0f0f] transition-all duration-300 border border-gray-800/50"
-              >
-                Prev
-              </button>
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                const pageNum = currentPage <= 3 ? i + 1 : currentPage - 2 + i;
-                return pageNum <= totalPages ? (
-                  <button
-                    key={pageNum}
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={`px-4 py-2 rounded-xl transition-all duration-300 border ${
-                      currentPage === pageNum 
-                        ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white border-pink-500/50 shadow-lg' 
-                        : 'bg-[#0f0f0f] text-white hover:bg-gradient-to-r hover:from-pink-600/20 hover:to-purple-600/20 border-gray-800/50'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                ) : null;
-              })}
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(prev => Math.min(prev+1, totalPages))}
-                className="px-4 py-2 bg-[#0f0f0f] text-white rounded-xl hover:bg-gradient-to-r hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 disabled:hover:bg-[#0f0f0f] transition-all duration-300 border border-gray-800/50"
-              >
-                Next
-              </button>
-            </div>
-          )}
+
         </main>
       </div>
       </div>

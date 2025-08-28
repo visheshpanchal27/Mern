@@ -189,37 +189,27 @@ const fetchProductById = asyncHandler(async (req, res) => {
   }
 });
 
-// FETCH ALL PRODUCTS (Optimized)
+// FETCH ALL PRODUCTS (Simplified)
 const fetchAllProducts = asyncHandler(async (req, res) => {
   try {
-    const { page = 1, limit = 0, sort = 'createdAt', order = 'desc' } = req.query;
+    console.log('📦 Fetching all products...');
     
-    const sortOrder = order === 'desc' ? -1 : 1;
-    const sortObj = { [sort]: sortOrder };
-    
-    let query = Product.find({})
+    const products = await Product.find({})
       .populate('category', 'name')
-      .select('name description price category brand image rating numReviews countInStock createdAt')
-      .sort(sortObj);
+      .sort({ createdAt: -1 })
+      .lean();
     
-    // Apply pagination only if limit is specified
-    if (limit > 0) {
-      const skip = (page - 1) * limit;
-      query = query.skip(skip).limit(parseInt(limit));
-    }
+    const total = products.length;
     
-    const products = await query.lean(); // Use lean() for better performance
-    const total = await Product.countDocuments({});
+    console.log(`✅ Found ${total} products`);
     
     res.json({
       products,
       total,
-      page: parseInt(page),
-      pages: limit > 0 ? Math.ceil(total / limit) : 1,
-      hasMore: limit > 0 ? page * limit < total : false
+      success: true
     });
   } catch (error) {
-    console.error('Error fetching all products:', error);
+    console.error('❌ Error fetching all products:', error);
     res.status(500).json({ error: "Failed to fetch products" });
   }
 });
