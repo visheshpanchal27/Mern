@@ -110,10 +110,10 @@ if (process.env.NODE_ENV === "production") {
   const frontendPath = path.join(__dirname, "/frontend/dist");
   app.use(express.static(frontendPath));
 
-  // fallback: send index.html for unknown routes
-  app.get("*", (req, res) =>
-    res.sendFile(path.resolve(frontendPath, "index.html"))
-  );
+  // SPA fallback: send index.html for non-API routes
+  app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.resolve(frontendPath, "index.html"));
+  });
 } else {
   app.get("/", (req, res) => {
     res.send("API is running...");

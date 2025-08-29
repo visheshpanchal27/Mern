@@ -10,6 +10,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { useFormValidation, validateEmail, validatePassword } from "../../components/FormValidation";
+import { sanitizeInput } from "../../utils/sanitizer";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -166,7 +167,7 @@ const Register = () => {
                   name="username"
                   className="w-full px-4 py-3 pl-12 bg-background-tertiary/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-500/50 transition-all shadow-inner backdrop-blur-sm"
                   placeholder="Enter your full name"
-                  value={username}
+                  value={sanitizeInput(username)}
                   onChange={handleChange}
                 />
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -175,7 +176,7 @@ const Register = () => {
                   </svg>
                 </div>
               </div>
-              {errors.username && <p className="text-red-400 text-sm">{errors.username}</p>}
+              {errors.username && <p className="text-red-400 text-sm">{String(errors.username)}</p>}
             </div>
 
             <div className="space-y-2">
@@ -186,7 +187,7 @@ const Register = () => {
                   name="email"
                   className="w-full px-4 py-3 pl-12 bg-background-tertiary/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-500/50 transition-all shadow-inner backdrop-blur-sm"
                   placeholder="Enter your email"
-                  value={email}
+                  value={sanitizeInput(email)}
                   onChange={handleChange}
                 />
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -196,7 +197,7 @@ const Register = () => {
                   </svg>
                 </div>
               </div>
-              {errors.email && <p className="text-red-400 text-sm">{errors.email}</p>}
+              {errors.email && <p className="text-red-400 text-sm">{String(errors.email)}</p>}
             </div>
 
             <div className="space-y-2">
@@ -223,7 +224,7 @@ const Register = () => {
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-400 text-sm">{errors.password}</p>}
+              {errors.password && <p className="text-red-400 text-sm">{String(errors.password)}</p>}
             </div>
 
             <div className="space-y-2">
@@ -250,7 +251,7 @@ const Register = () => {
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
-              {errors.confirmPassword && <p className="text-red-400 text-sm">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="text-red-400 text-sm">{String(errors.confirmPassword)}</p>}
               {confirmPassword && password !== confirmPassword && <p className="text-red-400 text-sm">Passwords do not match</p>}
             </div>
 
