@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { ProductCardSkeleton } from "../components/Skeletons";
+import { HomeSkeleton } from "../components/Skeletons";
 import Header from "../components/Header";
 import Massage from "../components/Massage";
 import ProductAll from "./Products/ProductAll.jsx";
@@ -51,13 +51,7 @@ const Home = () => {
     <>
       <Header />
       {isLoading ? (
-        <div className="px-4 md:px-8 mt-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <ProductCardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
+        <HomeSkeleton />
       ) : isError ? (
         <Massage variant="danger">Something went wrong!</Massage>
       ) : (
