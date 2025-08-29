@@ -12,17 +12,45 @@ const authentication = asyncHandler(async (req, res, next) => {
   }
 
   if (!token) {
-    res.status(401);
-    throw new Error('Not authorized, no token');
+    return res.status(401).json({ 
+      message: 'Access denied. No token provided.',
+      code: 'NO_TOKEN'
+    });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.userId).select('-password');
+    
+    // Check if user still exists
+    const user = await User.findById(decoded.userId).select('-password');
+    if (!user) {
+      return res.status(401).json({ 
+        message: 'User no longer exists',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+    
+    // Check if user is active
+    if (user.isBlocked) {
+      return res.status(403).json({ 
+        message: 'Account has been blocked',
+        code: 'ACCOUNT_BLOCKED'
+      });
+    }
+    
+    req.user = user;
     next();
   } catch (error) {
-    res.status(401);
-    throw new Error('Not authorized, token failed');
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ 
+        message: 'Token has expired',
+        code: 'TOKEN_EXPIRED'
+      });
+    }
+    return res.status(401).json({ 
+      message: 'Invalid token',
+      code: 'INVALID_TOKEN'
+    });
   }
 });
 

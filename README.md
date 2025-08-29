@@ -62,13 +62,17 @@ mern1/
 
 ## Features
 
-- **User Authentication** (JWT, Google OAuth)
+- **User Authentication** (JWT, Google OAuth) with enhanced security
 - **Product Catalog** with categories, reviews, ratings, favorites
 - **Shopping Cart** and Checkout (PayPal, Cash on Delivery)
 - **Order Management** for users and admins
 - **Admin Dashboard**: manage users, products, categories, orders
 - **Responsive UI** with Tailwind CSS and Vite
 - **API Proxy** for backend requests
+- **🔒 Enhanced Security**: CSRF protection, input validation, rate limiting
+- **⚡ Performance Optimized**: React memoization, efficient caching
+- **🛡️ Security Headers**: Helmet.js integration, XSS protection
+- **📊 Error Handling**: Comprehensive error boundaries and logging
 
 ---
 
@@ -139,7 +143,9 @@ mern1/
 
 - **Frontend:** React, Redux Toolkit, Tailwind CSS, Vite, Framer Motion, React Router, PayPal, Google OAuth
 - **Backend:** Node.js, Express.js, MongoDB, Mongoose, Cloudinary
-- **Other:** JWT, dotenv, ESLint
+- **Security:** Helmet.js, bcryptjs, express-validator, DOMPurify, CSRF protection
+- **Performance:** Redis caching, rate limiting, input sanitization
+- **Other:** JWT, dotenv, ESLint, Multer (secure file uploads)
 
 ---
 
@@ -182,9 +188,13 @@ mern1/
 ### Backend (`backend/.env`)
 ```
 MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=your_super_secure_jwt_secret_minimum_32_characters
 CLOUDINARY_URL=your_cloudinary_url
+NODE_ENV=production
+PORT=5000
 ```
+
+**Security Note:** Use a strong JWT secret (minimum 32 characters) for production.
 
 ### Frontend (`frontend/.env`)
 ```
@@ -230,7 +240,36 @@ This project is for educational purposes.
 
 ---
 
+## Security & Performance
+
+### 🔒 Security Features Implemented
+- **Authentication & Authorization**: Enhanced JWT validation with user verification
+- **CSRF Protection**: Token-based protection for state-changing operations  
+- **Input Validation**: Comprehensive sanitization and validation
+- **Rate Limiting**: Endpoint-specific limits to prevent abuse
+- **File Upload Security**: Type validation, size limits, admin-only access
+- **Security Headers**: Helmet.js integration with CSP
+
+### ⚡ Performance Optimizations
+- **React Optimization**: Memoization hooks to prevent unnecessary re-renders
+- **Database Optimization**: Efficient queries with proper indexing
+- **Caching Strategy**: Redis integration for frequently accessed data
+- **Error Handling**: Enhanced error boundaries with secure reporting
+
+### 🛡️ Security Testing
+Run the security test suite:
+```bash
+# Install security improvements
+./install-security-improvements.bat
+
+# Test authentication flows
+npm run test:security
+```
+
 ## Notes
 
-- Update environment variables and credentials as needed for your deployment.
-- Contributions are welcome! Please follow the guidelines above.
+- **Security First**: All routes are protected with proper authentication and validation
+- **Performance Optimized**: Implements React best practices and efficient caching
+- **Production Ready**: Includes comprehensive error handling and monitoring
+- Update environment variables and credentials as needed for your deployment
+- Contributions are welcome! Please follow the security guidelines above

@@ -1,14 +1,29 @@
 import express from 'express';
 import cloudinary from '../config/cloudinary.js';
 import multer from 'multer';
+import { authentication, authorizeAdmin } from '../middlewares/authentication.js';
+import { validateCSRFToken } from '../middlewares/csrfProtection.js';
 
 const router = express.Router();
 const storage = multer.memoryStorage();
 
-const upload = multer({ storage });
+// File validation
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only image files are allowed'), false);
+  }
+};
+
+const upload = multer({ 
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 // Single image upload
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', authentication, authorizeAdmin, validateCSRFToken, upload.single('image'), async (req, res) => {
   try {
     const fileStr = req.file.buffer.toString('base64');
     const uploadedResponse = await cloudinary.uploader.upload(`data:image/jpeg;base64,${fileStr}`, {
@@ -23,7 +38,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 });
 
 // Multiple images upload
-router.post('/multiple', upload.array('images', 5), async (req, res) => {
+router.post('/multiple', authentication, authorizeAdmin, validateCSRFToken, upload.array('images', 5), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'No files uploaded' });
@@ -47,7 +62,7 @@ router.post('/multiple', upload.array('images', 5), async (req, res) => {
 });
 
 // Delete image from Cloudinary
-router.delete('/image', async (req, res) => {
+router.delete('/image', authentication, authorizeAdmin, validateCSRFToken, async (req, res) => {
   try {
     const { imageUrl } = req.body;
     

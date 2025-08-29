@@ -1,17 +1,19 @@
 import express from 'express';
 import { createUser, loginUser, logoutCurrentUser, getAllUsers, getCurrentUserProfile ,updateCurrentUserProfile,deleteUserById,getUserById, updateUserById, googleAuth } from '../controllers/userController.js';
 import { authentication , authorizeAdmin } from '../middlewares/authentication.js';
+import { validateUserRegistration, handleValidationErrors, sanitizeInput } from '../middlewares/inputValidation.js';
+import { validateCSRFToken } from '../middlewares/csrfProtection.js';
 
 const router = express.Router();
 
-router.route('/').post(createUser).get(authentication, authorizeAdmin, getAllUsers);
+router.route('/').post(sanitizeInput, validateUserRegistration, handleValidationErrors, createUser).get(authentication, authorizeAdmin, getAllUsers);
 
 router.post("/google-auth", googleAuth);
 
-router.post("/auth", loginUser);
+router.post("/auth", sanitizeInput, loginUser);
 router.post("/logout", logoutCurrentUser);
 
-router.route('/profile').get(authentication, getCurrentUserProfile).put(authentication, updateCurrentUserProfile);
+router.route('/profile').get(authentication, getCurrentUserProfile).put(authentication, validateCSRFToken, sanitizeInput, updateCurrentUserProfile);
 
 
 //admin routes

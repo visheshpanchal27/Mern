@@ -4,11 +4,18 @@ import cloudinary from '../config/cloudinary.js';
 import fs from 'fs';
 import path from "path";
 import formidable from "formidable";
+import DOMPurify from 'isomorphic-dompurify';
+
+// Sanitize input for logging
+const sanitizeForLog = (input) => {
+  if (typeof input !== 'string') return input;
+  return DOMPurify.sanitize(input).replace(/[\r\n]/g, ' ');
+};
 
 const addProduct = asyncHandler(async (req, res) => {
   try {
-    console.log("📥 Incoming fields:", req.fields);
-    console.log("📥 Incoming files:", req.files);
+    console.log("📥 Incoming fields:", Object.keys(req.fields || {}));
+    console.log("📥 Incoming files:", Object.keys(req.files || {}));
 
     const {
       name,
@@ -90,9 +97,9 @@ const addProduct = asyncHandler(async (req, res) => {
 
 export const updateProductDetails = async (req, res) => {
   try {
-    console.log('🔄 Update request received for product:', req.params.id);
-    console.log('📝 Fields:', req.fields);
-    console.log('📁 Files:', req.files);
+    console.log('🔄 Update request received for product:', sanitizeForLog(req.params.id));
+    console.log('📝 Fields:', Object.keys(req.fields || {}));
+    console.log('📁 Files:', Object.keys(req.files || {}));
     
     const { id } = req.params;
     const product = await Product.findById(id);

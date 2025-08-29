@@ -17,6 +17,8 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import connectDB from './config/db.js';
 import { rateLimit } from './middlewares/rateLimiter.js';
 import { validateEnvironment } from './config/validateEnv.js';
+import { securityHeaders, generalRateLimit, authRateLimit } from './middlewares/securityMiddleware.js';
+import { generateCSRFToken } from './middlewares/csrfProtection.js';
 
 // ES module dirname setup
 const __filename = fileURLToPath(import.meta.url);
@@ -66,23 +68,21 @@ app.use(cors({
   exposedHeaders: ['Authorization', 'Set-Cookie'],
 }));
 
-// Security headers
-app.use((req, res, next) => {
-  res.setHeader("Cross-Origin-Opener-Policy", "unsafe-none");
-  res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("X-XSS-Protection", "1; mode=block");
-  next();
-});
+// Enhanced security headers
+app.use(securityHeaders);
 
 // Rate limiting
-app.use('/api/', rateLimit(100, 15 * 60 * 1000)); // 100 requests per 15 minutes
+app.use('/api/', generalRateLimit);
+app.use('/api/users/auth', authRateLimit);
+app.use('/api/users/register', authRateLimit);
 
 // Middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// CSRF token generation for authenticated routes
+app.use('/api/', generateCSRFToken);
 
 // Routes
 app.use('/api/users', userRouter);
