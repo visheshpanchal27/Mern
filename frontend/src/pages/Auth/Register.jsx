@@ -10,7 +10,11 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { useFormValidation, validateEmail, validatePassword } from "../../components/FormValidation";
-import { sanitizeInput } from "../../utils/sanitizer";
+// Simple input sanitization
+const sanitizeInput = (input) => {
+  if (typeof input !== 'string') return input;
+  return input.replace(/[<>]/g, '').trim();
+};
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
