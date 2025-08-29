@@ -3,6 +3,7 @@ import Product from "../models/productModal.js";
 import asyncHandler from 'express-async-handler';
 import { nanoid } from 'nanoid'; 
 import mongoose from "mongoose";
+import { sendOrderConfirmation, sendShippingNotification } from '../utils/emailService.js';
 
 // Utility Function
 function calcPrices(orderItems) {
@@ -83,6 +84,15 @@ const createOrder = async (req, res) => {
     });
 
     const createdOrder = await order.save();
+    
+    // Send order confirmation email
+    try {
+      const populatedOrder = await Order.findById(createdOrder._id).populate('user', 'email username');
+      await sendOrderConfirmation(populatedOrder, populatedOrder.user.email);
+    } catch (emailError) {
+      console.error('Failed to send order confirmation email:', emailError);
+    }
+    
     res.status(201).json(createdOrder);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -202,6 +212,15 @@ const markOrderAsDelivered = async (req, res) => {
       order.deliveredAt = Date.now();
 
       const updatedOrder = await order.save();
+      
+      // Send shipping notification email
+      try {
+        const populatedOrder = await Order.findById(updatedOrder._id).populate('user', 'email username');
+        await sendShippingNotification(populatedOrder, populatedOrder.user.email);
+      } catch (emailError) {
+        console.error('Failed to send shipping notification email:', emailError);
+      }
+      
       res.json(updatedOrder);
     } else {
       res.status(404);

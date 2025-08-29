@@ -8,6 +8,7 @@ import { createBrowserRouter, createRoutesFromElements, Route } from 'react-rout
 import store from './redux/store.js';
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { HelmetProvider } from 'react-helmet-async';
 
 // import your routes/pages...
 import Home from './pages/Home.jsx';
@@ -78,12 +79,14 @@ const router = createBrowserRouter(
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={clientId}>
-      <Provider store={store}>
-        <PayPalScriptProvider options={{ "client-id": "Aeg2zlMRergds1TlbocZrTeAzY9VPV91ID_2QuxtQzfJXsrEu2HUO6Q3QG4_At9kGtAnB4rx7NBhlzUQ" }}>
-          <RouterProvider router={router} />
-        </PayPalScriptProvider>
-      </Provider>
-    </GoogleOAuthProvider>
+    <HelmetProvider>
+      <GoogleOAuthProvider clientId={clientId}>
+        <Provider store={store}>
+          <PayPalScriptProvider options={{ "client-id": "Aeg2zlMRergds1TlbocZrTeAzY9VPV91ID_2QuxtQzfJXsrEu2HUO6Q3QG4_At9kGtAnB4rx7NBhlzUQ" }}>
+            <RouterProvider router={router} />
+          </PayPalScriptProvider>
+        </Provider>
+      </GoogleOAuthProvider>
+    </HelmetProvider>
   </StrictMode>
 );

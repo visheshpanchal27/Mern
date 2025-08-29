@@ -5,12 +5,15 @@ const transporter = nodemailer.createTransporter({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });
 
 export const sendOrderConfirmation = async (order, userEmail) => {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `${process.env.EMAIL_FROM_NAME || 'E-Commerce Store'} <${process.env.EMAIL_USER}>`,
     to: userEmail,
     subject: `Order Confirmation - #${order._id}`,
     html: `
@@ -52,7 +55,7 @@ export const sendOrderConfirmation = async (order, userEmail) => {
 
 export const sendShippingNotification = async (order, userEmail) => {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: `${process.env.EMAIL_FROM_NAME || 'E-Commerce Store'} <${process.env.EMAIL_USER}>`,
     to: userEmail,
     subject: `Your Order is Shipped - #${order._id}`,
     html: `

@@ -12,7 +12,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/usersApiSlice";
 import { logOut } from "../../redux/features/auth/authSlice";
-import SearchBar from "../../components/SearchBar";
 import _ from "lodash";
 import "./Navigation.css";
 
@@ -101,13 +100,6 @@ const Navigation = () => {
       onClick={isMobile ? handleSidebarInteraction : undefined}
     >
       <ul className="flex flex-col space-y-3 sm:space-y-6 pt-4 sm:pt-8">
-        {/* Search Bar - only show when expanded */}
-        {showSidebar && (
-          <li className="px-2">
-            <SearchBar className="w-full" />
-          </li>
-        )}
-        
         <NavItem to="/" icon={<AiOutlineHome className="w-5 h-5 sm:w-6 sm:h-6" />} label="Home" expanded={showSidebar} />
         <NavItem to="/shop" icon={<AiOutlineShopping className="w-5 h-5 sm:w-6 sm:h-6" />} label="Shop" expanded={showSidebar} />
         <NavItem
