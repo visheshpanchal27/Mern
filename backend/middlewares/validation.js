@@ -14,6 +14,7 @@ export const sanitizeInput = (req, res, next) => {
   };
 
   if (req.body) sanitizeObject(req.body);
+  if (req.fields) sanitizeObject(req.fields); // Handle formidable fields
   if (req.query) sanitizeObject(req.query);
   if (req.params) sanitizeObject(req.params);
   
@@ -41,6 +42,11 @@ export const validateReview = [
 
 // Check validation results
 export const checkValidation = (req, res, next) => {
+  // Skip validation for formidable requests (product updates)
+  if (req.fields) {
+    return next();
+  }
+  
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });

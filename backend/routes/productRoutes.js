@@ -36,7 +36,7 @@ router.get('/random', fetchRandomProducts);
 
 router
     .route('/:id')
-    .put(authentication, authorizeAdmin, checkId, sanitizeInput, formidable(), validateProduct, checkValidation, updateProductDetails)
+    .put(authentication, authorizeAdmin, checkId, formidable(), updateProductDetails)
     .get(checkId , fetchProductById)
     .delete(authentication, authorizeAdmin, checkId , removeProduct);
 

@@ -90,10 +90,15 @@ const addProduct = asyncHandler(async (req, res) => {
 
 export const updateProductDetails = async (req, res) => {
   try {
+    console.log('🔄 Update request received for product:', req.params.id);
+    console.log('📝 Fields:', req.fields);
+    console.log('📁 Files:', req.files);
+    
     const { id } = req.params;
     const product = await Product.findById(id);
 
     if (!product) {
+      console.log('❌ Product not found:', id);
       return res.status(404).json({ message: "Product not found" });
     }
 
@@ -110,21 +115,27 @@ export const updateProductDetails = async (req, res) => {
     if (fields.countInStock) product.countInStock = Number(fields.countInStock);
 
     // ✅ Handle main image update
-    if (files.image) {
-      // (Optional) Delete old image from Cloudinary if stored there
-      if (product.image && product.image.includes("res.cloudinary.com")) {
-        const publicId = product.image.split("/").pop().split(".")[0]; // crude extract
-        try {
-          await cloudinary.uploader.destroy(`mern_products/${publicId}`);
-        } catch (err) {
-          console.warn("⚠️ Failed to delete old Cloudinary image:", err.message);
+    if (files && files.image && files.image.path) {
+      try {
+        // (Optional) Delete old image from Cloudinary if stored there
+        if (product.image && product.image.includes("res.cloudinary.com")) {
+          const publicId = product.image.split("/").pop().split(".")[0];
+          try {
+            await cloudinary.uploader.destroy(`vishesh-store/${publicId}`);
+          } catch (err) {
+            console.warn("⚠️ Failed to delete old Cloudinary image:", err.message);
+          }
         }
-      }
 
-      const uploadResult = await cloudinary.uploader.upload(files.image.path, {
-        folder: "mern_products",
-      });
-      product.image = uploadResult.secure_url;
+        const uploadResult = await cloudinary.uploader.upload(files.image.path, {
+          folder: "vishesh-store",
+        });
+        product.image = uploadResult.secure_url;
+        console.log('✅ New image uploaded:', uploadResult.secure_url);
+      } catch (uploadError) {
+        console.error('❌ Image upload failed:', uploadError);
+        throw new Error('Failed to upload image: ' + uploadError.message);
+      }
     }
 
     // ✅ Handle additional images update from frontend
@@ -140,11 +151,20 @@ export const updateProductDetails = async (req, res) => {
     }
 
     const updatedProduct = await product.save();
+    console.log('✅ Product updated successfully:', updatedProduct._id);
 
     res.json(updatedProduct); // ✅ frontend gets full updated product
   } catch (error) {
-    console.error("Update error:", error);
-    res.status(500).json({ message: "❌ Failed to update product" });
+    console.error("❌ Update error:", error);
+    console.error("❌ Error stack:", error.stack);
+    
+    // Send more specific error message
+    const errorMessage = error.message || "Failed to update product";
+    res.status(400).json({ 
+      message: errorMessage,
+      error: error.name,
+      details: error.errors || null
+    });
   }
 };
 
