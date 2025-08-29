@@ -1,14 +1,101 @@
 @import "tailwindcss";
 @import "./styles/responsive.css";
 
-body {
-  background: #0f0f10;
-  color: #fff;
+/* CSS Variables for consistent theming */
+:root {
+  --bg-primary: #0f0f10;
+  --bg-secondary: #1A1A1A;
+  --bg-tertiary: #121212;
+  --text-primary: #ffffff;
+  --text-secondary: #CFCFCF;
+  --text-muted: #9CA3AF;
+  --brand-primary: #ec4899;
+  --brand-secondary: #be185d;
+  --brand-accent: #a855f7;
+  --border-primary: #374151;
+  --border-secondary: #6b7280;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
 }
 
+/* Global styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Consistent button styles */
+.btn-primary {
+  @apply bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg px-4 py-2 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary-500/25 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-primary-500/50;
+}
+
+.btn-secondary {
+  @apply bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg px-4 py-2 transition-all duration-300 border border-gray-600 hover:border-gray-500 shadow-md hover:shadow-lg hover:shadow-gray-500/20 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-gray-500/50;
+}
+
+.btn-outline {
+  @apply border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-medium rounded-lg px-4 py-2 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary-500/25 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-primary-500/50;
+}
+
+.btn-ghost {
+  @apply text-gray-300 hover:text-white hover:bg-gray-800/50 font-medium rounded-lg px-4 py-2 transition-all duration-300 hover:shadow-md hover:shadow-gray-500/20 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-gray-500/50;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg px-4 py-2 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-red-500/25 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-red-500/50;
+}
+
+/* Consistent card styles */
+.card-primary {
+  @apply bg-background-secondary rounded-xl shadow-lg border border-gray-800 transition-all duration-300 hover:shadow-xl;
+}
+
+.card-secondary {
+  @apply bg-gray-900/50 backdrop-blur-sm rounded-lg border border-gray-700;
+}
+
+/* Form elements */
 input,
-textarea {
-  color: #fff;
+textarea,
+select {
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+  transition: all 0.3s ease;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.15);
+  border-color: #6b7280;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.3), 0 8px 16px rgba(236, 72, 153, 0.2);
+}
+
+.input-primary {
+  @apply bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary-500/20 focus:shadow-xl focus:shadow-primary-500/30 hover:border-gray-500;
+}
+
+.input-error {
+  @apply bg-gray-800 border border-red-500 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-red-500/20 focus:shadow-xl focus:shadow-red-500/30;
+}
+
+.input-success {
+  @apply bg-gray-800 border border-green-500 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-green-500/20 focus:shadow-xl focus:shadow-green-500/30;
 }
 
 .custom-slider {

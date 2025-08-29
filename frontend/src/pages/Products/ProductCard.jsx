@@ -3,11 +3,13 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState, useMemo, useEffect } from "react";
+import { useSelector } from "react-redux";
 import HeartIcon from "./HeartIcon";
 import { useAddToCartMutation } from "../../redux/api/cartApiSlice";
 import { ProductCardSkeleton } from "../../components/Skeletons";
 
 const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
+  const { userInfo } = useSelector((state) => state.auth);
   const [addToCart] = useAddToCartMutation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -58,9 +60,16 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
   const currentImage = allImages[currentImageIndex] || allImages[0];
 
   const addToCartHandler = async (product, qty) => {
+    if (!userInfo) {
+      toast.info("🔒 Please sign in to add items to your cart", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
     try {
       await addToCart({ _id: product._id, qty }).unwrap();
-
       toast.success("✅ Item added to cart!", {
         position: "top-right",
         autoClose: 2000,
@@ -81,7 +90,7 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
 
   if (viewMode === 'list') {
     return (
-      <div className="relative bg-[#1A1A1A] rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl flex flex-col sm:flex-row gap-4 p-4">
+      <div className="card-primary overflow-hidden flex flex-col sm:flex-row gap-4 p-4">
         {/* Image */}
         <div className="w-full sm:w-32 h-32 flex-shrink-0 relative group">
           <img
@@ -133,13 +142,18 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
           <div className="flex items-center gap-3 mt-4">
             <Link
               to={`/product/${p._id}`}
-              className="bg-pink-600 hover:bg-pink-700 text-white text-sm px-4 py-2 rounded-lg transition-all flex-1 text-center"
+              className="btn-primary text-sm px-4 py-2 flex-1 text-center"
             >
               View Details
             </Link>
             <button
               onClick={() => addToCartHandler(p, 1)}
-              className="p-2 rounded-lg hover:bg-pink-600 transition-all bg-gray-700"
+              className={`p-2 rounded-lg transition-all ${
+                userInfo 
+                  ? 'bg-gray-700 hover:bg-pink-600' 
+                  : 'bg-gray-600 hover:bg-primary-600'
+              }`}
+              title={userInfo ? 'Add to cart' : 'Sign in to add to cart'}
             >
               <AiOutlineShoppingCart size={18} className="text-white" />
             </button>
@@ -150,7 +164,7 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
   }
 
   return (
-    <div className="relative bg-[#1A1A1A] rounded-xl sm:rounded-2xl shadow-lg overflow-hidden transition-transform duration-300 hover:scale-[1.02] flex flex-col h-full">
+    <div className="card-primary overflow-hidden transition-transform duration-300 hover:scale-[1.02] flex flex-col h-full">
       {/* Top Icons */}
       <div className="absolute top-1 sm:top-2 left-1 sm:left-2 z-10">
         <HeartIcon product={p} />
@@ -206,13 +220,18 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
         <div className="flex justify-between items-center mt-auto gap-2">
           <Link
             to={`/product/${p._id}`}
-            className="bg-pink-600 hover:bg-pink-700 text-white text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg transition-all flex-1 text-center"
+            className="btn-primary text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 flex-1 text-center"
           >
             View
           </Link>
           <button
             onClick={() => addToCartHandler(p, 1)}
-            className="p-1.5 sm:p-2 rounded-full hover:bg-pink-600 transition-all flex-shrink-0"
+            className={`p-1.5 sm:p-2 rounded-full transition-all flex-shrink-0 ${
+              userInfo 
+                ? 'hover:bg-pink-600' 
+                : 'hover:bg-primary-600'
+            }`}
+            title={userInfo ? 'Add to cart' : 'Sign in to add to cart'}
           >
             <AiOutlineShoppingCart size={16} className="text-white sm:w-5 sm:h-5" />
           </button>

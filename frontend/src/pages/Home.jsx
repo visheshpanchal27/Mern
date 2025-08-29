@@ -101,7 +101,7 @@ const Home = () => {
               >
                 <Link
                   to="/shop"
-                  className="group bg-gradient-to-r from-pink-600 to-purple-600 font-bold rounded-full py-3 px-8 text-white hover:from-pink-700 hover:to-purple-700 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="btn-primary group rounded-full py-3 px-8 flex items-center gap-2"
                 >
                   <FaShoppingBag className="text-lg" />
                   Explore All Products
@@ -110,7 +110,7 @@ const Home = () => {
                 
                 <button
                   onClick={() => window.location.reload()}
-                  className="bg-gray-800/50 backdrop-blur-sm font-medium rounded-full py-3 px-6 text-gray-300 hover:bg-gray-700/50 hover:text-white transition-all duration-300 border border-gray-600 hover:border-gray-500"
+                  className="btn-secondary rounded-full py-3 px-6"
                 >
                   🎲 Refresh Selection
                 </button>
@@ -150,7 +150,7 @@ const Home = () => {
             transition={{ delay: 1.4, duration: 0.6 }}
             className="mt-16 mb-8 text-center px-4"
           >
-            <div className="bg-gradient-to-r from-gray-900/50 to-gray-800/50 backdrop-blur-sm rounded-2xl p-8 mx-4 md:mx-8 border border-gray-700">
+            <div className="card-secondary p-8 mx-4 md:mx-8">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
                 Want to see more amazing products?
               </h2>
@@ -159,7 +159,7 @@ const Home = () => {
               </p>
               <Link
                 to="/shop"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-600 to-purple-600 font-bold rounded-full py-3 px-8 text-white hover:from-pink-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="btn-primary inline-flex items-center gap-2 rounded-full py-3 px-8"
               >
                 View All Products
                 <FaArrowRight className="text-sm" />

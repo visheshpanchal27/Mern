@@ -1,17 +1,21 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   useGetCartQuery,
   useUpdateCartMutation,
   useClearCartMutation,
 } from "../redux/api/cartApiSlice";
-import { FaTrash, FaShoppingCart } from "react-icons/fa";
+import { FaTrash, FaShoppingCart, FaUser, FaUserPlus } from "react-icons/fa";
 import { IoArrowBackSharp } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { data: cart, isLoading, isError } = useGetCartQuery();
+  const { userInfo } = useSelector((state) => state.auth);
+  const { data: cart, isLoading, isError } = useGetCartQuery(undefined, {
+    skip: !userInfo, // Skip API call if not logged in
+  });
   const [updateCart] = useUpdateCartMutation();
   const [clearCart, { isLoading: isClearing }] = useClearCartMutation();
 
@@ -65,26 +69,88 @@ const Cart = () => {
     }
   };
 
+  // Show login prompt for non-authenticated users
+  if (!userInfo) {
+    return (
+      <div className="w-full min-h-screen px-4 pt-6 bg-background-primary">
+        <button
+          onClick={() => navigate(-1)}
+          className="btn-secondary flex items-center gap-2 py-2 px-4 mb-6"
+        >
+          <IoArrowBackSharp />
+          Go Back
+        </button>
+
+        <div className="flex flex-col items-center justify-center text-center mt-20 space-y-6 px-4">
+          <div className="card-primary p-8 max-w-md w-full">
+            <FaShoppingCart className="text-6xl text-primary-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-4">Sign In to View Cart</h2>
+            <p className="text-gray-400 mb-6">
+              Please sign in to your account to view and manage your cart items.
+            </p>
+            
+            <div className="space-y-3">
+              <Link
+                to="/login?redirect=/cart"
+                className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+              >
+                <FaUser className="text-sm" />
+                Sign In
+              </Link>
+              
+              <Link
+                to="/register?redirect=/cart"
+                className="btn-outline w-full py-3 flex items-center justify-center gap-2"
+              >
+                <FaUserPlus className="text-sm" />
+                Create Account
+              </Link>
+            </div>
+            
+            <div className="mt-6 pt-4 border-t border-gray-700">
+              <p className="text-sm text-gray-400 mb-3">Or continue shopping as guest</p>
+              <Link
+                to="/shop"
+                className="btn-secondary w-full py-2 text-sm"
+              >
+                Browse Products
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading)
     return (
-      <div className="flex justify-center items-center h-screen bg-black text-white">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-pink-500"></div>
+      <div className="flex justify-center items-center h-screen bg-background-primary text-white">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-500"></div>
       </div>
     );
 
   if (isError)
     return (
-      <div className="flex justify-center items-center h-screen bg-black text-red-500">
-        Failed to load cart.
+      <div className="flex justify-center items-center h-screen bg-background-primary text-red-500">
+        <div className="card-primary p-6 text-center">
+          <h3 className="text-xl font-semibold mb-2">Failed to load cart</h3>
+          <p className="text-gray-400 mb-4">Please try refreshing the page</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="btn-primary px-4 py-2"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
     );
 
   return (
-    <div className="w-full min-h-screen overflow-hidden px-2 sm:px-4 pt-4 sm:pt-6 bg-black">
+    <div className="w-full min-h-screen overflow-hidden px-2 sm:px-4 pt-4 sm:pt-6 bg-background-primary">
       {/* Go Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-white border border-gray-600 py-2 px-3 sm:px-4 rounded-full hover:bg-gray-700 transition duration-300 cursor-pointer mb-4 sm:mb-6 text-sm sm:text-base"
+        className="btn-secondary flex items-center gap-2 py-2 px-3 sm:px-4 mb-4 sm:mb-6 text-sm sm:text-base"
       >
         <IoArrowBackSharp className="text-sm sm:text-base" />
         Go Back
@@ -97,7 +163,7 @@ const Cart = () => {
           <p className="text-gray-400 text-sm sm:text-base">Looks like you haven't added anything yet.</p>
           <Link
             to="/shop"
-            className="bg-pink-500 hover:bg-pink-600 text-white px-4 sm:px-6 py-2 rounded-full transition duration-300 cursor-pointer text-sm sm:text-base"
+            className="btn-primary px-4 sm:px-6 py-2 text-sm sm:text-base"
           >
             Go to Shop
           </Link>
@@ -189,7 +255,7 @@ const Cart = () => {
 
           {/* Checkout Summary */}
           <div className="w-full lg:w-[300px] xl:w-[350px] flex-shrink-0 lg:pl-4">
-            <div className="p-4 sm:p-6 rounded-lg border border-gray-700 text-white bg-[#1a1a1a] lg:sticky lg:top-10">
+            <div className="card-primary p-4 sm:p-6 text-white lg:sticky lg:top-10">
               <h2 className="text-lg sm:text-xl font-semibold mb-3">
                 Items ({cartItems.reduce((acc, item) => acc + item.qty, 0)})
               </h2>
@@ -201,7 +267,7 @@ const Cart = () => {
               </div>
 
               <button
-                className="bg-pink-500 w-full py-3 rounded-full text-sm sm:text-lg hover:bg-pink-600 transition-colors duration-200 cursor-pointer"
+                className="btn-primary w-full py-3 text-sm sm:text-lg"
                 disabled={cartItems.length === 0}
                 onClick={checkoutHandler}
               >
@@ -209,7 +275,7 @@ const Cart = () => {
               </button>
 
               <button
-                className="bg-red-600 w-full py-2 mt-4 rounded-full text-xs sm:text-sm hover:bg-red-700 transition-colors duration-200 cursor-pointer"
+                className="btn-secondary w-full py-2 mt-4 text-xs sm:text-sm bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700"
                 onClick={clearCartHandler}
                 disabled={isClearing}
               >
