@@ -343,6 +343,35 @@ const fetchRandomProducts = asyncHandler(async (req, res) => {
   }
 });
 
+// SEARCH PRODUCTS
+const searchProducts = asyncHandler(async (req, res) => {
+  try {
+    const { q } = req.query;
+    
+    if (!q || q.trim().length < 2) {
+      return res.json([]);
+    }
+
+    const searchRegex = new RegExp(q.trim(), 'i');
+    
+    const products = await Product.find({
+      $or: [
+        { name: searchRegex },
+        { description: searchRegex },
+        { brand: searchRegex }
+      ]
+    })
+    .populate('category', 'name')
+    .limit(20)
+    .sort({ createdAt: -1 });
+
+    res.json(products);
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ message: 'Search failed' });
+  }
+});
+
 export {
   addProduct,
   removeProduct,
@@ -354,4 +383,5 @@ export {
   fetchNewProduct,
   filterProducts,
   fetchRandomProducts,
+  searchProducts,
 };

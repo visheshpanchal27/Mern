@@ -15,25 +15,28 @@ import {
     fetchNewProduct,
     filterProducts,
     fetchRandomProducts,
+    searchProducts,
 } from '../controllers/productController.js';
 import { authentication,authorizeAdmin } from '../middlewares/authentication.js';
 import checkId from '../middlewares/checkId.js';
+import { validateProduct, validateReview, checkValidation, sanitizeInput } from '../middlewares/validation.js';
 
 router.route('/')
     .get(fetchProducts)
-    .post(authentication, authorizeAdmin, formidable(), addProduct);
+    .post(authentication, authorizeAdmin, sanitizeInput, formidable(), validateProduct, checkValidation, addProduct);
 
 router.route('/allProducts').get(fetchAllProducts);
-router.route('/:id/reviews').post(authentication, checkId, addProductReview);
+router.route('/:id/reviews').post(authentication, checkId, sanitizeInput, validateReview, checkValidation, addProductReview);
 
 router.get('/top', fetchTopProduct)
 router.get('/new', fetchNewProduct)
+router.get('/search', searchProducts)
 router.get('/random', fetchRandomProducts);
 
 
 router
     .route('/:id')
-    .put(authentication, authorizeAdmin, checkId , formidable(), updateProductDetails)
+    .put(authentication, authorizeAdmin, checkId, sanitizeInput, formidable(), validateProduct, checkValidation, updateProductDetails)
     .get(checkId , fetchProductById)
     .delete(authentication, authorizeAdmin, checkId , removeProduct);
 

@@ -11,6 +11,8 @@ import productsRouter from './routes/productRoutes.js';
 import uploadRouter from './routes/uploadRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
+import wishlistRoutes from './routes/wishlistRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 
 import connectDB from './config/db.js';
 import { rateLimit } from './middlewares/rateLimiter.js';
@@ -89,6 +91,8 @@ app.use('/api/products', productsRouter);
 app.use('/api/uploads', uploadRouter);
 app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/admin/analytics', analyticsRoutes);
 
 // PayPal config
 app.get("/api/config/paypal", (req, res) => {

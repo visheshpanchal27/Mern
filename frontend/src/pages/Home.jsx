@@ -4,6 +4,7 @@ import { HomeSkeleton } from "../components/Skeletons";
 import Header from "../components/Header";
 import Massage from "../components/Massage";
 import ProductAll from "./Products/ProductAll.jsx";
+import SEOHead from "../components/SEOHead";
 import { useState, useEffect } from "react";
 import { PRODUCTS_URL } from "../redux/constants.js";
 import { motion } from "framer-motion";
@@ -49,6 +50,11 @@ const Home = () => {
 
   return (
     <>
+      <SEOHead 
+        title="MERN E-Commerce Store - Premium Products"
+        description="Discover amazing products at great prices. Shop electronics, fashion, home goods and more with fast shipping and secure checkout."
+        keywords="ecommerce, online shopping, electronics, fashion, home goods, premium products"
+      />
       <Header />
       {isLoading ? (
         <HomeSkeleton />

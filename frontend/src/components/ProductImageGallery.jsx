@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { ImageGallerySkeleton } from "./Skeletons";
+import { useSwipe } from "../hooks/useSwipe";
 
 const ProductImageGallery = ({ 
   product, 
@@ -44,6 +45,11 @@ const ProductImageGallery = ({
     }
   };
 
+  const swipeHandlers = useSwipe(
+    () => setSelectedImage(prev => (prev + 1) % allImages.length), // Swipe left - next image
+    () => setSelectedImage(prev => (prev - 1 + allImages.length) % allImages.length) // Swipe right - prev image
+  );
+
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Main Image */}
@@ -53,6 +59,7 @@ const ProductImageGallery = ({
           alt={product.name}
           onClick={handleImageClick}
           className="w-full max-h-[50rem] object-contain rounded cursor-zoom-in"
+          {...swipeHandlers}
         />
         
         {/* Stock indicators */}

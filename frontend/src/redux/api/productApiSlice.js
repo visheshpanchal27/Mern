@@ -115,6 +115,12 @@ export const productApiSlice = apiSlice.injectEndpoints({
         body: { checked, radio },
       }),
     }),
+
+    // 🔹 Search products
+    searchProducts: builder.query({
+      query: (searchTerm) => `${PRODUCTS_URL}/search?q=${encodeURIComponent(searchTerm)}`,
+      keepUnusedDataFor: 5,
+    }),
   }),
 });
 
@@ -131,4 +137,5 @@ export const {
   useGetTopProductsQuery,
   useGetNewProductsQuery,
   useGetFilteredProductsQuery,
+  useSearchProductsQuery,
 } = productApiSlice;
