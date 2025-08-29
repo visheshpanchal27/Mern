@@ -75,26 +75,47 @@ const Register = () => {
           throw new Error("Missing Google access token");
         }
 
-        const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        // Get user info from Google
+        const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
           headers: {
             Authorization: `Bearer ${tokenResponse.access_token}`,
           },
         });
 
-        const data = await res.json();
-        const { name, email, picture } = data;
+        const userData = await userRes.json();
+        const { name, email, picture } = userData;
 
         if (!email.endsWith("@gmail.com")) {
           toast.error("Only Gmail accounts are allowed");
           return;
         }
 
-        dispatch(setCredentials({ username: name, email, image: picture }));
+        // Call backend Google Auth API
+        const backendRes = await fetch(`${import.meta.env.VITE_API_URL || 'https://mernbackend-tmp5.onrender.com'}/api/users/google-auth`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            name,
+            email,
+            picture
+          })
+        });
+
+        const backendData = await backendRes.json();
+        
+        if (!backendRes.ok) {
+          throw new Error(backendData.message || 'Google auth failed');
+        }
+
+        dispatch(setCredentials(backendData));
         navigate(redirect);
         toast.success("Google login successful");
       } catch (err) {
         console.error("Google login error:", err);
-        toast.error("Google login failed");
+        toast.error(err.message || "Google login failed");
       }
     },
     onError: () => {

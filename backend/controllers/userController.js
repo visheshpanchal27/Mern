@@ -231,34 +231,36 @@ const updateUserById = asyncHandler(async (req, res) => {
 });
 
 const googleAuth = asyncHandler(async (req, res) => {
-  const { tokenId } = req.body;
+  const { name, email, picture } = req.body;
 
-  if (!process.env.GOOGLE_CLIENT_ID) {
-    res.status(500);
-    throw new Error('Google Client ID not configured');
+  if (!name || !email) {
+    res.status(400);
+    throw new Error('Name and email are required');
   }
 
-  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+  // Sanitize inputs
+  const sanitizedName = sanitizeInput(name);
+  const sanitizedEmail = sanitizeInput(email);
 
-  const ticket = await client.verifyIdToken({
-    idToken: tokenId,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
+  // Validate email
+  if (!validateEmail(sanitizedEmail)) {
+    res.status(400);
+    throw new Error('Invalid email format');
+  }
 
-  const payload = ticket.getPayload();
-  const { email, name } = payload;
-
-  let user = await User.findOne({ email });
+  let user = await User.findOne({ email: sanitizedEmail });
 
   if (!user) {
+    // Create new user for Google Auth
     user = await User.create({
-      username: name,
-      email,
-      password: '',
+      username: sanitizedName,
+      email: sanitizedEmail,
+      password: '', // No password for Google users
+      image: picture || '',
     });
   }
 
-  // ✅ Generate token and set it in cookie
+  // Generate token and set it in cookie
   const token = createToken(res, user._id);
 
   res.status(200).json({
@@ -266,7 +268,8 @@ const googleAuth = asyncHandler(async (req, res) => {
     username: user.username,
     email: user.email,
     isAdmin: user.isAdmin,
-    token, // ✅ Send it in response for localStorage
+    image: user.image || picture,
+    token, // Send token for localStorage
   });
 });
 
