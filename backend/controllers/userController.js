@@ -231,47 +231,50 @@ const updateUserById = asyncHandler(async (req, res) => {
 });
 
 const googleAuth = asyncHandler(async (req, res) => {
-  const { name, email, picture } = req.body;
+  try {
+    const { name, email, picture } = req.body;
 
-  if (!name || !email) {
-    res.status(400);
-    throw new Error('Name and email are required');
-  }
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and email are required' });
+    }
 
-  // Sanitize inputs
-  const sanitizedName = sanitizeInput(name);
-  const sanitizedEmail = sanitizeInput(email);
+    // Sanitize inputs
+    const sanitizedName = name.trim();
+    const sanitizedEmail = email.trim().toLowerCase();
 
-  // Validate email
-  if (!validateEmail(sanitizedEmail)) {
-    res.status(400);
-    throw new Error('Invalid email format');
-  }
+    // Simple email validation
+    if (!sanitizedEmail.includes('@')) {
+      return res.status(400).json({ message: 'Invalid email format' });
+    }
 
-  let user = await User.findOne({ email: sanitizedEmail });
+    let user = await User.findOne({ email: sanitizedEmail });
 
-  if (!user) {
-    // Create new user for Google Auth
-    user = await User.create({
-      username: sanitizedName,
-      email: sanitizedEmail,
-      password: '', // No password for Google users
-      image: picture || '',
-      isGoogleUser: true,
+    if (!user) {
+      // Create new user for Google Auth
+      user = await User.create({
+        username: sanitizedName,
+        email: sanitizedEmail,
+        password: 'google-auth-user', // Placeholder for Google users
+        image: picture || '',
+        isGoogleUser: true,
+      });
+    }
+
+    // Generate token and set it in cookie
+    const token = createToken(res, user._id);
+
+    res.status(200).json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      isAdmin: user.isAdmin,
+      image: user.image || picture,
+      token, // Send token for localStorage
     });
+  } catch (error) {
+    console.error('Google Auth Error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
-
-  // Generate token and set it in cookie
-  const token = createToken(res, user._id);
-
-  res.status(200).json({
-    _id: user._id,
-    username: user.username,
-    email: user.email,
-    isAdmin: user.isAdmin,
-    image: user.image || picture,
-    token, // Send token for localStorage
-  });
 });
 
 
