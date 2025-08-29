@@ -105,7 +105,7 @@ const Login = () => {
     <div className="min-h-screen bg-background-primary flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
       </div>
       
@@ -116,14 +116,14 @@ const Login = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="w-full max-w-md"
         >
-        <div className="bg-background-secondary/90 backdrop-blur-xl border border-primary-500/30 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+        <div className="bg-gray-900/90 backdrop-blur-xl border border-pink-500/30 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500 rounded-full -translate-y-16 translate-x-16"></div>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-purple-500 rounded-full translate-y-12 -translate-x-12"></div>
           </div>
           <div className="relative z-10">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-r from-primary-500 to-purple-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-primary-500/25 relative overflow-hidden">
+            <div className="w-20 h-20 bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-pink-500/25 relative overflow-hidden">
               <div className="absolute inset-0 bg-white/10 rounded-2xl"></div>
               <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -140,7 +140,7 @@ const Login = () => {
                 <input
                   type="email"
                   name="email"
-                  className="w-full px-4 py-3 pl-12 bg-background-tertiary/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-500/50 transition-all shadow-inner backdrop-blur-sm"
+                  className="w-full px-4 py-3 pl-12 bg-gray-800/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 hover:border-pink-500/50 transition-all shadow-inner backdrop-blur-sm"
                   placeholder="Enter your email"
                   value={email}
                   onChange={handleChange}
@@ -161,7 +161,7 @@ const Login = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
-                  className="w-full px-4 py-3 pl-12 pr-12 bg-background-tertiary/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-500/50 transition-all shadow-inner backdrop-blur-sm"
+                  className="w-full px-4 py-3 pl-12 pr-12 bg-gray-800/50 border border-gray-600/50 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 hover:border-pink-500/50 transition-all shadow-inner backdrop-blur-sm"
                   placeholder="Enter your password"
                   value={password}
                   onChange={handleChange}
@@ -185,7 +185,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-2xl hover:shadow-primary-500/30 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+              className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500/50 transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-2xl hover:shadow-pink-500/30 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
               <span className="relative z-10">
@@ -224,7 +224,7 @@ const Login = () => {
             Don't have an account?{" "}
             <Link
               to={redirect ? `/register?redirect=${redirect}` : "/register"}
-              className="text-primary-400 hover:text-primary-300 font-medium transition-colors"
+              className="text-pink-400 hover:text-pink-300 font-medium transition-colors"
             >
               Sign up
             </Link>
@@ -245,7 +245,7 @@ const Login = () => {
               alt="Login Illustration"
               className="w-full h-[600px] object-cover rounded-2xl shadow-2xl"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary-900/50 to-transparent rounded-2xl"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-pink-900/50 to-transparent rounded-2xl"></div>
             <div className="absolute bottom-8 left-8 right-8">
               <h3 className="text-2xl font-bold text-white mb-2">Welcome Back</h3>
               <p className="text-gray-200">Sign in to access your account and continue shopping</p>

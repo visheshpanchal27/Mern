@@ -36,7 +36,7 @@ body {
 
 /* Consistent button styles */
 .btn-primary {
-  @apply bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg px-4 py-2 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary-500/25 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-primary-500/50;
+  @apply bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-medium rounded-lg px-4 py-2 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-pink-500/25 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-pink-500/50;
 }
 
 .btn-secondary {
@@ -44,7 +44,7 @@ body {
 }
 
 .btn-outline {
-  @apply border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-medium rounded-lg px-4 py-2 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary-500/25 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-primary-500/50;
+  @apply border-2 border-pink-600 text-pink-600 hover:bg-pink-600 hover:text-white font-medium rounded-lg px-4 py-2 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-pink-500/25 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-pink-500/50;
 }
 
 .btn-ghost {
@@ -57,7 +57,7 @@ body {
 
 /* Consistent card styles */
 .card-primary {
-  @apply bg-background-secondary rounded-xl shadow-lg border border-gray-800 transition-all duration-300 hover:shadow-xl;
+  @apply bg-gray-800 rounded-xl shadow-lg border border-gray-800 transition-all duration-300 hover:shadow-xl;
 }
 
 .card-secondary {
@@ -87,7 +87,7 @@ select:focus {
 }
 
 .input-primary {
-  @apply bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary-500/20 focus:shadow-xl focus:shadow-primary-500/30 hover:border-gray-500;
+  @apply bg-gray-800 border border-gray-600 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-pink-500/20 focus:shadow-xl focus:shadow-pink-500/30 hover:border-gray-500;
 }
 
 .input-error {
