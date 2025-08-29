@@ -257,6 +257,7 @@ const googleAuth = asyncHandler(async (req, res) => {
       email: sanitizedEmail,
       password: '', // No password for Google users
       image: picture || '',
+      isGoogleUser: true,
     });
   }
 

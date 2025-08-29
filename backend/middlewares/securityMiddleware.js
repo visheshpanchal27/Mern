@@ -10,10 +10,11 @@ export const securityHeaders = helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
       scriptSrc: ["'self'"],
-      connectSrc: ["'self'", "https://api.paypal.com"],
+      connectSrc: ["'self'", "https://api.paypal.com", "https://www.googleapis.com"],
     },
   },
   crossOriginEmbedderPolicy: false,
+  crossOriginOpenerPolicy: false,
 });
 
 // Rate limiting for different endpoints
