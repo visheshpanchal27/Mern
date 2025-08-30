@@ -109,7 +109,7 @@ const Navigation = () => {
       onClick={isMobile ? handleSidebarInteraction : undefined}
     >
       {/* Logo/Brand */}
-      <div className="flex items-center justify-center py-4 border-b border-gray-800/50">
+      <Link to="/" className="flex items-center justify-center py-4 border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors duration-200 cursor-pointer">
         <div className="w-8 h-8 flex items-center justify-center">
           <svg viewBox="0 0 40 40" className="w-full h-full">
             <path d="M8 20c0-4 4-8 8-8s8 4 8 8-4 8-8 8-8-4-8-8z" fill="#2563eb" />
@@ -123,7 +123,7 @@ const Navigation = () => {
             <div className="text-xs font-bold bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">PLAZA</div>
           </div>
         )}
-      </div>
+      </Link>
       
       <ul className="flex flex-col space-y-3 sm:space-y-6 pt-4">
         <NavItem to="/" icon={<AiOutlineHome className="w-5 h-5 sm:w-6 sm:h-6" />} label="Home" expanded={showSidebar} />
