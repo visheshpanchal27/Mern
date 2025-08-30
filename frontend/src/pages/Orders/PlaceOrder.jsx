@@ -47,7 +47,7 @@ const PlaceOrder = () => {
     if (!promoCode.trim()) return;
     
     try {
-      const response = await fetch(`https://mernbackend-tmp5.onrender.com/api/promo/validate`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/promo/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: promoCode })

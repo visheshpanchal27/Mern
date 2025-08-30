@@ -144,13 +144,25 @@ const Cart = () => {
   }, [savedForLater]);
   
   // Apply promo code
-  const applyPromoCode = useCallback(() => {
-    if (promoCode === 'SAVE10') {
-      toast.success("🎉 Promo code applied! 10% discount");
-    } else if (promoCode === 'FREESHIP') {
-      toast.success("🚚 Free shipping applied!");
-    } else {
-      toast.error("Invalid promo code");
+  const applyPromoCode = useCallback(async () => {
+    if (!promoCode.trim()) return;
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/promo/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode })
+      });
+      
+      const result = await response.json();
+      
+      if (result.valid) {
+        toast.success(`🎉 Promo code applied! ${result.discount}% discount`);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error('Failed to validate promo code');
     }
   }, [promoCode]);
 
