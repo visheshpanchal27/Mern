@@ -6,7 +6,7 @@ import {
   useUpdateCartMutation,
   useClearCartMutation,
 } from "../redux/api/cartApiSlice";
-import { FaTrash, FaShoppingCart, FaUser, FaUserPlus, FaHeart, FaBolt, FaCheck, FaPercent } from "react-icons/fa";
+import { FaTrash, FaShoppingCart, FaUser, FaUserPlus, FaHeart, FaBolt, FaCheck } from "react-icons/fa";
 import { IoArrowBackSharp } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-toastify";
@@ -26,8 +26,7 @@ const Cart = () => {
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [isQuickCheckout, setIsQuickCheckout] = useState(false);
   const [savedForLater, setSavedForLater] = useState(new Set());
-  const [showPromoCode, setShowPromoCode] = useState(false);
-  const [promoCode, setPromoCode] = useState('');
+
 
   // Filter out items with null/deleted products
   const cartItems = (cart?.items || []).filter(item => item.product && item.product._id);
@@ -37,11 +36,10 @@ const Cart = () => {
     const subtotal = cartItems.reduce((acc, item) => acc + item.qty * (item.product?.price || 0), 0);
     const shipping = subtotal > 100 ? 0 : 10;
     const tax = subtotal * 0.08; // 8% tax
-    const discount = promoCode === 'SAVE10' ? subtotal * 0.1 : 0;
-    const total = subtotal + shipping + tax - discount;
+    const total = subtotal + shipping + tax;
     
-    return { subtotal, shipping, tax, discount, total };
-  }, [cartItems, promoCode]);
+    return { subtotal, shipping, tax, total };
+  }, [cartItems]);
 
   // Update item quantity
   const updateCartHandler = async (product, qty) => {
@@ -143,28 +141,7 @@ const Cart = () => {
     localStorage.setItem('savedForLater', JSON.stringify([...newSavedItems]));
   }, [savedForLater]);
   
-  // Apply promo code
-  const applyPromoCode = useCallback(async () => {
-    if (!promoCode.trim()) return;
-    
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/promo/validate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: promoCode })
-      });
-      
-      const result = await response.json();
-      
-      if (result.valid) {
-        toast.success(`🎉 Promo code applied! ${result.discount}% discount`);
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error('Failed to validate promo code');
-    }
-  }, [promoCode]);
+
 
   const clearCartHandler = async () => {
     try {
@@ -382,12 +359,7 @@ const Cart = () => {
                   <span>Tax:</span>
                   <span>${cartTotals.tax.toFixed(2)}</span>
                 </div>
-                {cartTotals.discount > 0 && (
-                  <div className="flex justify-between text-green-400">
-                    <span>Discount:</span>
-                    <span>-${cartTotals.discount.toFixed(2)}</span>
-                  </div>
-                )}
+
                 <hr className="border-gray-600" />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total:</span>
@@ -395,34 +367,7 @@ const Cart = () => {
                 </div>
               </div>
 
-              {/* Promo Code Section */}
-              <div className="space-y-2">
-                <button
-                  onClick={() => setShowPromoCode(!showPromoCode)}
-                  className="flex items-center gap-2 text-sm text-pink-400 hover:text-pink-300 transition"
-                >
-                  <FaPercent className="text-xs" />
-                  {showPromoCode ? 'Hide' : 'Add'} Promo Code
-                </button>
-                
-                {showPromoCode && (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                      placeholder="Enter code"
-                      className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none"
-                    />
-                    <button
-                      onClick={applyPromoCode}
-                      className="px-3 py-2 bg-pink-600 hover:bg-pink-700 rounded text-sm transition"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                )}
-              </div>
+
 
               {/* Checkout Button */}
               <button
