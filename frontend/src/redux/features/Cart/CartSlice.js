@@ -209,11 +209,13 @@ const cartSlice = createSlice({
         state.loading = false;
         state.order = action.payload;
         state.orderSuccess = true;
-        state.cartItems = []; // Clear cart after order
+        state.cartItems = []; // Clear cart after successful order
+        state.error = null; // Clear any previous errors
       })
       .addCase(createOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.orderSuccess = false;
       });
   },
 });

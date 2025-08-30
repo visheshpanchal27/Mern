@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL || 'https://mernbackend-tmp5.onrender.com',
+    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000',
     credentials: 'include',
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth?.token || localStorage.getItem('token');
@@ -13,6 +13,6 @@ export const apiSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Product', 'Order', 'User'],
+  tagTypes: ['Product', 'Order', 'User', 'Category', 'Cart', 'Wishlist'],
   endpoints: (builder) => ({}),
 });

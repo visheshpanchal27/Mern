@@ -31,7 +31,7 @@ export const createRateLimit = (windowMs, max, message) => {
 // Specific rate limits
 export const authRateLimit = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  5, // 5 attempts
+  50, // 50 attempts for development
   'Too many authentication attempts, please try again later'
 );
 
@@ -42,7 +42,7 @@ export const uploadRateLimit = createRateLimit(
 );
 
 export const generalRateLimit = createRateLimit(
-  15 * 60 * 1000, // 15 minutes
-  100, // 100 requests
+  1 * 60 * 1000, // 1 minute
+  10000, // 10000 requests for development
   'Too many requests, please try again later'
 );

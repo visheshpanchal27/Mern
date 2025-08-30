@@ -1,29 +1,22 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { MultiImageUploadSkeleton } from "./Skeletons";
+import { useUploadProductImageMutation } from "../redux/api/productApiSlice";
 
 const MultiImageUpload = ({ onImagesUploaded, existingImages = [], isLoading = false, onImageDeleted }) => {
   const [uploading, setUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [deleting, setDeleting] = useState(null);
+  const [uploadProductImage] = useUploadProductImageMutation();
 
   if (isLoading) return <MultiImageUploadSkeleton />;
 
   const deleteImage = async (imageUrl, index) => {
     setDeleting(index);
     try {
-      const response = await fetch('/api/uploads/image', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl }),
-      });
-      
-      if (response.ok) {
-        onImageDeleted && onImageDeleted(imageUrl, index);
-        toast.success('Image deleted successfully!');
-      } else {
-        throw new Error('Failed to delete image');
-      }
+      // Call the parent callback immediately to update UI
+      onImageDeleted && onImageDeleted(imageUrl, index);
+      toast.success('Image deleted successfully!');
     } catch (error) {
       console.error('Delete error:', error);
       toast.error('Failed to delete image');
@@ -49,24 +42,19 @@ const MultiImageUpload = ({ onImagesUploaded, existingImages = [], isLoading = f
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      selectedFiles.forEach(file => {
-        formData.append('images', file);
-      });
-
-      const response = await fetch('/api/uploads/multiple', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
+      const uploadedImages = [];
+      
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        const result = await uploadProductImage(formData).unwrap();
+        uploadedImages.push(result.image);
       }
-
-      const data = await response.json();
-      onImagesUploaded(data.images);
+      
+      onImagesUploaded(uploadedImages);
       setSelectedFiles([]);
-      toast.success(`${data.images.length} images uploaded successfully!`);
+      toast.success(`${uploadedImages.length} images uploaded successfully!`);
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload images');

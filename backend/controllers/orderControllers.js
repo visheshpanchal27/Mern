@@ -1,5 +1,6 @@
 import Order from "../models/orderModel.js";
 import Product from "../models/productModal.js";
+import Cart from "../models/cartModel.js";
 import asyncHandler from 'express-async-handler';
 import { nanoid } from 'nanoid'; 
 import mongoose from "mongoose";
@@ -35,7 +36,7 @@ function calcPrices(orderItems) {
 
 const createOrder = async (req, res) => {
   try {
-    const { orderItems, shippingAddress, paymentMethod } = req.body;
+    const { orderItems, shippingAddress, paymentMethod, isBuyNow } = req.body;
 
     if (orderItems && orderItems.length === 0) {
       res.status(400);
@@ -67,10 +68,8 @@ const createOrder = async (req, res) => {
     const { itemsPrice, taxPrice, shippingPrice, totalPrice } =
       calcPrices(dbOrderItems);
 
-    // ✅ Generate trackingId
     const trackingId = nanoid(10);
 
-    // ✅ Create the order with trackingId
     const order = new Order({
       orderItems: dbOrderItems,
       user: req.user._id,
@@ -80,10 +79,19 @@ const createOrder = async (req, res) => {
       taxPrice,
       shippingPrice,
       totalPrice,
-      trackingId, // ← Include here
+      trackingId,
     });
 
     const createdOrder = await order.save();
+    
+    // Only clear cart if this is NOT a buy now order
+    if (!isBuyNow) {
+      try {
+        await Cart.findOneAndDelete({ user: req.user._id });
+      } catch (cartError) {
+        console.error('Failed to clear cart after order:', cartError);
+      }
+    }
     
     // Send order confirmation email
     try {
@@ -284,8 +292,52 @@ const orderSchema = mongoose.Schema(
   { timestamps: true }
 );
 
+// Buy Now - Direct order creation without cart
+const createBuyNowOrder = async (req, res) => {
+  try {
+    const { productId, qty, shippingAddress, paymentMethod } = req.body;
+
+    // Get product from database
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Create order item
+    const orderItem = {
+      product: productId,
+      qty: qty || 1,
+      price: product.price,
+      name: product.name,
+      image: product.image
+    };
+
+    const { itemsPrice, taxPrice, shippingPrice, totalPrice } = calcPrices([orderItem]);
+    const trackingId = nanoid(10);
+
+    // Create order directly without touching cart
+    const order = new Order({
+      orderItems: [orderItem],
+      user: req.user._id,
+      shippingAddress,
+      paymentMethod,
+      itemsPrice,
+      taxPrice,
+      shippingPrice,
+      totalPrice,
+      trackingId,
+    });
+
+    const createdOrder = await order.save();
+    res.status(201).json(createdOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export { 
     createOrder,
+    createBuyNowOrder,
     getAllOrders, 
     getUserOrders, 
     countTotalOrders, 

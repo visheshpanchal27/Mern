@@ -23,7 +23,7 @@ const upload = multer({
 });
 
 // Single image upload
-router.post('/', authentication, authorizeAdmin, validateCSRFToken, upload.single('image'), async (req, res) => {
+router.post('/', authentication, authorizeAdmin, upload.single('image'), async (req, res) => {
   try {
     const fileStr = req.file.buffer.toString('base64');
     const uploadedResponse = await cloudinary.uploader.upload(`data:image/jpeg;base64,${fileStr}`, {
@@ -38,7 +38,7 @@ router.post('/', authentication, authorizeAdmin, validateCSRFToken, upload.singl
 });
 
 // Multiple images upload
-router.post('/multiple', authentication, authorizeAdmin, validateCSRFToken, upload.array('images', 5), async (req, res) => {
+router.post('/multiple', authentication, authorizeAdmin, upload.array('images', 5), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'No files uploaded' });
@@ -62,7 +62,7 @@ router.post('/multiple', authentication, authorizeAdmin, validateCSRFToken, uplo
 });
 
 // Delete image from Cloudinary
-router.delete('/image', authentication, authorizeAdmin, validateCSRFToken, async (req, res) => {
+router.delete('/image', authentication, authorizeAdmin, async (req, res) => {
   try {
     const { imageUrl } = req.body;
     

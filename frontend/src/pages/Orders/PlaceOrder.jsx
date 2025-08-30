@@ -1,20 +1,37 @@
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useState, useMemo, useCallback } from "react";
 import { useCreateOrderMutation } from "../../redux/api/orderApiSlice";
 import { useGetCartQuery, useClearCartMutation } from "../../redux/api/cartApiSlice";
 import Loader from "../../components/Loader";
 import Message from "../../components/Massage";
 import ProgressSteps from "../../components/ProgressSteps";
+import { FaCheck, FaCreditCard, FaMoneyBillWave, FaShieldAlt, FaTruck } from "react-icons/fa";
 
 const PlaceOrder = () => {
   const navigate = useNavigate();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
+  const [orderCreated, setOrderCreated] = useState(false);
 
-  // Fetch cart from backend
-  const { data: cart, isLoading: cartLoading, isError } = useGetCartQuery();
+  // Check if this is a buy now flow
+  const urlParams = new URLSearchParams(window.location.search);
+  const isBuyNow = urlParams.get('buyNow') === 'true';
+  
+  // Fetch cart from backend (skip if buy now)
+  const { data: cart, isLoading: cartLoading, isError } = useGetCartQuery(undefined, {
+    skip: isBuyNow
+  });
   const [createOrder, { isLoading }] = useCreateOrderMutation();
   const [clearCart] = useClearCartMutation();
 
-  const cartItems = cart?.items || [];
+  // Get items - either single buy now product or cart items
+  const cartItems = isBuyNow 
+    ? (() => {
+        const buyNowProduct = localStorage.getItem('buyNowProduct');
+        return buyNowProduct ? [JSON.parse(buyNowProduct)] : [];
+      })()
+    : cart?.items || [];
 
   const shippingAddress =
     cart?.shippingAddress || JSON.parse(localStorage.getItem("shippingAddress")) || {};
@@ -22,58 +39,110 @@ const PlaceOrder = () => {
   const paymentMethod =
     cart?.paymentMethod || localStorage.getItem("paymentMethod") || "CashOnDelivery";
 
-  // Calculate prices
-  const itemsPrice = cartItems.reduce(
-    (acc, item) => acc + item.qty * item.product.price,
-    0
-  );
-  const shippingPrice = itemsPrice > 100 ? 0 : 10;
-  const taxPrice = Number((0.18 * itemsPrice).toFixed(2));
-  const totalPrice = (itemsPrice + shippingPrice + taxPrice).toFixed(2);
+  // Enhanced price calculations with memoization
+  const priceCalculations = useMemo(() => {
+    const itemsPrice = cartItems.reduce(
+      (acc, item) => {
+        const price = isBuyNow ? item.price : item.product.price;
+        return acc + item.qty * price;
+      },
+      0
+    );
+    const shippingPrice = itemsPrice > 100 ? 0 : 10;
+    const taxPrice = Number((0.08 * itemsPrice).toFixed(2)); // 8% tax
+    const processingFee = itemsPrice > 50 ? 0 : 2.99;
+    const totalPrice = (itemsPrice + shippingPrice + taxPrice + processingFee).toFixed(2);
+    
+    return { itemsPrice, shippingPrice, taxPrice, processingFee, totalPrice };
+  }, [cartItems, isBuyNow]);
+  
+  const { itemsPrice, shippingPrice, taxPrice, processingFee, totalPrice } = priceCalculations;
 
-  // Place Order Handler
-  const placeOrderHandler = async () => {
-  // Validate shipping address
-  const { address, city, postalCode, country } = shippingAddress || {};
-  if (!address || !city || !postalCode || !country) {
-    toast.error("Please complete your shipping address before placing the order.");
-    return;
-  }
+  // Enhanced Place Order Handler
+  const placeOrderHandler = useCallback(async () => {
+    // Comprehensive validation
+    const { address, city, postalCode, country } = shippingAddress || {};
+    if (!address || !city || !postalCode || !country) {
+      toast.error("Please complete your shipping address before placing the order.");
+      return;
+    }
+    
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+    
+    if (!paymentMethod) {
+      toast.error("Please select a payment method");
+      return;
+    }
+    
+    setIsProcessing(true);
+    
+    try {
+      // Simulate order processing delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const res = await createOrder({
+        orderItems: cartItems.map((item) => ({
+          _id: isBuyNow ? item._id : item.product._id,
+          qty: item.qty,
+          price: isBuyNow ? item.price : item.product.price,
+          name: isBuyNow ? item.name : item.product.name,
+          image: isBuyNow ? item.image : item.product.image,
+        })),
+        shippingAddress,
+        paymentMethod,
+        itemsPrice,
+        shippingPrice,
+        taxPrice,
+        processingFee,
+        totalPrice,
+        isBuyNow,
+      }).unwrap();
 
-  try {
-    const res = await createOrder({
-      orderItems: cartItems.map((item) => ({
-        _id: item.product._id || item.product,
-        qty: item.qty,
-        price: item.product.price || item.product,
-        name: item.product.name || item.product,
-        image: item.product.image || item.product,
-      })),
-      shippingAddress,
-      paymentMethod,
-      itemsPrice,
-      shippingPrice,
-      taxPrice,
-      totalPrice,
-    }).unwrap();
+      setOrderCreated(true);
+      setOrderConfirmed(true);
+      
+      // Handle different payment methods
+      if (paymentMethod === 'PayPal') {
+        toast.success("🎉 Order created! Redirecting to PayPal...");
+        navigate(`/order/${res._id}`);
+      } else {
+        toast.success("🎉 Order placed successfully!");
+        navigate(`/order-summary/${res.trackingId}`);
+      }
+      
+      // Clear data after navigation
+      if (isBuyNow) {
+        localStorage.removeItem('buyNowProduct');
+      } else {
+        await clearCart().unwrap();
+      }
+      
+    } catch (err) {
+      toast.error(err?.data?.error || "Something went wrong");
+      setIsProcessing(false);
+    }
+  }, [cartItems, shippingAddress, paymentMethod, itemsPrice, shippingPrice, taxPrice, processingFee, totalPrice, createOrder, clearCart, navigate]);
 
-    await clearCart().unwrap();
-    navigate(`/order-summary/${res.trackingId}`);
-  } catch (err) {
-    toast.error(err?.data?.error || "Something went wrong");
-  }
-};
 
-
-  if (cartLoading) return <Loader />;
-  if (isError) return <Message variant="danger">Failed to load cart</Message>;
+  if (!isBuyNow && cartLoading) return <Loader />;
+  if (!isBuyNow && isError) return <Message variant="danger">Failed to load cart</Message>;
 
   return (
     <>
       <ProgressSteps step1 step2 step3 />
       <div className="container mx-auto mt-8">
-        {cartItems.length === 0 ? (
-          <Message>Your cart is empty</Message>
+        {cartItems.length === 0 && !orderCreated ? (
+          <Message>{isBuyNow ? "Buy now product not found" : "Your cart is empty"}</Message>
+        ) : orderCreated ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-center">
+              <div className="animate-spin w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-white text-lg">Processing your order...</p>
+            </div>
+          </div>
         ) : (
           <>
             {/* Cart Items Table */}
@@ -89,72 +158,162 @@ const PlaceOrder = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {cartItems.map((item) => (
-                    <tr key={item.product._id}>
-                      <td className="p-2">
-                        <img
-                          src={
-                            item.product.image?.startsWith("http")
-                              ? item.product.image
-                              : `${import.meta.env.VITE_API_URL}${item.product.image}`
-                          }
-                          alt={item.product.name}
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                      </td>
-                      <td className="p-2">
-                        <Link to={`/product/${item.product._id}`}>
-                          {item.product.name}
-                        </Link>
-                      </td>
-                      <td className="p-2">{item.qty}</td>
-                      <td className="p-2">${item.product.price.toFixed(2)}</td>
-                      <td className="p-2">
-                        ${(item.qty * item.product.price).toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
+                  {cartItems.map((item) => {
+                    const product = isBuyNow ? item : item.product;
+                    return (
+                      <tr key={product._id}>
+                        <td className="p-2">
+                          <img
+                            src={
+                              product.image?.startsWith("http")
+                                ? product.image
+                                : `${import.meta.env.VITE_API_URL}${product.image}`
+                            }
+                            alt={product.name}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                        </td>
+                        <td className="p-2">
+                          <Link to={`/product/${product._id}`}>
+                            {product.name}
+                          </Link>
+                        </td>
+                        <td className="p-2">{item.qty}</td>
+                        <td className="p-2">${product.price.toFixed(2)}</td>
+                        <td className="p-2">
+                          ${(item.qty * product.price).toFixed(2)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
-            {/* Order Summary */}
-            <div className="mt-8">
-              <h2 className="text-2xl font-semibold mb-5">Order Summary</h2>
-              <div className="flex justify-between flex-wrap p-8 bg-[#181818] text-white rounded-lg">
-                <ul className="text-lg">
-                  <li>Items: ${itemsPrice.toFixed(2)}</li>
-                  <li>Shipping: ${shippingPrice.toFixed(2)}</li>
-                  <li>Tax: ${taxPrice.toFixed(2)}</li>
-                  <li>Total: ${totalPrice}</li>
-                </ul>
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Shipping</h2>
-                  <p>
-                    <strong>Address:</strong> {shippingAddress.address},{" "}
-                    {shippingAddress.city} {shippingAddress.postalCode},{" "}
+            {/* Enhanced Order Summary */}
+            <div className="mt-8 grid lg:grid-cols-2 gap-8">
+              {/* Order Details */}
+              <div className="space-y-6">
+                <h2 className="text-2xl font-semibold mb-5">Order Summary</h2>
+                
+                {/* Price Breakdown */}
+                <div className="bg-[#181818] p-6 rounded-lg space-y-4">
+                  <h3 className="text-lg font-semibold mb-4">Price Details</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Items ({cartItems.length}):</span>
+                      <span>${itemsPrice.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Shipping:</span>
+                      <span className={shippingPrice === 0 ? 'text-green-400' : ''}>
+                        {shippingPrice === 0 ? 'FREE' : `$${shippingPrice.toFixed(2)}`}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Tax (8%):</span>
+                      <span>${taxPrice.toFixed(2)}</span>
+                    </div>
+                    {processingFee > 0 && (
+                      <div className="flex justify-between text-sm text-gray-400">
+                        <span>Processing Fee:</span>
+                        <span>${processingFee.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <hr className="border-gray-600" />
+                    <div className="flex justify-between text-xl font-bold text-pink-400">
+                      <span>Total:</span>
+                      <span>${totalPrice}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Shipping Info */}
+                <div className="bg-[#181818] p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <FaTruck className="text-blue-400" />
+                    Shipping Address
+                  </h3>
+                  <p className="text-gray-300">
+                    {shippingAddress.address}<br />
+                    {shippingAddress.city}, {shippingAddress.postalCode}<br />
                     {shippingAddress.country}
                   </p>
                 </div>
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Payment</h2>
-                  <strong>Method:</strong> {paymentMethod}
+                
+                {/* Payment Info */}
+                <div className="bg-[#181818] p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    {paymentMethod === 'PayPal' ? <FaCreditCard className="text-blue-400" /> : <FaMoneyBillWave className="text-green-400" />}
+                    Payment Method
+                  </h3>
+                  <p className="text-gray-300">{paymentMethod}</p>
                 </div>
               </div>
-
-              {/* Place Order Button */}
-              <button
-                type="button"
-                className="cursor-pointer bg-pink-500 hover:bg-pink-600 text-white py-2 px-4 rounded-full text-lg w-full mt-4 flex items-center justify-center transition duration-200 disabled:opacity-50"
-                disabled={cartItems.length === 0 || isLoading}
-                onClick={placeOrderHandler}
-              >
-                {isLoading ? (
-                  <div className=" w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  "Place Order"
-                )}
-              </button>
+              
+              {/* Order Actions */}
+              <div className="space-y-6">
+                {/* Security Features */}
+                <div className="bg-[#181818] p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <FaShieldAlt className="text-green-400" />
+                    Secure Checkout
+                  </h3>
+                  <div className="space-y-2 text-sm text-gray-300">
+                    <div className="flex items-center gap-2">
+                      <FaCheck className="text-green-400" />
+                      <span>SSL Encrypted</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FaCheck className="text-green-400" />
+                      <span>Secure Payment Processing</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FaCheck className="text-green-400" />
+                      <span>Money Back Guarantee</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Place Order Button */}
+                <div className="space-y-4">
+                  {orderConfirmed ? (
+                    <div className="bg-green-500/20 border border-green-500 text-green-400 p-4 rounded-lg text-center">
+                      <FaCheck className="mx-auto mb-2 text-2xl" />
+                      <p className="font-semibold">Order Confirmed!</p>
+                      <p className="text-sm">Redirecting to order summary...</p>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white py-4 px-6 rounded-lg text-lg font-semibold flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={cartItems.length === 0 || isLoading || isProcessing}
+                      onClick={placeOrderHandler}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-3"></div>
+                          Processing Order...
+                        </>
+                      ) : isLoading ? (
+                        <>
+                          <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-3"></div>
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <FaCheck className="mr-2" />
+                          Place Order - ${totalPrice}
+                        </>
+                      )}
+                    </button>
+                  )}
+                  
+                  <p className="text-xs text-gray-400 text-center">
+                    By placing this order, you agree to our Terms of Service and Privacy Policy
+                  </p>
+                </div>
+              </div>
             </div>
           </>
         )}

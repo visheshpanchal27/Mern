@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import Message from "../../components/Massage";
 import Loader from "../../components/Loader";
 import { Link } from "react-router-dom";
@@ -5,7 +6,8 @@ import { useGetOrdersQuery, useDeleteOrderMutation } from "../../redux/api/order
 import DeleteIcon from '@mui/icons-material/Delete';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaShoppingCart, FaEye, FaCalendar, FaDollarSign } from "react-icons/fa";
 
 const OrderList = () => {
   const { data: orders, isLoading, error, refetch } = useGetOrdersQuery();
@@ -28,13 +30,52 @@ const OrderList = () => {
   };
 
   return (
-    <section className="xl:ml-[4rem] md:ml-0 p-5">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Order Management</h1>
-        <div className="text-sm text-gray-400">
-          Showing {orders?.length || 0} orders
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f]">
+      <section className="xl:ml-[4rem] md:ml-0 p-5">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <FaShoppingCart className="text-pink-500 text-2xl" />
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
+            Order Management
+          </h1>
         </div>
-      </div>
+        <p className="text-gray-400">Track and manage customer orders ({orders?.length || 0} total)</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+          <div className="bg-gradient-to-br from-[#1a1a1a] to-[#151515] p-4 rounded-xl border border-gray-800/50">
+            <div className="flex items-center gap-2">
+              <FaShoppingCart className="text-blue-400" />
+              <span className="text-gray-400 text-sm">Total Orders</span>
+            </div>
+            <p className="text-2xl font-bold text-white mt-1">{orders?.length || 0}</p>
+          </div>
+          <div className="bg-gradient-to-br from-[#1a1a1a] to-[#151515] p-4 rounded-xl border border-gray-800/50">
+            <div className="flex items-center gap-2">
+              <FaDollarSign className="text-green-400" />
+              <span className="text-gray-400 text-sm">Revenue</span>
+            </div>
+            <p className="text-2xl font-bold text-white mt-1">${orders?.reduce((sum, order) => sum + order.totalPrice, 0).toFixed(2) || '0.00'}</p>
+          </div>
+          <div className="bg-gradient-to-br from-[#1a1a1a] to-[#151515] p-4 rounded-xl border border-gray-800/50">
+            <div className="flex items-center gap-2">
+              <FaCalendar className="text-purple-400" />
+              <span className="text-gray-400 text-sm">Today</span>
+            </div>
+            <p className="text-2xl font-bold text-white mt-1">{orders?.filter(order => new Date(order.createdAt).toDateString() === new Date().toDateString()).length || 0}</p>
+          </div>
+          <div className="bg-gradient-to-br from-[#1a1a1a] to-[#151515] p-4 rounded-xl border border-gray-800/50">
+            <div className="flex items-center gap-2">
+              <FaEye className="text-pink-400" />
+              <span className="text-gray-400 text-sm">Pending</span>
+            </div>
+            <p className="text-2xl font-bold text-white mt-1">{orders?.filter(order => !order.isDelivered).length || 0}</p>
+          </div>
+        </div>
+      </motion.div>
       
       {isLoading ? (
         <Loader />
@@ -43,8 +84,8 @@ const OrderList = () => {
           {error?.data?.message || error.error}
         </Message>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-gray-700">
-          <table className="min-w-full bg-black/50 backdrop-blur-md text-white">
+        <div className="bg-gradient-to-br from-[#1a1a1a] to-[#151515] rounded-2xl border border-gray-800/50 overflow-hidden">
+          <table className="min-w-full text-white">
             <thead className="bg-black/60">
               <tr className="text-left text-gray-300">
                 <th className="px-6 py-4 w-8"></th>
@@ -61,9 +102,8 @@ const OrderList = () => {
 
             <tbody>
               {[...orders].reverse().map((order) => (
-                <>
+                <React.Fragment key={order._id}>
                   <tr
-                    key={order._id}
                     className={`hover:bg-gray-800 transition duration-200 ${expandedOrder === order._id ? 'bg-gray-800' : 'border-b border-gray-700'}`}
                   >
                     <td className="px-2 py-3 text-center">
@@ -274,13 +314,14 @@ const OrderList = () => {
                       </td>
                     </tr>
                   )}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
         </div>
       )}
     </section>
+    </div>
   );
 };
 

@@ -21,14 +21,16 @@ export const addToCart = async (req, res) => {
       );
 
       if (existingItem) {
-        existingItem.qty += quantity; // increase qty
+        // Replace quantity instead of adding to it to fix the accumulation bug
+        existingItem.qty = quantity;
       } else {
         cart.items.push({ product: productId, qty: quantity });
       }
     }
 
     const updatedCart = await cart.save();
-    res.status(200).json(updatedCart);
+    const populatedCart = await Cart.findById(updatedCart._id).populate('items.product');
+    res.status(200).json(populatedCart);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to add to cart" });

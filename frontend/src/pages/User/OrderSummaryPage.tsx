@@ -50,12 +50,12 @@ const OrderSummaryPage = () => {
     doc.setFontSize(20);
     doc.setTextColor(...secondaryColor);
     doc.setFont("helvetica", "bold");
-    doc.text("Vishesh WebStore", margin, 20);
+    doc.text("Infinity Plaza", margin, 20);
 
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text("123 Business Street, City, Country", margin, 26);
-    doc.text("Phone: +1 (123) 456-7890 | Email: info@visheshwebstore.com", margin, 32);
+    doc.text("Phone: +1 (123) 456-7890 | Email: info@infinityplaza.com", margin, 32);
 
     doc.setDrawColor(...primaryColor);
     doc.setLineWidth(0.5);
@@ -191,23 +191,51 @@ const OrderSummaryPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8" style={{ backgroundColor: "#0f0f10", color: "#e5e5e5", minHeight: "100vh" }}>
-      {/* Header */}
+      {/* Success Header */}
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-2 mb-2">
+          <CheckCircleIcon className="text-green-400 text-2xl animate-pulse" />
+          <h1 className="text-2xl font-bold text-green-400">Order Confirmed!</h1>
+        </div>
+        <p className="text-gray-400">Thank you for your purchase. Your order has been successfully placed.</p>
+      </div>
+
+      {/* Header Actions */}
       <div className="flex justify-between items-center mb-8">
         <button
           onClick={() => navigate(-1)}
-          className="cursor-pointer flex items-center gap-2 mb-8 text-gray-300 hover:text-white bg-transparent border border-gray-600 hover:border-pink-500 rounded-full py-2 px-5 transition duration-300"
+          className="cursor-pointer flex items-center gap-2 text-gray-300 hover:text-white bg-transparent border border-gray-600 hover:border-pink-500 rounded-full py-2 px-5 transition duration-300"
         >
           <ArrowBackIcon /> Go Back
         </button>
-        <h1 className="cursor-default text-3xl font-bold bg-gradient-to-r from-pink-500 to-pink-700 bg-clip-text text-transparent">
-          Order Summary
-        </h1>
         <button
           onClick={generateInvoice}
-          className="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-pink-500 to-pink-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 hover:from-pink-600 hover:to-pink-800 shadow-md"
+          className="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-pink-500 to-pink-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 hover:from-pink-600 hover:to-pink-800 shadow-lg hover:scale-105"
         >
-          <ReceiptIcon /> Invoice
+          <ReceiptIcon /> Download Invoice
         </button>
+      </div>
+
+      {/* Order Progress */}
+      <div className="bg-gray-800/50 rounded-xl p-6 mb-8 border border-gray-700">
+        <h3 className="text-lg font-semibold mb-4 text-white">Order Progress</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+              <CheckCircleIcon className="text-white text-sm" />
+            </div>
+            <span className="ml-2 text-green-400 font-medium">Order Placed</span>
+          </div>
+          <div className="flex-1 h-1 bg-gray-700 mx-4">
+            <div className={`h-full bg-gradient-to-r from-green-500 to-yellow-500 rounded transition-all duration-1000 ${order.isDelivered ? 'w-full' : 'w-1/2'}`}></div>
+          </div>
+          <div className="flex items-center">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${order.isDelivered ? 'bg-green-500' : 'bg-gray-600'}`}>
+              <LocalShippingIcon className="text-white text-sm" />
+            </div>
+            <span className={`ml-2 font-medium ${order.isDelivered ? 'text-green-400' : 'text-gray-400'}`}>Delivered</span>
+          </div>
+        </div>
       </div>
 
       {/* Order Overview */}

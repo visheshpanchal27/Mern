@@ -1,7 +1,7 @@
 // Simple rate limiting middleware
 const rateLimitStore = new Map();
 
-export const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
+export const rateLimit = (maxRequests = 1000, windowMs = 15 * 60 * 1000) => {
   return (req, res, next) => {
     const clientId = req.ip || req.connection.remoteAddress;
     const now = Date.now();

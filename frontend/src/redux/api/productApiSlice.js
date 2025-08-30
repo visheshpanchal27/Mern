@@ -11,7 +11,14 @@ export const productApiSlice = apiSlice.injectEndpoints({
         params: { keyword },
       }),
       keepUnusedDataFor: 5,
-      providesTags: ["Product"],
+      providesTags: (result) => {
+        const products = result?.products || result || [];
+        return [
+          'Product',
+          { type: 'Product', id: 'LIST' },
+          ...(Array.isArray(products) ? products.map(({ _id }) => ({ type: 'Product', id: _id })) : [])
+        ];
+      },
     }),
 
     // 🔹 Get single product by ID
@@ -25,16 +32,19 @@ export const productApiSlice = apiSlice.injectEndpoints({
       query: (params = {}) => ({
         url: `${PRODUCTS_URL}/allProducts`,
         params: {
-          limit: params.limit || 0, // 0 means no limit
-          page: params.page || 1,
           sort: params.sort || 'createdAt',
-          order: params.order || 'desc',
-          _t: Date.now() // Cache busting
+          order: params.order || 'desc'
         }
       }),
-      keepUnusedDataFor: 0, // Don't cache
-      providesTags: ['Product'],
-      forceRefetch: ({ currentArg, previousArg }) => true,
+      keepUnusedDataFor: 30,
+      providesTags: (result) => {
+        const products = result?.products || result || [];
+        return [
+          'Product',
+          { type: 'Product', id: 'LIST' },
+          ...(Array.isArray(products) ? products.map(({ _id }) => ({ type: 'Product', id: _id })) : [])
+        ];
+      },
     }),
 
     // 🔹 Get product details
@@ -52,6 +62,7 @@ export const productApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: formData, // ✅ send as multipart/form-data
       }),
+      invalidatesTags: ['Product'],
     }),
     fetchCategories: builder.query({
       query: () => CATEGORY_URL,
@@ -65,7 +76,11 @@ export const productApiSlice = apiSlice.injectEndpoints({
         body: formData,
         headers: formData instanceof FormData ? {} : { "Content-Type": "application/json" },
       }),
-      invalidatesTags: ["Product"],
+      invalidatesTags: (result, error, { productId }) => [
+        'Product',
+        { type: 'Product', id: productId },
+        { type: 'Product', id: 'LIST' }
+      ],
     }),
 
     // 🔹 Upload product image
@@ -83,7 +98,11 @@ export const productApiSlice = apiSlice.injectEndpoints({
         url: `${PRODUCTS_URL}/${productId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Product"],
+      invalidatesTags: (result, error, productId) => [
+        'Product',
+        { type: 'Product', id: productId },
+        { type: 'Product', id: 'LIST' }
+      ],
     }),
 
     // 🔹 Create review
@@ -93,18 +112,24 @@ export const productApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: (result, error, { productId }) => [
+        { type: 'Product', id: productId },
+        'Product'
+      ],
     }),
 
     // 🔹 Get top products
     getTopProducts: builder.query({
       query: () => `${PRODUCTS_URL}/top`,
       keepUnusedDataFor: 5,
+      providesTags: ['Product'],
     }),
 
     // 🔹 Get new products
     getNewProducts: builder.query({
       query: () => `${PRODUCTS_URL}/new`,
       keepUnusedDataFor: 5,
+      providesTags: ['Product'],
     }),
 
     // 🔹 Filtered products (category, price)
@@ -114,12 +139,14 @@ export const productApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: { checked, radio },
       }),
+      providesTags: ['Product'],
     }),
 
     // 🔹 Search products
     searchProducts: builder.query({
       query: (searchTerm) => `${PRODUCTS_URL}/search?q=${encodeURIComponent(searchTerm)}`,
       keepUnusedDataFor: 5,
+      providesTags: ['Product'],
     }),
   }),
 });

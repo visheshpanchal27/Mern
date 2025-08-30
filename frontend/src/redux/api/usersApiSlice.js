@@ -56,6 +56,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: 'PUT',
         body: userData,
       }),
+      invalidatesTags: ['User'],
     }),
 
     getUsers: builder.query({
@@ -65,7 +66,13 @@ export const userApiSlice = apiSlice.injectEndpoints({
           'Authorization': `Bearer ${getAuthToken()}`,
         },
       }),
-      providesTags: ['User'],
+      providesTags: (result) => {
+        const users = Array.isArray(result) ? result : [];
+        return [
+          'User',
+          ...users.map(({ _id }) => ({ type: 'User', id: _id }))
+        ];
+      },
       keepUnusedDataFor: 5,
     }),
 
@@ -77,6 +84,10 @@ export const userApiSlice = apiSlice.injectEndpoints({
           'Authorization': `Bearer ${getAuthToken()}`,
         },
       }),
+      invalidatesTags: (result, error, id) => [
+        'User',
+        { type: 'User', id }
+      ],
     }),
 
     getUserDetails: builder.query({
@@ -105,7 +116,10 @@ export const userApiSlice = apiSlice.injectEndpoints({
           'Authorization': `Bearer ${getAuthToken()}`,
         },
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'User', id }],
+      invalidatesTags: (result, error, { id }) => [
+        'User',
+        { type: 'User', id }
+      ],
     }),
 
     googleLogin: builder.mutation({

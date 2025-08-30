@@ -11,14 +11,23 @@ import { FaHeart } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/usersApiSlice";
+import { useGetCartQuery } from "../../redux/api/cartApiSlice";
 import { logOut } from "../../redux/features/auth/authSlice";
 import _ from "lodash";
 import "./Navigation.css";
 
 const Navigation = () => {
   const { userInfo } = useSelector((state) => state.auth);
-  const { cartItems } = useSelector((state) => state.cart);
+  const { data: cartData } = useGetCartQuery(undefined, { 
+    skip: !userInfo,
+    pollingInterval: 500,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true
+  });
   const favoriteItems = useSelector((state) => state.favorites || []);
+  
+  const cartItems = cartData?.items || [];
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -91,22 +100,39 @@ const Navigation = () => {
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       ref={sidebarRef}
-      className={`fixed top-0 left-0 h-screen flex flex-col justify-between p-2 sm:p-4 bg-[#000]/90 backdrop-blur-md text-white z-50 transition-all duration-300 group
+      className={`fixed top-0 left-0 h-screen flex flex-col justify-between p-2 sm:p-4 bg-gradient-to-b from-black/95 via-gray-900/90 to-black/95 backdrop-blur-xl text-white z-50 transition-all duration-500 group
         ${showSidebar ? "w-[12rem] sm:w-[14rem]" : "w-[3rem] sm:w-[4rem] hover:w-[12rem] sm:hover:w-[14rem]"}
-        rounded-r-xl shadow-lg border-r border-gray-900 overflow-y-auto overflow-x-hidden custom-scrollbar`}
+        rounded-r-2xl shadow-2xl shadow-pink-500/10 border-r border-gray-800/50 overflow-y-auto overflow-x-hidden custom-scrollbar hover:shadow-pink-500/20`}
       id="navigation-container"
       onMouseEnter={!isMobile ? () => debouncedSetShowSidebar(true) : undefined}
       onMouseLeave={!isMobile ? () => debouncedSetShowSidebar(false) : undefined}
       onClick={isMobile ? handleSidebarInteraction : undefined}
     >
-      <ul className="flex flex-col space-y-3 sm:space-y-6 pt-4 sm:pt-8">
+      {/* Logo/Brand */}
+      <div className="flex items-center justify-center py-4 border-b border-gray-800/50">
+        <div className="w-8 h-8 flex items-center justify-center">
+          <svg viewBox="0 0 40 40" className="w-full h-full">
+            <path d="M8 20c0-4 4-8 8-8s8 4 8 8-4 8-8 8-8-4-8-8z" fill="#2563eb" />
+            <path d="M16 20c0-4 4-8 8-8s8 4 8 8-4 8-8 8-8-4-8-8z" fill="#059669" />
+            <path d="M12 16c2-2 6-2 8 0s2 6 0 8-6 2-8 0-2-6 0-8z" fill="none" stroke="#fff" strokeWidth="1" />
+          </svg>
+        </div>
+        {showSidebar && (
+          <div className="ml-3">
+            <div className="text-xs font-bold text-white">INFINITY</div>
+            <div className="text-xs font-bold bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">PLAZA</div>
+          </div>
+        )}
+      </div>
+      
+      <ul className="flex flex-col space-y-3 sm:space-y-6 pt-4">
         <NavItem to="/" icon={<AiOutlineHome className="w-5 h-5 sm:w-6 sm:h-6" />} label="Home" expanded={showSidebar} />
         <NavItem to="/shop" icon={<AiOutlineShopping className="w-5 h-5 sm:w-6 sm:h-6" />} label="Shop" expanded={showSidebar} />
         <NavItem
           to="/cart"
           icon={<AiOutlineShoppingCart className="w-5 h-5 sm:w-6 sm:h-6" />}
           label="Cart"
-          badge={cartItems.reduce((a, c) => a + c.qty, 0)}
+          badge={cartItems.reduce((a, c) => a + (c.quantity || c.qty || 0), 0)}
           expanded={showSidebar}
         />
         <NavItem
@@ -144,7 +170,7 @@ const Navigation = () => {
                 <span className="px-2">{userInfo.username}</span>
               ) : (
                 <div
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-pink-700 text-black font-bold text-sm uppercase"
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-sm uppercase shadow-lg hover:shadow-pink-500/50 transition-all duration-300 hover:scale-110"
                   title={userInfo.username}
                   aria-label="User avatar"
                 >
@@ -202,7 +228,7 @@ const NavItem = React.memo(({ to, icon, label, badge = 0, expanded }) => (
   <li className="group relative">
     <Link
       to={to}
-      className="flex items-center justify-center md:justify-start space-x-2 sm:space-x-4 w-full px-1 sm:px-2 py-2 rounded-xl transition-all duration-300 hover:bg-[#272738] hover:shadow-lg hover:text-pink-400"
+      className="flex items-center justify-center md:justify-start space-x-2 sm:space-x-4 w-full px-1 sm:px-2 py-2 rounded-xl transition-all duration-300 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 hover:shadow-lg hover:shadow-pink-500/25 hover:text-pink-400 hover:scale-105"
       aria-label={label}
     >
       <div className="relative flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8">

@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineShoppingCart } from "react-icons/ai";
+import { FaBolt } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useState, useMemo, useEffect } from "react";
@@ -9,6 +10,7 @@ import { useAddToCartMutation } from "../../redux/api/cartApiSlice";
 import { ProductCardSkeleton } from "../../components/Skeletons";
 
 const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
+  const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
   const [addToCart] = useAddToCartMutation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -88,6 +90,23 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
     }
   };
 
+  const buyNowHandler = (product) => {
+    if (!userInfo) {
+      toast.info("🔒 Please sign in to buy now");
+      return;
+    }
+    
+    localStorage.setItem('buyNowProduct', JSON.stringify({
+      _id: product._id,
+      name: product.name,
+      price: product.price,
+      image: product.image
+    }));
+    
+    navigate('/shipping?buyNow=true');
+    toast.success("🚀 Proceeding to checkout!");
+  };
+
   if (viewMode === 'list') {
     return (
       <div className="card-primary overflow-hidden flex flex-col sm:flex-row gap-4 p-4">
@@ -148,12 +167,8 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
             </Link>
             <button
               onClick={() => addToCartHandler(p, 1)}
-              className={`p-2 rounded-lg transition-all ${
-                userInfo 
-                  ? 'bg-gray-700 hover:bg-pink-600' 
-                  : 'bg-gray-600 hover:bg-primary-600'
-              }`}
-              title={userInfo ? 'Add to cart' : 'Sign in to add to cart'}
+              className="bg-gray-700 hover:bg-pink-600 p-2 rounded-lg transition-all"
+              title="Add to cart"
             >
               <AiOutlineShoppingCart size={18} className="text-white" />
             </button>
@@ -217,23 +232,19 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
           </p>
         </div>
 
-        <div className="flex justify-between items-center mt-auto gap-2">
+        <div className="flex items-center mt-auto gap-2">
           <Link
             to={`/product/${p._id}`}
-            className="btn-primary text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 flex-1 text-center"
+            className="btn-primary text-xs px-3 py-1.5 flex-1 text-center"
           >
-            View
+            View Details
           </Link>
           <button
             onClick={() => addToCartHandler(p, 1)}
-            className={`p-1.5 sm:p-2 rounded-full transition-all flex-shrink-0 ${
-              userInfo 
-                ? 'hover:bg-pink-600' 
-                : 'hover:bg-primary-600'
-            }`}
-            title={userInfo ? 'Add to cart' : 'Sign in to add to cart'}
+            className="bg-gray-700 hover:bg-pink-600 p-2 rounded transition-all"
+            title="Add to cart"
           >
-            <AiOutlineShoppingCart size={16} className="text-white sm:w-5 sm:h-5" />
+            <AiOutlineShoppingCart size={16} className="text-white" />
           </button>
         </div>
       </div>

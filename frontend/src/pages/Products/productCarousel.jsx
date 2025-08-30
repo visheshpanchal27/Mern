@@ -24,13 +24,19 @@ const ProductCarousel = () => {
   const settings = {
     dots: true,
     infinite: true,
-    speed: 700,
+    speed: 1000,
     slidesToShow: 1,
     slidesToScroll: 1,
     arrows: false,
     autoplay: true,
-    autoplaySpeed: 3500,
+    autoplaySpeed: 4000,
     fade: true,
+    cssEase: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+    pauseOnHover: true,
+    pauseOnFocus: true,
+    swipeToSlide: true,
+    touchThreshold: 10,
+    lazyLoad: 'ondemand',
   };
 
   useEffect(() => {
@@ -120,7 +126,7 @@ const ProductCarousel = () => {
         <Slider {...settings}>
           {products.map((product) => (
             <div key={product._id} className="p-1">
-              <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl">
+              <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-500 group">
                 <img
                   src={
                     product.image?.startsWith("http")
@@ -128,17 +134,17 @@ const ProductCarousel = () => {
                       : `${import.meta.env.VITE_API_URL}${product.image}`
                   }
                   alt={product.name}
-                  className="w-full h-[24rem] object-cover opacity-90 hover:opacity-100 transition duration-300"
+                  className="w-full h-[24rem] object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
                   loading="lazy"
                 />
                 <div className="absolute top-4 right-4 z-10">
                   <HeartIcon product={product} />
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/70 backdrop-blur-sm text-white rounded-t-3xl">
-                  <h2 className="text-lg font-bold hover:text-pink-400">
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/70 backdrop-blur-sm text-white rounded-t-3xl group-hover:bg-black/80 transition-all duration-300">
+                  <h2 className="text-lg font-bold hover:text-pink-400 transition-colors duration-200">
                     <Link to={`/product/${product._id}`}>{product.name}</Link>
                   </h2>
-                  <p className="text-pink-400 font-bold">${product.price}</p>
+                  <p className="text-pink-400 font-bold text-xl">${product.price}</p>
                   <div className="flex justify-between text-sm mt-2">
                     <p className="flex items-center">
                       <FaStore className="mr-1 text-pink-300" />

@@ -2,7 +2,8 @@ import express from "express";
 const router = express.Router();
 
 import { 
-    createOrder, 
+    createOrder,
+    createBuyNowOrder, 
     getAllOrders, 
     getUserOrders, 
     countTotalOrders, 
@@ -24,6 +25,8 @@ import {
 router.route("/")
     .post(authentication, createOrder)
     .get( authentication, authorizeAdmin, getAllOrders );
+router.route("/buy-now")
+    .post(authentication, createBuyNowOrder);
 router.get('/track/:trackingId', getOrderByTrackingId);
 router.route("/mine").get( authentication , getUserOrders);
 router.route("/total-orders").get(countTotalOrders);

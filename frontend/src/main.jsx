@@ -33,6 +33,7 @@ import UserOrder from './pages/User/UserOrder.jsx';
 import OrderList from './pages/Admin/OrderList.jsx';
 import AdminDashboard from './pages/Admin/AdminDashboard.jsx';
 import OrderSummaryPage from './pages/User/OrderSummaryPage.jsx';
+import ExpressCheckout from './pages/Orders/ExpressCheckout.jsx';
 import ErrorPage from './components/ErrorPage.jsx';
 
 // Google Client ID from env
@@ -59,6 +60,7 @@ const router = createBrowserRouter(
           <Route path="/profile" element={<Profile />} />
           <Route path="/shipping" element={<ShippingCountry />} />
           <Route path="/placeorder" element={<PlaceOrder />} />
+          <Route path="/express-checkout" element={<ExpressCheckout />} />
           <Route path="/order/:id" element={<Order />} />
           <Route path="/order-summary/:trackingId" element={<OrderSummaryPage />} />
         </Route>

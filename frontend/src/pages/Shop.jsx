@@ -269,7 +269,13 @@ const Shop = () => {
                         onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                         className="w-full h-3 bg-gradient-to-r from-gray-700 to-gray-600 rounded-full appearance-none cursor-pointer slider"
                         style={{
-                          background: `linear-gradient(to right, #374151 0%, #374151 ${((priceRange[1] - priceRange[0]) / 50000) * 100}%, #ec4899 ${((priceRange[1] - priceRange[0]) / 50000) * 100}%, #8b5cf6 100%)`
+                          background: `linear-gradient(to right, 
+                            #374151 0%, 
+                            #374151 ${(priceRange[0] / 50000) * 100}%, 
+                            #ec4899 ${(priceRange[0] / 50000) * 100}%, 
+                            #ec4899 ${(priceRange[1] / 50000) * 100}%, 
+                            #374151 ${(priceRange[1] / 50000) * 100}%, 
+                            #374151 100%)`
                         }}
                       />
                     </div>
@@ -329,33 +335,7 @@ const Shop = () => {
                 </button>
               )}
 
-              {/* Brands */}
-              <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mt-8 mb-6 text-white font-bold shadow-lg cursor-default">
-                Filter by Brands
-              </h2>
-              <div className="space-y-3">
-                {(showAllBrands ? uniqueBrands : uniqueBrands.slice(0,4))?.map(brand => (
-                  <label key={brand} className="flex items-center gap-3 cursor-pointer text-white select-none">
-                    <input
-                      type="radio"
-                      name="brand"
-                      onChange={() => {
-                        setSearchTerm(brand);
-                      }}
-                      className="appearance-none w-5 h-5 rounded-full border-2 border-pink-500 checked:bg-pink-500 transition-all duration-300 ease-in-out transform hover:scale-110 focus:ring-2 focus:ring-pink-500 cursor-pointer"
-                    />
-                    <span className="text-sm cursor-pointer">{brand}</span>
-                  </label>
-                ))}
-              </div>
-              {uniqueBrands.length > 5 && (
-                <button
-                  className="text-pink-400 text-xs mt-2 hover:underline transition cursor-pointer"
-                  onClick={() => setShowAllBrands(!showAllBrands)}
-                >
-                  {showAllBrands ? "Show Less" : "Show More"}
-                </button>
-              )}
+
 
               {/* Price Filter Input */}
               <h2 className="text-center bg-gradient-to-r from-pink-600 to-pink-500 py-2 rounded-full mt-8 mb-6 text-white font-bold shadow-lg cursor-default">

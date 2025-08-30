@@ -4,6 +4,8 @@ import moment from "moment";
 import { useAllProductsQuery } from "../../redux/api/productApiSlice";
 import Loader from "../../components/Loader";
 import ProductImageGallery from "../../components/ProductImageGallery";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaEdit, FaEye, FaPlus } from "react-icons/fa";
 
 const AllProducts = () => {
   const { data: productsData, isLoading, isError } = useAllProductsQuery();
@@ -22,19 +24,36 @@ const AllProducts = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] relative">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f] relative">
       {/* Sidebar */}
       <div className="hidden md:flex fixed top-0 left-0 h-full w-20 bg-black flex-col items-center py-6 z-20">
       </div>
 
       {/* Main content */}
       <div className="container mx-auto px-4 md:px-6 py-6 md:ml-20">
-        <h1 className="text-2xl font-bold mb-6 text-white">
-          All Products ({products?.length || 0})
-        </h1>
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">
+                Product Management
+              </h1>
+              <p className="text-gray-400">Manage all products ({products?.length || 0} total)</p>
+            </div>
+            <Link 
+              to="/admin/productlist"
+              className="bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-pink-500/25 flex items-center gap-2 mt-4 md:mt-0"
+            >
+              <FaPlus /> New Product
+            </Link>
+          </div>
 
-        {/* Responsive grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
             <ProductCard key={product._id} product={product} />
           ))}

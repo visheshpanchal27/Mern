@@ -3,6 +3,7 @@ import Navigation from "./pages/Auth/Navigation";
 import {ToastContainer} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import ErrorBoundary from './components/ErrorBoundary';
+import RealTimeUpdates from './components/RealTimeUpdates';
 
 
 
@@ -11,6 +12,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <RealTimeUpdates />
       <ToastContainer/>
       <Navigation/>
       <main className="py-3">

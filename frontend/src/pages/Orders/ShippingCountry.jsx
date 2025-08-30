@@ -6,11 +6,15 @@ import {
   savePaymentMethod,
 } from "../../redux/features/Cart/CartSlice";
 import ProgressSteps from "../../components/ProgressSteps";
-import { FaMoneyBillWave, FaPaypal, FaMousePointer } from "react-icons/fa";
+import { FaMoneyBillWave, FaPaypal, FaTruck, FaMapMarkerAlt, FaShieldAlt } from "react-icons/fa";
 
 const ShippingCountry = () => {
   const cart = useSelector((state) => state.cart);
   const { shippingAddress } = cart;
+  
+  // Check if this is buy now flow
+  const urlParams = new URLSearchParams(window.location.search);
+  const isBuyNow = urlParams.get('buyNow') === 'true';
 
   const [paymentMethod, setPaymentMethod] = useState("PayPal");
   const [address, setAddress] = useState(shippingAddress.address || "");
@@ -46,7 +50,7 @@ const ShippingCountry = () => {
     localStorage.setItem("shippingAddress", JSON.stringify(shippingData));
     localStorage.setItem("paymentMethod", paymentMethod);
 
-    navigate("/placeorder");
+    navigate(isBuyNow ? "/placeorder?buyNow=true" : "/placeorder");
   };
 
   useEffect(() => {
@@ -56,14 +60,18 @@ const ShippingCountry = () => {
   }, [navigate, shippingAddress]);
 
   return (
-    <div className="container mx-auto mt-10 px-4">
-      <ProgressSteps step1 step2 />
-      <div className="mt-12 flex justify-center">
-        <form
-          onSubmit={submitHandler}
-          className="w-full max-w-2xl bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-xl space-y-6"
-        >
-          <h1 className="text-3xl font-bold text-white mb-4">Shipping Information</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 px-4 py-8">
+      <div className="container mx-auto max-w-6xl">
+        <ProgressSteps step1 step2 />
+        
+        <div className="mt-8 grid lg:grid-cols-2 gap-8">
+          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-8 shadow-2xl">
+            <div className="flex items-center gap-3 mb-6">
+              <FaTruck className="text-pink-500 text-2xl" />
+              <h1 className="text-2xl font-bold text-white">Shipping Details</h1>
+            </div>
+            
+            <form onSubmit={submitHandler} className="space-y-6">
 
           {/* Address */}
           <div>
@@ -125,48 +133,119 @@ const ShippingCountry = () => {
 
           {/* Payment Method */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Payment Method</label>
-            <div className="space-y-3">
-              <label className="flex items-center p-3 bg-gray-700 rounded-lg border border-gray-600 hover:border-pink-500 transition-colors cursor-pointer">
+            <label className="block text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <FaPaypal className="text-pink-500" />
+              Choose Payment Method
+            </label>
+            <div className="grid gap-4">
+              <label className={`relative flex items-center p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer group ${
+                paymentMethod === "PayPal" 
+                  ? "border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20" 
+                  : "border-gray-600 bg-gray-700/50 hover:border-blue-400 hover:bg-blue-500/5"
+              }`}>
                 <input
                   type="radio"
                   name="paymentMethod"
                   value="PayPal"
                   checked={paymentMethod === "PayPal"}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="accent-pink-500 mr-3"
+                  className="sr-only"
                 />
-                <FaPaypal className="text-blue-400 text-xl mr-2" />
-                <span className="text-white">PayPal or Credit Card</span>
+                <div className={`w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center ${
+                  paymentMethod === "PayPal" ? "border-blue-500 bg-blue-500" : "border-gray-400"
+                }`}>
+                  {paymentMethod === "PayPal" && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                </div>
+                <FaPaypal className="text-blue-400 text-2xl mr-3" />
+                <div className="flex-1">
+                  <span className="text-white font-medium">PayPal</span>
+                  <p className="text-sm text-gray-400 mt-1">Secure payment with PayPal</p>
+                </div>
+                {paymentMethod === "PayPal" && (
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
               </label>
 
-              <label className="flex items-center p-3 bg-gray-700 rounded-lg border border-gray-600 hover:border-pink-500 transition-colors cursor-pointer">
+              <label className={`relative flex items-center p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer group ${
+                paymentMethod === "CashOnDelivery" 
+                  ? "border-green-500 bg-green-500/10 shadow-lg shadow-green-500/20" 
+                  : "border-gray-600 bg-gray-700/50 hover:border-green-400 hover:bg-green-500/5"
+              }`}>
                 <input
                   type="radio"
                   name="paymentMethod"
                   value="CashOnDelivery"
                   checked={paymentMethod === "CashOnDelivery"}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="accent-pink-500 mr-3"
+                  className="sr-only"
                 />
-                <FaMoneyBillWave className="text-green-400 text-xl mr-2" />
-                <span className="text-white">Cash on Delivery</span>
+                <div className={`w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center ${
+                  paymentMethod === "CashOnDelivery" ? "border-green-500 bg-green-500" : "border-gray-400"
+                }`}>
+                  {paymentMethod === "CashOnDelivery" && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                </div>
+                <FaMoneyBillWave className="text-green-400 text-2xl mr-3" />
+                <div className="flex-1">
+                  <span className="text-white font-medium">Cash on Delivery</span>
+                  <p className="text-sm text-gray-400 mt-1">Pay when you receive your order</p>
+                </div>
+                {paymentMethod === "CashOnDelivery" && (
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
               </label>
             </div>
           </div>
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={!isFormValid}
-            className={`w-full flex items-center justify-center gap-2 bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-full text-lg transition ${
-              !isFormValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-            }`}
-          >
-             
-            Continue
-          </button>
-        </form>
+              <button
+                type="submit"
+                disabled={!isFormValid}
+                className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-semibold py-4 rounded-xl text-lg transition-all duration-300 ${
+                  !isFormValid ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-105"
+                }`}
+              >
+                <FaMapMarkerAlt className="text-sm" />
+                Continue to Order
+              </button>
+            </form>
+          </div>
+          
+          {/* Right Side - Info Panel */}
+          <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-2xl p-8 shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <FaShieldAlt className="text-green-500 text-2xl" />
+              <h2 className="text-xl font-bold text-white">Secure Checkout</h2>
+            </div>
+            
+            <div className="space-y-4 text-gray-300">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>SSL Encrypted Transaction</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Safe & Secure Payment</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>Fast Delivery Worldwide</span>
+              </div>
+            </div>
+            
+            <div className="mt-8 p-4 bg-gradient-to-r from-pink-500/10 to-purple-600/10 rounded-xl border border-pink-500/20">
+              <h3 className="text-white font-semibold mb-2">Delivery Information</h3>
+              <p className="text-sm text-gray-400">Free shipping on orders over $100. Standard delivery takes 3-5 business days.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

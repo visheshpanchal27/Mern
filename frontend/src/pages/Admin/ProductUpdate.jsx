@@ -9,6 +9,7 @@ import {
 import { useFetchCategoriesQuery } from "../../redux/api/categoryApiSlice";
 import { toast } from "react-toastify";
 import MultiImageUpload from "../../components/MultiImageUpload";
+import { useOptimisticMutation } from "../../hooks/useOptimisticMutation";
 
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -34,6 +35,7 @@ const ProductUpdate = () => {
   const [uploadProductImage] = useUploadProductImageMutation();
   const [updateProduct] = useUpdateProductMutation();
   const [deleteProduct] = useDeleteProductMutation();
+  const { updateProductOptimistically, deleteProductOptimistically } = useOptimisticMutation();
 
 useEffect(() => {
   if (!productData) return;
@@ -108,10 +110,21 @@ const submitHandler = async (e) => {
 
     toast.info("⏳ Updating product...");
 
-    await updateProduct({
-      productId: id,
-      formData, // ✅ correct key
-    }).unwrap();
+    // Optimistic update
+    const optimisticData = {
+      name: name.trim(),
+      description: description?.trim() || "",
+      price: Number(price),
+      brand: brand?.trim() || "",
+      quantity: Number(quantity) || 0,
+      countInStock: Number(countInStock) || 0
+    };
+
+    await updateProductOptimistically(
+      id,
+      optimisticData,
+      updateProduct({ productId: id, formData })
+    );
 
     toast.dismiss();
     toast.success("✅ Product updated successfully");
@@ -137,7 +150,7 @@ const submitHandler = async (e) => {
     if (!confirmed) return;
 
     try {
-      await deleteProduct(id).unwrap();
+      await deleteProductOptimistically(id, deleteProduct(id));
       toast.success("🗑️ Product deleted successfully");
       navigate("/admin/allproductslist");
     } catch (err) {
@@ -153,10 +166,16 @@ const submitHandler = async (e) => {
   };
 
   return (
-    <div className="container xl:mx-[9rem] sm:mx-[0] text-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0f0f0f] text-white">
+      <div className="container xl:mx-[9rem] sm:mx-[0] py-8">
       <div className="flex flex-col md:flex-row">
         <form onSubmit={submitHandler} className="md:w-3/4 p-4">
-          <h2 className="text-xl font-semibold mb-6">Update / Delete Product</h2>
+          <div className="mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent mb-2">
+              Product Editor
+            </h2>
+            <p className="text-gray-400">Update product details and manage images</p>
+          </div>
 
           {imagePreview && (
             <div className="text-center mb-4 relative">
@@ -180,7 +199,7 @@ const submitHandler = async (e) => {
           )}
 
           <label
-            className="border px-4 block w-full text-center rounded-lg cursor-pointer font-bold py-11 border-gray-700 hover:border-pink-500 transition mb-6"
+            className="bg-gradient-to-br from-[#1a1a1a] to-[#151515] border-2 border-dashed border-gray-700 hover:border-pink-500 px-4 block w-full text-center rounded-xl cursor-pointer font-bold py-11 transition-all duration-300 mb-6 hover:bg-gradient-to-br hover:from-pink-600/10 hover:to-purple-600/10"
           >
             {image ? "Change Image" : "Upload Image"}
             <input
@@ -278,7 +297,11 @@ const submitHandler = async (e) => {
                 toast.success(`${newImages.length} additional images uploaded!`);
               }}
               onImageDeleted={(imageUrl, index) => {
-                setAdditionalImages(prev => prev.filter((_, i) => i !== index));
+                setAdditionalImages(prev => {
+                  const updated = prev.filter((_, i) => i !== index);
+                  console.log('Removing image at index:', index, 'Updated array:', updated);
+                  return updated;
+                });
               }}
               existingImages={additionalImages}
             />
@@ -287,20 +310,21 @@ const submitHandler = async (e) => {
           <div className="flex gap-4">
             <button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-semibold"
+              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-green-500/25"
             >
-              Update
+              Update Product
             </button>
             <button
               type="button"
               onClick={deleteHandler}
-              className="bg-pink-600 hover:bg-pink-700 px-6 py-3 rounded-lg font-semibold"
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-red-500/25"
             >
-              Delete
+              Delete Product
             </button>
           </div>
         </form>
       </div>
+    </div>
     </div>
   );
 };
