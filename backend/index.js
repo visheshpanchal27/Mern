@@ -50,6 +50,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy for deployment platforms like Render
+app.set('trust proxy', 1);
+
 // CORS setup
 const allowedOrigins = [
   "http://localhost:5173",
