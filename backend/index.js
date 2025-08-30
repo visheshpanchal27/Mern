@@ -53,7 +53,8 @@ const app = express();
 // CORS setup
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://mern-j0z9.onrender.com"
+  "https://mern-j0z9.onrender.com",
+  "https://shopping-canter.netlify.app"
 ];
 app.use(cors({
   origin: (origin, callback) => {
@@ -101,6 +102,23 @@ app.use('/api/admin/analytics', analyticsRoutes);
 // PayPal config
 app.get("/api/config/paypal", (req, res) => {
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID });
+});
+
+// Promo codes
+app.post("/api/promo/validate", (req, res) => {
+  const { code } = req.body;
+  const validCodes = {
+    'VISHESH': { discount: 10, type: 'percentage' },
+    'INFINITY': { discount: 10, type: 'percentage' },
+    'PLAZA': { discount: 10, type: 'percentage' },
+    'WELCOME10': { discount: 10, type: 'percentage' }
+  };
+  
+  if (validCodes[code.toUpperCase()]) {
+    res.json({ valid: true, ...validCodes[code.toUpperCase()] });
+  } else {
+    res.status(400).json({ valid: false, message: 'Invalid promo code' });
+  }
 });
 
 // --------------------------------

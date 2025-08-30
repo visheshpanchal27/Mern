@@ -13,6 +13,9 @@ const PlaceOrder = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoApplied, setPromoApplied] = useState(false);
 
   // Check if this is a buy now flow
   const urlParams = new URLSearchParams(window.location.search);
@@ -39,6 +42,38 @@ const PlaceOrder = () => {
   const paymentMethod =
     cart?.paymentMethod || localStorage.getItem("paymentMethod") || "CashOnDelivery";
 
+  // Promo code functions
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) return;
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/promo/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode })
+      });
+      
+      const result = await response.json();
+      
+      if (result.valid) {
+        setPromoDiscount(result.discount);
+        setPromoApplied(true);
+        toast.success(`Promo code applied! ${result.discount}% discount`);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error('Failed to validate promo code');
+    }
+  };
+
+  const removePromoCode = () => {
+    setPromoCode('');
+    setPromoDiscount(0);
+    setPromoApplied(false);
+    toast.info('Promo code removed');
+  };
+
   // Enhanced price calculations with memoization
   const priceCalculations = useMemo(() => {
     const itemsPrice = cartItems.reduce(
@@ -51,12 +86,13 @@ const PlaceOrder = () => {
     const shippingPrice = itemsPrice > 100 ? 0 : 10;
     const taxPrice = Number((0.08 * itemsPrice).toFixed(2)); // 8% tax
     const processingFee = itemsPrice > 50 ? 0 : 2.99;
-    const totalPrice = (itemsPrice + shippingPrice + taxPrice + processingFee).toFixed(2);
+    const discountAmount = promoApplied ? (itemsPrice * promoDiscount / 100) : 0;
+    const totalPrice = (itemsPrice + shippingPrice + taxPrice + processingFee - discountAmount).toFixed(2);
     
-    return { itemsPrice, shippingPrice, taxPrice, processingFee, totalPrice };
-  }, [cartItems, isBuyNow]);
+    return { itemsPrice, shippingPrice, taxPrice, processingFee, discountAmount, totalPrice };
+  }, [cartItems, isBuyNow, promoApplied, promoDiscount]);
   
-  const { itemsPrice, shippingPrice, taxPrice, processingFee, totalPrice } = priceCalculations;
+  const { itemsPrice, shippingPrice, taxPrice, processingFee, discountAmount, totalPrice } = priceCalculations;
 
   // Enhanced Place Order Handler
   const placeOrderHandler = useCallback(async () => {
@@ -220,6 +256,12 @@ const PlaceOrder = () => {
                         <span>${processingFee.toFixed(2)}</span>
                       </div>
                     )}
+                    {promoApplied && (
+                      <div className="flex justify-between text-green-400">
+                        <span>Discount ({promoDiscount}%):</span>
+                        <span>-${discountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
                     <hr className="border-gray-600" />
                     <div className="flex justify-between text-xl font-bold text-pink-400">
                       <span>Total:</span>
@@ -273,6 +315,38 @@ const PlaceOrder = () => {
                       <span>Money Back Guarantee</span>
                     </div>
                   </div>
+                </div>
+                
+                {/* Promo Code Section */}
+                <div className="bg-[#181818] p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold mb-4">Promo Code</h3>
+                  {promoApplied ? (
+                    <div className="flex items-center justify-between bg-green-500/20 border border-green-500 rounded-lg p-3">
+                      <span className="text-green-400 font-medium">Code Applied: {promoCode.toUpperCase()}</span>
+                      <button
+                        onClick={removePromoCode}
+                        className="text-red-400 hover:text-red-300 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Enter promo code (VISHESH, INFINITY)"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        className="flex-1 p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-pink-500 focus:outline-none"
+                      />
+                      <button
+                        onClick={applyPromoCode}
+                        className="px-6 py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Place Order Button */}
