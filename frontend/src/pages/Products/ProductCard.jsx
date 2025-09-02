@@ -3,11 +3,12 @@ import { AiOutlineShoppingCart } from "react-icons/ai";
 import { FaBolt } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, memo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import HeartIcon from "./HeartIcon";
 import { useAddToCartMutation } from "../../redux/api/cartApiSlice";
 import { ProductCardSkeleton } from "../../components/Skeletons";
+import QuickViewModal from "../../components/QuickViewModal";
 
 const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
   const [addToCart] = useAddToCartMutation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showQuickView, setShowQuickView] = useState(false);
 
   if (isLoading || !p) return <ProductCardSkeleton viewMode={viewMode} />;
 
@@ -61,7 +63,7 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
 
   const currentImage = allImages[currentImageIndex] || allImages[0];
 
-  const addToCartHandler = async (product, qty) => {
+  const addToCartHandler = useCallback(async (product, qty) => {
     if (!userInfo) {
       toast.info("🔒 Please sign in to add items to your cart", {
         position: "top-right",
@@ -88,9 +90,9 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
         toast.error("❌ Failed to add item. Try again.");
       }
     }
-  };
+  }, [userInfo, addToCart]);
 
-  const buyNowHandler = (product) => {
+  const buyNowHandler = useCallback((product) => {
     if (!userInfo) {
       toast.info("🔒 Please sign in to buy now");
       return;
@@ -105,7 +107,7 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
     
     navigate('/shipping?buyNow=true');
     toast.success("🚀 Proceeding to checkout!");
-  };
+  }, [userInfo, navigate]);
 
   if (viewMode === 'list') {
     return (
@@ -153,9 +155,6 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
             <p className="text-[#CFCFCF] text-sm mb-3 line-clamp-2">
               {p.description?.substring(0, 150)}...
             </p>
-            <span className="bg-pink-100 text-pink-800 text-xs font-medium px-2 py-1 rounded-full">
-              {p.brand}
-            </span>
           </div>
           
           <div className="flex items-center gap-3 mt-4">
@@ -179,15 +178,11 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
   }
 
   return (
-    <div className="card-primary overflow-hidden transition-transform duration-300 hover:scale-[1.02] flex flex-col h-full">
+    <>
+    <div className="card-primary overflow-hidden transition-transform duration-300 hover:scale-[1.02] flex flex-col h-full relative">
       {/* Top Icons */}
-      <div className="absolute top-1 sm:top-2 left-1 sm:left-2 z-10">
+      <div className="absolute top-2 left-2 z-10">
         <HeartIcon product={p} />
-      </div>
-      <div className="absolute top-1 sm:top-2 right-1 sm:right-2 z-10">
-        <span className="bg-pink-100 text-pink-800 text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
-          {p.brand}
-        </span>
       </div>
 
       {/* Product Image */}
@@ -195,7 +190,7 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
         <img
           src={currentImage}
           alt={p.name}
-          className="w-full h-40 sm:h-48 md:h-52 lg:h-56 object-contain p-1 sm:p-2 bg-[#121212] rounded-t-xl sm:rounded-t-2xl transition-all duration-300"
+          className="w-full h-40 sm:h-48 md:h-52 lg:h-56 object-contain p-1 sm:p-2 bg-white rounded-t-xl sm:rounded-t-2xl transition-all duration-300"
           loading="lazy"
         />
         {allImages.length > 1 && (
@@ -233,12 +228,12 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
         </div>
 
         <div className="flex items-center mt-auto gap-2">
-          <Link
-            to={`/product/${p._id}`}
-            className="btn-primary text-xs px-3 py-1.5 flex-1 text-center"
+          <button
+            onClick={() => setShowQuickView(true)}
+            className="btn-secondary text-xs px-3 py-1.5 flex-1"
           >
-            View Details
-          </Link>
+            Quick View
+          </button>
           <button
             onClick={() => addToCartHandler(p, 1)}
             className="bg-gray-700 hover:bg-pink-600 p-2 rounded transition-all"
@@ -249,7 +244,14 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
         </div>
       </div>
     </div>
+    
+    <QuickViewModal 
+      product={p} 
+      isOpen={showQuickView} 
+      onClose={() => setShowQuickView(false)} 
+    />
+    </>
   );
 };
 
-export default ProductCard;
+export default memo(ProductCard);

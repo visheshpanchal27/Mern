@@ -71,63 +71,20 @@ const Product = ({ product }) => {
           <img
             src={currentImage}
             alt={product.name}
-            className="object-cover w-full h-full group-hover:scale-110 transition duration-700"
+            className="object-contain w-full h-full bg-white transition duration-300"
             loading="lazy"
           />
-          
-          {/* Image indicators */}
-          {allImages.length > 1 && (
-            <div className="absolute bottom-2 left-2 flex gap-1">
-              {allImages.map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentImageIndex ? 'bg-pink-500' : 'bg-white/50'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-          
-          {/* Image counter */}
-          {allImages.length > 1 && (
-            <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-              {currentImageIndex + 1}/{allImages.length}
-            </div>
-          )}
 
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
           {/* Heart Icon */}
           <div className="absolute top-4 right-4 z-10">
             <HeartIcon product={product} />
           </div>
 
-          {/* Quick view button */}
-          <Link 
-            to={`/product/${product._id}`}
-            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
-          >
-            <button className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-full font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg">
-              Quick View
-            </button>
-          </Link>
-          
-          {/* Manual refresh button */}
-          {allImages.length > 1 && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setRefreshKey(prev => prev + 1);
-              }}
-              className="absolute top-2 right-12 bg-black/70 hover:bg-pink-600/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 z-20"
-              title="Shuffle Images"
-            >
-              🎲
-            </button>
-          )}
+
+
         </div>
 
         {/* Product Info */}

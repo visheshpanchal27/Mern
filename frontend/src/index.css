@@ -34,6 +34,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+
+
 /* Consistent button styles */
 .btn-primary {
   @apply bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white font-medium rounded-lg px-4 py-2 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-pink-500/25 transform hover:scale-105 active:scale-95 focus:ring-2 focus:ring-pink-500/50;

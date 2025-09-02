@@ -6,6 +6,7 @@ import { setCategories, setChecked } from "../redux/features/Shop/shopSlice";
 import Loader from "../components/Loader";
 import ProductCard from "./Products/ProductCard";
 import { ProductCardSkeleton } from "../components/Skeletons";
+import Breadcrumb from "../components/Breadcrumb";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch, FaFilter, FaTimes, FaTh, FaList, FaRedo } from "react-icons/fa";
 
@@ -42,10 +43,17 @@ if (typeof document !== 'undefined') {
 const MemoizedProductCard = memo(({ product, viewMode, index }) => (
   <motion.div
     key={product._id}
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: Math.min(index * 0.05, 0.3), duration: 0.3 }}
-    className={viewMode === 'list' ? 'w-full' : ''}
+    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{ 
+      delay: Math.min(index * 0.03, 0.2), 
+      duration: 0.5, 
+      ease: "easeOut",
+      type: "spring",
+      stiffness: 100
+    }}
+    whileHover={{ scale: 1.02, y: -2 }}
+    className={`${viewMode === 'list' ? 'w-full' : ''} will-change-transform`}
   >
     <ProductCard p={product} viewMode={viewMode} />
   </motion.div>
@@ -221,9 +229,12 @@ const Shop = () => {
               initial={{ x: -300, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-gradient-to-b from-[#1a1a1a] to-[#151515] p-4 lg:p-6 rounded-2xl w-full lg:w-[300px] xl:w-[320px] shrink-0 shadow-2xl border border-gray-800/50 lg:sticky lg:top-4 backdrop-blur-sm"
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="bg-gradient-to-b from-[#1a1a1a] to-[#151515] p-4 lg:p-6 rounded-2xl w-full lg:w-[300px] xl:w-[320px] shrink-0 shadow-2xl border border-gray-800/50 lg:sticky lg:top-4 backdrop-blur-sm will-change-transform"
             >
+              {/* Breadcrumb */}
+              <Breadcrumb />
+
               {/* Search */}
               <div className="mb-8 relative">
                 <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -433,7 +444,7 @@ const Shop = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
               className={viewMode === 'grid' 
                 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8"
                 : "space-y-6"
