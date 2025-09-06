@@ -77,7 +77,8 @@ app.use((req, res, next) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   next();
 });
-app.use(securityHeaders);
+// Temporarily disabled security headers for CSP issues
+// app.use(securityHeaders);
 
 // Rate limiting
 app.use('/api/', generalRateLimit);
