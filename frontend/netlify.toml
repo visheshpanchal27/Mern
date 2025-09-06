@@ -1,0 +1,12 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  VITE_API_URL = "https://mernbackend-tmp5.onrender.com"
+  VITE_GOOGLE_CLIENT_ID = "972265869668-qhabmg47r6pibno71a4ea35kbcgjob1p.apps.googleusercontent.com"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
