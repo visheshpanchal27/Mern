@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
 import { FaTimes, FaHeart, FaRegHeart, FaStar, FaStarHalfAlt, FaRegStar, FaShoppingCart, FaEye, FaShare, FaExpand, FaInfoCircle, FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaChevronLeft, FaChevronRight, FaDownload, FaCheck, FaTruck, FaUndo, FaTag, FaGift, FaFire } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCartBackend } from "../redux/features/cart/cartSlice";
+import { addToCartBackend } from "../redux/features/Cart/CartSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { SizeSelector, ColorSelector, SpecsDisplay } from "./ProductOptions";
