@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "postinstall": "cd ../frontend && npm install && npm run build"
+    "build": "npm run build --prefix ../frontend",
+    "postinstall": "npm ci --only=production --prefix ../frontend && npm run build --prefix ../frontend"
   },
   "keywords": [],
   "author": "",
