@@ -131,12 +131,12 @@ if (process.env.NODE_ENV === "production") {
   const frontendPath = path.join(__dirname, "../frontend/dist");
   app.use(express.static(frontendPath));
 
-  // Catch-all for React Router (except API routes)
+  // ✅ Handle all non-API routes (fallback to React)
   app.get("*", (req, res) => {
-    if (!req.path.startsWith("/api")) {
-      res.sendFile(path.resolve(frontendPath, "index.html"));
-    } else {
+    if (req.originalUrl.startsWith("/api")) {
       res.status(404).json({ message: "API route not found" });
+    } else {
+      res.sendFile(path.resolve(frontendPath, "index.html"));
     }
   });
 } else {
