@@ -128,12 +128,16 @@ app.post("/api/promo/validate", (req, res) => {
 // ✅ Serve React frontend in production
 // --------------------------------
 if (process.env.NODE_ENV === "production") {
-  const frontendPath = path.join(__dirname, "/frontend/dist");
+  const frontendPath = path.join(__dirname, "../frontend/dist");
   app.use(express.static(frontendPath));
 
-  // SPA fallback: send index.html for non-API routes
-  app.get(/^(?!\/api).*/, (req, res) => {
-    res.sendFile(path.resolve(frontendPath, "index.html"));
+  // Catch-all for React Router (except API routes)
+  app.get("*", (req, res) => {
+    if (!req.path.startsWith("/api")) {
+      res.sendFile(path.resolve(frontendPath, "index.html"));
+    } else {
+      res.status(404).json({ message: "API route not found" });
+    }
   });
 } else {
   app.get("/", (req, res) => {
