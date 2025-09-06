@@ -54,22 +54,12 @@ const app = express();
 app.set('trust proxy', 1);
 
 // CORS setup
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://mern-j0z9.onrender.com",
-  "https://shopping-canter.netlify.app"
-];
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.error(`CORS blocked: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true,
   credentials: true,
   exposedHeaders: ['Authorization', 'Set-Cookie'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
 // Enhanced security headers with Google OAuth fix
