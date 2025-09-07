@@ -54,22 +54,57 @@ const Register = () => {
     e.preventDefault();
 
     if (!validateAll()) {
-      toast.error("Please fix the validation errors");
+      toast.error("Please fix the validation errors", {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error("Passwords do not match", {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       return;
     }
 
+    // Loading toast
+    const loadingToast = toast.loading("Creating your account...", {
+      position: "top-right",
+    });
+
     try {
       const res = await register({ username, email, password }).unwrap();
-      dispatch(setCredentials({ ...res }));
-      navigate(redirect);
-      toast.success("User successfully registered");
+      toast.dismiss(loadingToast);
+      toast.success(res.message || "Registration successful! Please check your email.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      navigate('/verify-email', { state: { email } });
     } catch (err) {
-      toast.error(err?.data?.message || "Something went wrong");
+      toast.dismiss(loadingToast);
+      const errorMessage = err?.data?.message || "Something went wrong";
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 6000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
   };
 
@@ -91,7 +126,14 @@ const Register = () => {
         const { name, email, picture } = userData;
 
         if (!email.endsWith("@gmail.com")) {
-          toast.error("Only Gmail accounts are allowed");
+          toast.error("Only Gmail accounts are allowed", {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
           return;
         }
 
@@ -117,14 +159,35 @@ const Register = () => {
 
         dispatch(setCredentials(backendData));
         navigate(redirect);
-        toast.success("Google login successful");
+        toast.success("Welcome! Google login successful", {
+          position: "top-right",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       } catch (err) {
         console.error("Google login error:", err);
-        toast.error(err.message || "Google login failed");
+        toast.error(err.message || "Google login failed", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
       }
     },
     onError: () => {
-      toast.error("Google login failed");
+      toast.error("Google login failed", {
+        position: "top-right",
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     },
     flow: "implicit",
   });

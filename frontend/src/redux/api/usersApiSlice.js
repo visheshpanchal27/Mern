@@ -135,6 +135,28 @@ export const userApiSlice = apiSlice.injectEndpoints({
         return response;
       },
     }),
+
+    verifyEmail: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/verify-email`,
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (response) => {
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
+        return response;
+      },
+    }),
+
+    resendVerification: builder.mutation({
+      query: (data) => ({
+        url: `${USERS_URL}/resend-verification`,
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -149,4 +171,6 @@ export const {
   useGetUserDetailsQuery,
   useUpdateUserMutation,
   useGoogleLoginMutation,
+  useVerifyEmailMutation,
+  useResendVerificationMutation,
 } = userApiSlice;

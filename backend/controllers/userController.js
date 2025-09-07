@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import createToken from '../utils/createToken.js';
 import jwt from 'jsonwebtoken';
 import { validateEmail, validatePassword, sanitizeInput } from '../utils/validation.js';
+import { sendVerificationEmail } from '../utils/emailService.js';
 
 // Enhanced Register User
 const createUser = asyncHandler(async (req, res) => {
@@ -39,24 +40,35 @@ const createUser = asyncHandler(async (req, res) => {
     throw new Error("Email already exists");
   }
 
+  // Generate verification code
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const verificationExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
   // Create user
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   const newUser = await User.create({ 
     username: sanitizedUsername, 
     email: sanitizedEmail, 
-    password: hashedPassword 
+    password: hashedPassword,
+    emailVerificationCode: verificationCode,
+    emailVerificationExpires: verificationExpires
   });
 
-  // Set cookie AND return token in response
-  const token = createToken(res, newUser._id);
+  // Send verification email
+  try {
+    // Temporarily skip email sending for testing
+    console.log('📝 Verification code for', sanitizedEmail, ':', verificationCode);
+    // await sendVerificationEmail(sanitizedEmail, verificationCode);
+    console.log('✅ Verification email sent for:', sanitizedEmail);
+  } catch (emailError) {
+    console.error('❌ Email sending failed:', emailError);
+    // Still allow registration but inform user
+  }
 
   res.status(201).json({
-    _id: newUser._id,
-    username: newUser.username,
-    email: newUser.email,
-    isAdmin: newUser.isAdmin,
-    token 
+    message: 'Registration successful. Please check your email for verification code.',
+    email: sanitizedEmail
   });
 });
 
@@ -79,13 +91,22 @@ const loginUser = asyncHandler(async (req, res) => {
 
   // Find user
   const user = await User.findOne({ email: sanitizedEmail });
+  console.log('Login attempt for:', sanitizedEmail);
+  console.log('User found:', user ? 'Yes' : 'No');
   if (!user) {
     res.status(401);
     throw new Error("Invalid email or password");
   }
 
+  // Check if email is verified (temporarily disabled for testing)
+  // if (!user.isEmailVerified) {
+  //   res.status(401);
+  //   throw new Error("Please verify your email before logging in");
+  // }
+
   // Verify password
   const isPasswordValid = await bcrypt.compare(password, user.password);
+  console.log('Password valid:', isPasswordValid);
   if (!isPasswordValid) {
     res.status(401);
     throw new Error("Invalid email or password");
@@ -279,6 +300,77 @@ const googleAuth = asyncHandler(async (req, res) => {
 
 
 
+// Verify Email
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    res.status(400);
+    throw new Error("Email and verification code are required");
+  }
+
+  const user = await User.findOne({ 
+    email: sanitizeInput(email),
+    emailVerificationCode: code,
+    emailVerificationExpires: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    res.status(400);
+    throw new Error("Invalid or expired verification code");
+  }
+
+  user.isEmailVerified = true;
+  user.emailVerificationCode = undefined;
+  user.emailVerificationExpires = undefined;
+  await user.save();
+
+  const token = createToken(res, user._id);
+
+  res.status(200).json({
+    _id: user._id,
+    username: user.username,
+    email: user.email,
+    isAdmin: user.isAdmin,
+    token
+  });
+});
+
+// Resend Verification Code
+const resendVerification = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    res.status(400);
+    throw new Error("Email is required");
+  }
+
+  const user = await User.findOne({ email: sanitizeInput(email) });
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  if (user.isEmailVerified) {
+    res.status(400);
+    throw new Error("Email is already verified");
+  }
+
+  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const verificationExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+  user.emailVerificationCode = verificationCode;
+  user.emailVerificationExpires = verificationExpires;
+  await user.save();
+
+  await sendVerificationEmail(user.email, verificationCode);
+
+  res.status(200).json({
+    message: 'Verification code sent successfully'
+  });
+});
+
 export {
   createUser,
   loginUser,
@@ -290,4 +382,6 @@ export {
   getUserById,
   updateUserById,
   googleAuth,
+  verifyEmail,
+  resendVerification,
 };

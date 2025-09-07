@@ -13,6 +13,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import otpRoutes from './routes/otpRoutes.js';
 
 import connectDB from './config/db.js';
 import { rateLimit } from './middlewares/rateLimiter.js';
@@ -36,7 +37,9 @@ console.log("Loading ENV:", {
   MONGO_URI: process.env.MONGO_URI ? "Loaded" : "Missing",
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY ? "Loaded" : "Missing",
-  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? "Loaded" : "Missing"
+  CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? "Loaded" : "Missing",
+  EMAIL_USER: process.env.EMAIL_USER ? "Loaded" : "Missing",
+  EMAIL_PASS: process.env.EMAIL_PASS ? "Loaded" : "Missing"
 });
 
 const port = process.env.PORT || 5000;
@@ -67,8 +70,7 @@ app.use((req, res, next) => {
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
   next();
 });
-// Temporarily disabled security headers for CSP issues
-// app.use(securityHeaders);
+app.use(securityHeaders);
 
 // Rate limiting
 app.use('/api/', generalRateLimit);
@@ -92,6 +94,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/admin/analytics', analyticsRoutes);
+app.use('/api/otp', otpRoutes);
 
 // PayPal config
 app.get("/api/config/paypal", (req, res) => {

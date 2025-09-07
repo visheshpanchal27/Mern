@@ -15,6 +15,7 @@ import Home from './pages/Home.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import Login from './pages/Auth/Login.jsx';
 import Register from './pages/Auth/Register.jsx';
+import EmailVerification from './pages/Auth/EmailVerification.jsx';
 import Profile from './pages/User/Profile.jsx';
 import AdminRoute from './pages/Admin/AdminRoute.jsx';
 import UserList from './pages/Admin/UserList.jsx';
@@ -49,6 +50,7 @@ const router = createBrowserRouter(
       <Route path="/" element={<App />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify-email" element={<EmailVerification />} />
         <Route index element={<Home />} />
         <Route path="/favorite" element={<Favorites />} />
         <Route path="/product/:id" element={<ProductDetails />} />

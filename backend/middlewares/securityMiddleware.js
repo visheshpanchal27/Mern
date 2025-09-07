@@ -3,7 +3,32 @@ import rateLimit from 'express-rate-limit';
 
 // Enhanced security headers
 export const securityHeaders = helmet({
-  contentSecurityPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "https://www.paypalobjects.com"],
+      scriptSrc: [
+        "'self'", 
+        "'unsafe-inline'", 
+        "'unsafe-eval'", 
+        "https://accounts.google.com", 
+        "https://apis.google.com", 
+        "https://www.googleapis.com",
+        "https://www.paypal.com",
+        "https://js.paypal.com"
+      ],
+      connectSrc: [
+        "'self'", 
+        "https://api.paypal.com", 
+        "https://www.googleapis.com",
+        "https://accounts.google.com",
+        "https://mernbackend-tmp5.onrender.com"
+      ],
+      frameSrc: ["'self'", "https://accounts.google.com", "https://www.paypal.com"],
+    },
+  },
   crossOriginEmbedderPolicy: false,
   crossOriginOpenerPolicy: false,
 });
@@ -19,10 +44,12 @@ export const createRateLimit = (windowMs, max, message) => {
   });
 };
 
-// Specific rate limits
+// Production-ready rate limits
+const isProduction = process.env.NODE_ENV === 'production';
+
 export const authRateLimit = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  50, // 50 attempts for development
+  isProduction ? 5 : 50, // 5 attempts in production, 50 in development
   'Too many authentication attempts, please try again later'
 );
 
@@ -34,6 +61,6 @@ export const uploadRateLimit = createRateLimit(
 
 export const generalRateLimit = createRateLimit(
   1 * 60 * 1000, // 1 minute
-  10000, // 10000 requests for development
+  isProduction ? 100 : 10000, // 100 requests in production, 10000 in development
   'Too many requests, please try again later'
 );
