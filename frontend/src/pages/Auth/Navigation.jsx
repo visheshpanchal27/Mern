@@ -13,7 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../redux/api/usersApiSlice";
 import { useGetCartQuery } from "../../redux/api/cartApiSlice";
 import { logOut } from "../../redux/features/auth/authSlice";
-import _ from "lodash";
+
 import "./Navigation.css";
 
 const Navigation = () => {
@@ -73,7 +73,13 @@ const Navigation = () => {
 
   // Debounced sidebar hover
   const debouncedSetShowSidebar = useCallback(
-    _.debounce((value) => setShowSidebar(value), 100),
+    (() => {
+      let timeoutId;
+      return (value) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => setShowSidebar(value), 100);
+      };
+    })(),
     []
   );
 
