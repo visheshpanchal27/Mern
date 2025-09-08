@@ -189,11 +189,11 @@ const Home = () => {
             className="mt-16 mb-8 text-center px-4"
           >
             <div className="card-secondary p-8 mx-4 md:mx-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                Want to see more amazing products?
+              <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent mb-4">
+                Discover Our Complete Collection
               </h2>
-              <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-                Browse our complete collection and find exactly what you're looking for.
+              <p className="text-gray-300 mb-6 max-w-2xl mx-auto text-lg">
+                Explore thousands of premium products across all categories. Find your perfect match today!
               </p>
               <Link
                 to="/shop"
