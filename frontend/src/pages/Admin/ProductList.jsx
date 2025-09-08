@@ -268,7 +268,7 @@ const ProductList = () => {
                 </div>
               ) : (
                 "Submit Product"
-              )
+              )}
             </button>
           </div>
         </div>
