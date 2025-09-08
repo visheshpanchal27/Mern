@@ -7,9 +7,6 @@ export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (_, { getState, rejectWithValue }) => {
     try {
-      const API_URL = BASE_URL;
-      console.log("API_URL from BASE_URL =>", BASE_URL);
-
       const {
         auth: { userInfo },
       } = getState();
@@ -24,7 +21,7 @@ export const fetchCart = createAsyncThunk(
         },
       };
 
-      const { data } = await axios.get(`${API_URL}/api/cart`, config);
+      const { data } = await axios.get(`${BASE_URL}/cart`, config);
       return data.items || [];
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message);
@@ -37,8 +34,6 @@ export const addToCartBackend = createAsyncThunk(
   "cart/addToCartBackend",
   async (item, { getState, rejectWithValue }) => {
     try {
-      const API_URL = BASE_URL;
-
       const {
         auth: { userInfo },
       } = getState();
@@ -55,7 +50,7 @@ export const addToCartBackend = createAsyncThunk(
       };
 
       const { data } = await axios.post(
-        `${API_URL}/api/cart`,
+        `${BASE_URL}/cart`,
         { productId: item._id, quantity: item.qty },
         config
       );
@@ -72,8 +67,6 @@ export const removeFromCartBackend = createAsyncThunk(
   "cart/removeFromCartBackend",
   async (productId, { getState, rejectWithValue }) => {
     try {
-        const API_URL = BASE_URL;
-
       const {
         auth: { userInfo },
       } = getState();
@@ -90,7 +83,7 @@ export const removeFromCartBackend = createAsyncThunk(
       };
 
       const { data } = await axios.put(
-        `${API_URL}/api/cart`,
+        `${BASE_URL}/cart`,
         { items: [{ product: productId, qty: 0 }] },
         config
       );
