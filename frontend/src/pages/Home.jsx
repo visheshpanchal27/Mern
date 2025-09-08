@@ -55,7 +55,7 @@ const Home = () => {
       />
       <Header refreshKey={headerRefreshKey} />
       {isLoading ? (
-        <EnhancedHomeSkeleton />
+        <HomeSkeleton />
       ) : error ? (
         <Massage variant="danger">Something went wrong!</Massage>
       ) : (
@@ -65,7 +65,7 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="relative mt-16 px-4 md:px-20 py-16 bg-gradient-to-br from-pink-900/20 via-purple-900/20 to-blue-900/20 rounded-3xl mx-4 md:mx-8 mb-12"
+            className="relative mt-12 sm:mt-16 px-3 sm:px-4 md:px-20 py-8 sm:py-12 md:py-16 bg-gradient-to-br from-pink-900/20 via-purple-900/20 to-blue-900/20 rounded-2xl sm:rounded-3xl mx-2 sm:mx-4 md:mx-8 mb-8 sm:mb-12"
           >
             <div className="absolute inset-0 bg-black/30 rounded-3xl"></div>
             <div className="relative z-10">
@@ -77,10 +77,10 @@ const Home = () => {
                   transition={{ delay: 0.2, duration: 0.5 }}
                   className="mb-6"
                 >
-                  <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
+                  <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent mb-3 sm:mb-4">
                     Welcome to Our Store
                   </h1>
-                  <p className="text-2xl md:text-3xl text-gray-300 mb-6">
+                  <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-300 mb-4 sm:mb-6">
                     Discover Amazing Products
                   </p>
                 </motion.div>
@@ -96,11 +96,11 @@ const Home = () => {
                   transition={{ delay: 0.6, duration: 0.5 }}
                   className="flex items-center justify-center gap-2 mb-4"
                 >
-                  <FaStar className="text-yellow-400 text-2xl" />
-                  <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  <FaStar className="text-yellow-400 text-lg sm:text-xl md:text-2xl" />
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
                     Special Products
                   </h2>
-                  <FaStar className="text-yellow-400 text-2xl" />
+                  <FaStar className="text-yellow-400 text-lg sm:text-xl md:text-2xl" />
                 </motion.div>
                 
                 <motion.p 
@@ -143,9 +143,9 @@ const Home = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.6 }}
-            className="px-4 md:px-8"
+            className="px-2 sm:px-4 md:px-8"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 max-w-7xl mx-auto">
               {visibleProducts.map((product, index) => (
                 <motion.div 
                   key={product._id}

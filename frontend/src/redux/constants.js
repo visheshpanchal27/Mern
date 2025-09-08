@@ -1,4 +1,4 @@
-export const BASE_URL = "https://mernbackend-tmp5.onrender.com/api";
+export const BASE_URL = "http://localhost:5000/api";
 
 export const USERS_URL = `${BASE_URL}/users`;
 export const CATEGORY_URL = `${BASE_URL}/categories`;

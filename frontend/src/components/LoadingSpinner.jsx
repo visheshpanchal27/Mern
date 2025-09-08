@@ -1,22 +1,15 @@
-import { motion } from 'framer-motion';
-
-const LoadingSpinner = ({ size = 'md', message = 'Loading...' }) => {
-  const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12'
-  };
-
+const LoadingSpinner = () => {
   return (
-    <div className="flex flex-col items-center justify-center p-4">
-      <motion.div
-        className={`${sizeClasses[size]} border-4 border-pink-200 border-t-pink-600 rounded-full`}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-      />
-      {message && (
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{message}</p>
-      )}
+    <div className="flex items-center justify-center p-4">
+      <div className="flex space-x-1">
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className="w-2 h-8 bg-pink-500 rounded-full animate-wave"
+            style={{ animationDelay: `${i * 0.1}s` }}
+          />
+        ))}
+      </div>
     </div>
   );
 };

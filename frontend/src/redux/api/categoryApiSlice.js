@@ -39,7 +39,7 @@ export const categoryApiSlice = apiSlice.injectEndpoints({
         }),
 
         fetchCategories: builder.query({
-            query: ()=>`${CATEGORY_URL}/categories`,
+            query: ()=>`${CATEGORY_URL}`,
             providesTags: (result) => [
                 'Category',
                 ...(result || []).map(({ _id }) => ({ type: 'Category', id: _id }))

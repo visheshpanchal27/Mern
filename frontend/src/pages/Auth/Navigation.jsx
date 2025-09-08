@@ -27,7 +27,7 @@ const Navigation = () => {
   });
   const favoriteItems = useSelector((state) => state.favorites || []);
   
-  const cartItems = cartData?.items || [];
+  const cartItems = userInfo ? (cartData?.items || []) : [];
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);

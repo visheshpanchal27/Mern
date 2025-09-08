@@ -253,11 +253,22 @@ const ProductList = () => {
                   : "hover:bg-pink-700"
               }`}
             >
-              {uploading
-                ? "Uploading Image..."
-                : creatingProduct
-                ? "Creating Product..."
-                : "Submit Product"}
+              {uploading || creatingProduct ? (
+                <div className="flex items-center justify-center gap-2">
+                  <div className="flex space-x-1">
+                    {[...Array(3)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-1 h-4 bg-white rounded-full animate-wave"
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      />
+                    ))}
+                  </div>
+                  {uploading ? "Uploading..." : "Creating..."}
+                </div>
+              ) : (
+                "Submit Product"
+              )
             </button>
           </div>
         </div>

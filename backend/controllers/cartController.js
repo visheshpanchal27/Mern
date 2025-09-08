@@ -21,8 +21,8 @@ export const addToCart = async (req, res) => {
       );
 
       if (existingItem) {
-        // Replace quantity instead of adding to it to fix the accumulation bug
-        existingItem.qty = quantity;
+        // Increment quantity when product already exists
+        existingItem.qty += quantity;
       } else {
         cart.items.push({ product: productId, qty: quantity });
       }

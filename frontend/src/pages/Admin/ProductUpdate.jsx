@@ -310,7 +310,7 @@ const submitHandler = async (e) => {
           <div className="flex gap-4">
             <button
               type="submit"
-              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-green-500/25"
+              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 px-8 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-green-500/25 flex items-center justify-center gap-2"
             >
               Update Product
             </button>

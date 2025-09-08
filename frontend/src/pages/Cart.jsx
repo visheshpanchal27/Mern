@@ -15,7 +15,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.auth);
   const { data: cart, isLoading, isError } = useGetCartQuery(undefined, {
-    skip: !userInfo, // Skip API call if not logged in
+    skip: !userInfo
   });
   const [updateCart] = useUpdateCartMutation();
   const [clearCart, { isLoading: isClearing }] = useClearCartMutation();
@@ -151,53 +151,31 @@ const Cart = () => {
     }
   };
 
-  // Show login prompt for non-authenticated users
+
+
+  // Show login prompt if user is not authenticated
   if (!userInfo) {
     return (
-      <div className="w-full min-h-screen px-4 pt-6 bg-background-primary">
-        <button
-          onClick={() => navigate(-1)}
-          className="btn-secondary flex items-center gap-2 py-2 px-4 mb-6"
-        >
-          <IoArrowBackSharp />
-          Go Back
-        </button>
-
-        <div className="flex flex-col items-center justify-center text-center mt-20 space-y-6 px-4">
-          <div className="card-primary p-8 max-w-md w-full">
-            <FaShoppingCart className="text-6xl text-primary-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-4">Sign In to View Cart</h2>
-            <p className="text-gray-400 mb-6">
-              Please sign in to your account to view and manage your cart items.
-            </p>
-            
-            <div className="space-y-3">
-              <Link
-                to="/login?redirect=/cart"
-                className="btn-primary w-full py-3 flex items-center justify-center gap-2"
-              >
-                <FaUser className="text-sm" />
-                Sign In
-              </Link>
-              
-              <Link
-                to="/register?redirect=/cart"
-                className="btn-outline w-full py-3 flex items-center justify-center gap-2"
-              >
-                <FaUserPlus className="text-sm" />
-                Create Account
-              </Link>
-            </div>
-            
-            <div className="mt-6 pt-4 border-t border-gray-700">
-              <p className="text-sm text-gray-400 mb-3">Or continue shopping as guest</p>
-              <Link
-                to="/shop"
-                className="btn-secondary w-full py-2 text-sm"
-              >
-                Browse Products
-              </Link>
-            </div>
+      <div className="flex justify-center items-center min-h-screen bg-background-primary text-white px-4">
+        <div className="card-primary p-8 text-center max-w-md w-full">
+          <FaShoppingCart className="text-6xl text-gray-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-semibold mb-4">Access Your Cart</h2>
+          <p className="text-gray-400 mb-6">Please login or register to view your shopping cart</p>
+          <div className="space-y-3">
+            <Link
+              to="/login"
+              className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+            >
+              <FaUser className="text-lg" />
+              Login
+            </Link>
+            <Link
+              to="/register"
+              className="btn-secondary w-full py-3 flex items-center justify-center gap-2"
+            >
+              <FaUserPlus className="text-lg" />
+              Register
+            </Link>
           </div>
         </div>
       </div>

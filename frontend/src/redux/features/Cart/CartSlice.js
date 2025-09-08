@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { BASE_URL } from "../../constants";
+import { logOut } from "../auth/authSlice";
 
 // ---------------------- Fetch Cart ----------------------
 export const fetchCart = createAsyncThunk(
@@ -209,6 +210,10 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.orderSuccess = false;
+      })
+      // Clear cart on logout
+      .addCase(logOut, (state) => {
+        return initialState;
       });
   },
 });

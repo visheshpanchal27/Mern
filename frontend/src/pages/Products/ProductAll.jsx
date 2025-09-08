@@ -128,7 +128,7 @@ const Product = ({ product }) => {
 
   return (
     <motion.div 
-      className="w-full max-w-xs h-full p-2 relative mx-auto"
+      className="w-full max-w-xs sm:max-w-sm md:max-w-xs lg:max-w-sm xl:max-w-xs h-full p-1 sm:p-2 relative mx-auto"
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       whileHover={{ y: -8, scale: 1.02 }}
@@ -137,7 +137,7 @@ const Product = ({ product }) => {
       <div className="relative overflow-hidden rounded-2xl shadow-xl bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a] hover:shadow-2xl hover:shadow-pink-500/20 transition-all duration-500 border border-gray-800 hover:border-pink-500/50 backdrop-blur-sm h-full flex flex-col">
         
         {/* Image Section */}
-        <div className="relative w-full h-48 overflow-hidden rounded-t-2xl group flex-shrink-0">
+        <div className="relative w-full h-36 sm:h-40 md:h-44 lg:h-48 overflow-hidden rounded-t-2xl group flex-shrink-0">
           <motion.img
             src={currentImage}
             alt={product.name}
@@ -179,7 +179,7 @@ const Product = ({ product }) => {
           />
           
           {/* Advanced Badges */}
-          <div className="absolute top-3 left-3 z-20 flex flex-col gap-1">
+          <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-20 flex flex-col gap-1">
             {product.countInStock === 0 && (
               <motion.span 
                 className="bg-red-500/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg"
@@ -237,7 +237,7 @@ const Product = ({ product }) => {
             )}
           </div>
           
-          <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+          <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20 flex flex-col gap-1 sm:gap-2">
             <HeartIcon product={product} />
             {isHovered && (
               <motion.button
@@ -294,19 +294,19 @@ const Product = ({ product }) => {
         </div>
 
         {/* Enhanced Product Info */}
-        <div className="p-3 space-y-2 bg-gradient-to-b from-transparent to-black/10 flex-1 flex flex-col justify-between">
+        <div className="p-2 sm:p-3 space-y-1 sm:space-y-2 bg-gradient-to-b from-transparent to-black/10 flex-1 flex flex-col justify-between">
           <div className="flex-1">
             <Link to={`/product/${product._id}`}>
               <motion.h2 
-                className="text-lg font-bold text-white hover:text-pink-400 transition truncate mb-2"
+                className="text-sm sm:text-base md:text-lg font-bold text-white hover:text-pink-400 transition truncate mb-1 sm:mb-2"
                 whileHover={{ scale: 1.02 }}
               >
                 {product.name}
               </motion.h2>
             </Link>
 
-            <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed mb-3">
-              {product.description?.substring(0, 60)}...
+            <p className="text-gray-400 text-xs sm:text-sm line-clamp-2 leading-relaxed mb-2 sm:mb-3">
+              {product.description?.substring(0, 50)}...
             </p>
           </div>
 

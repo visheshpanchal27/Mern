@@ -61,6 +61,6 @@ export const uploadRateLimit = createRateLimit(
 
 export const generalRateLimit = createRateLimit(
   1 * 60 * 1000, // 1 minute
-  isProduction ? 100 : 10000, // 100 requests in production, 10000 in development
+  isProduction ? 200 : 10000, 
   'Too many requests, please try again later'
 );

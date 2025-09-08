@@ -177,7 +177,15 @@ const Shop = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0f0f0f] flex justify-center items-center ml-12 sm:ml-16 lg:ml-20">
-        <Loader />
+        <div className="flex gap-2">
+          {[1,2,3,4,5].map(i => (
+            <div 
+              key={i}
+              className="w-2 h-8 bg-gray-600 rounded-full animate-wave"
+              style={{ animationDelay: `${i * 0.1}s` }}
+            ></div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -451,9 +459,17 @@ const Shop = () => {
               }
             >
               {isLoading ? (
-                Array.from({ length: 8 }).map((_, i) => (
-                  <ProductCardSkeleton key={i} viewMode={viewMode} />
-                ))
+                <div className="col-span-full flex justify-center items-center py-20">
+                  <div className="flex gap-2">
+                    {[1,2,3,4,5].map(i => (
+                      <div 
+                        key={i}
+                        className="w-2 h-8 bg-gray-600 rounded-full animate-wave"
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      ></div>
+                    ))}
+                  </div>
+                </div>
               ) : !allProducts.length ? (
                 <motion.div className="col-span-full text-center py-12">
                   <div className="bg-[#1a1a1a] rounded-xl p-8 max-w-md mx-auto">

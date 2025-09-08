@@ -150,7 +150,7 @@ const SmallProduct = ({ product, isLoading, refreshKey = 0 }) => {
         
         {/* Enhanced Overlay */}
         <motion.div 
-          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-xl flex items-center justify-center"
+          className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-xl items-center justify-center hidden md:flex"
           initial={{ opacity: 0 }}
           animate={{ opacity: isHovered ? 1 : 0 }}
           transition={{ duration: 0.3 }}
