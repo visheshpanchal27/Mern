@@ -3,12 +3,12 @@ import { apiSlice } from "./apiSlice";
 export const cartApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getCart: builder.query({
-      query: () => `api/cart`,
+      query: () => `cart`,
       providesTags: ["Cart"],
     }),
     addToCart: builder.mutation({
       query: (item) => ({
-        url: `api/cart`,
+        url: `cart`,
         method: "POST",
         body: { productId: item._id, quantity: item.qty || 1 },
       }),
@@ -25,7 +25,7 @@ export const cartApiSlice = apiSlice.injectEndpoints({
     }),
     updateCart: builder.mutation({
       query: (items) => ({
-        url: `api/cart`,
+        url: `cart`,
         method: "PUT",
         body: { items },
       }),
@@ -39,7 +39,7 @@ export const cartApiSlice = apiSlice.injectEndpoints({
     }),
     clearCart: builder.mutation({
       query: () => ({
-        url: `api/cart`,
+        url: `cart`,
         method: "DELETE",
       }),
       invalidatesTags: ["Cart"],

@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
-import { FaTimes, FaHeart, FaRegHeart, FaStar, FaStarHalfAlt, FaRegStar, FaShoppingCart, FaEye, FaShare, FaExpand, FaInfoCircle, FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaChevronLeft, FaChevronRight, FaDownload, FaCheck, FaTruck, FaUndo, FaTag, FaGift, FaFire } from "react-icons/fa";
+import { FaTimes, FaHeart, FaRegHeart, FaStar, FaStarHalfAlt, FaRegStar, FaShoppingCart, FaEye, FaShare, FaInfoCircle, FaPlay, FaPause, FaVolumeUp, FaVolumeMute, FaChevronLeft, FaChevronRight, FaCheck, FaTruck, FaUndo, FaTag, FaGift, FaFire } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCartBackend } from "../redux/features/Cart/CartSlice";
 import { toast } from "react-toastify";
@@ -281,30 +281,13 @@ const QuickViewModal = ({ isOpen, onClose, product }) => {
                         transition={{ type: "spring", damping: 20 }}
                         src={images[selectedImage] || product.image}
                         alt={product.name}
-                        className="w-full h-[450px] object-contain rounded-2xl transition-transform duration-300"
-
+                        className="w-full h-[450px] object-contain rounded-2xl transition-transform duration-300 cursor-pointer hover:scale-105"
+                        onClick={() => setIsImageExpanded(true)}
                       />
                     )}
                   </div>
                   
-                  {/* Media Controls */}
-                  <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <motion.button 
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setIsImageExpanded(true)}
-                      className="bg-black/50 backdrop-blur-sm text-white p-3 rounded-full hover:bg-black/70 transition-all"
-                    >
-                      <FaExpand size={14} />
-                    </motion.button>
-                    <motion.button 
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="bg-black/50 backdrop-blur-sm text-white p-3 rounded-full hover:bg-black/70 transition-all"
-                    >
-                      <FaDownload size={14} />
-                    </motion.button>
-                  </div>
+
                   
                   {/* Navigation Arrows */}
                   {mediaItems.length > 1 && (
@@ -686,16 +669,10 @@ const QuickViewModal = ({ isOpen, onClose, product }) => {
                 <img
                   src={images[selectedImage] || product.image}
                   alt={product.name}
-                  className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+                  className="w-full h-full max-w-[90vw] max-h-[90vh] object-contain rounded-2xl shadow-2xl"
                 />
                 <div className="absolute top-4 right-4 flex gap-3">
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="p-3 bg-black/50 backdrop-blur-sm text-white rounded-full hover:bg-black/70 transition-all"
-                  >
-                    <FaDownload size={18} />
-                  </motion.button>
+
                   <motion.button
                     whileHover={{ scale: 1.1, rotate: -5 }}
                     whileTap={{ scale: 0.9 }}

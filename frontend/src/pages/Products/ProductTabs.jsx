@@ -19,6 +19,7 @@ const ProductTabs = ({
   const { data, isLoading } = useGetTopProductsQuery();
   const [activeTab, setActiveTab] = useState(1);
   const [randomizedProducts, setRandomizedProducts] = useState([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Fisher-Yates shuffle algorithm for better randomization
   const shuffleArray = useCallback((array) => {
@@ -34,6 +35,7 @@ const ProductTabs = ({
     if (data && data.length > 0) {
       const shuffled = shuffleArray(data);
       setRandomizedProducts(shuffled.slice(0, 8));
+      setRefreshKey(prev => prev + 1);
     }
   }, [data, shuffleArray]);
 
@@ -196,7 +198,7 @@ const ProductTabs = ({
                 <Loader />
               ) : (
                 randomizedProducts.map((relatedProduct) => (
-                  <SmallProduct key={relatedProduct._id} product={relatedProduct} />
+                  <SmallProduct key={`${relatedProduct._id}-${refreshKey}`} product={relatedProduct} refreshKey={refreshKey} />
                 ))
               )}
             </div>

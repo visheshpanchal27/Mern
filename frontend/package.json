@@ -7,8 +7,11 @@
     "dev": "vite",
     "build": "vite build --mode production",
     "build:memory": "cross-env NODE_OPTIONS=--max-old-space-size=3072 vite build --mode production",
+    "build:analyze": "vite build --mode production && npx vite-bundle-analyzer dist",
+    "build:fast": "vite build --mode production --minify esbuild",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "optimize": "npm run build:fast && npm run preview"
   },
   "dependencies": {
     "@emotion/react": "^11.10.0",
@@ -44,6 +47,7 @@
     "slick-carousel": "^1.8.1"
   },
   "devDependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.27.1",
     "@eslint/js": "^9.21.0",
     "@tailwindcss/vite": "^4.1.4",
     "@types/dompurify": "^3.0.5",

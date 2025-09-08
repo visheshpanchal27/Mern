@@ -24,8 +24,16 @@ const store = configureStore({
     preloadedState: {
         favorites: initialFavorites,
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware),
-    devTools:true,
+    middleware: (getDefaultMiddleware) => 
+        getDefaultMiddleware({
+            serializableCheck: {
+                ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+                ignoredPaths: ['register']
+            },
+            immutableCheck: { warnAfter: 128 },
+            serializableCheck: { warnAfter: 128 }
+        }).concat(apiSlice.middleware),
+    devTools: process.env.NODE_ENV !== 'production',
 });
 
 setupListeners(store.dispatch);

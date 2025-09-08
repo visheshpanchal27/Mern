@@ -1,6 +1,5 @@
 import ReactDOM from 'react-dom/client';
-import { StrictMode } from 'react';
-import App from './App.jsx';
+import { StrictMode, Suspense, lazy } from 'react';
 import './index.css';
 import { RouterProvider } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -8,34 +7,35 @@ import { createBrowserRouter, createRoutesFromElements, Route } from 'react-rout
 import store from './redux/store.js';
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import Loader from './components/Loader.jsx';
 
-
-// import your routes/pages...
-import Home from './pages/Home.jsx';
-import PrivateRoute from './components/PrivateRoute.jsx';
-import Login from './pages/Auth/Login.jsx';
-import Register from './pages/Auth/Register.jsx';
-import EmailVerification from './pages/Auth/EmailVerification.jsx';
-import Profile from './pages/User/Profile.jsx';
-import AdminRoute from './pages/Admin/AdminRoute.jsx';
-import UserList from './pages/Admin/UserList.jsx';
-import CategoryList from './pages/Admin/CategoryList.jsx';
-import ProductList from './pages/Admin/ProductList.jsx';
-import ProductUpdate from './pages/Admin/ProductUpdate.jsx';
-import AllProducts from './pages/Admin/AllProducts.jsx';
-import Favorites from './pages/Products/Favorites.jsx';
-import ProductDetails from './pages/Products/productDetails.jsx';
-import Cart from './pages/Cart.jsx';
-import Shop from './pages/Shop.jsx';
-import ShippingCountry from './pages/Orders/ShippingCountry.jsx';
-import PlaceOrder from './pages/Orders/PlaceOrder.jsx';
-import Order from './pages/Orders/Order.jsx';
-import UserOrder from './pages/User/UserOrder.jsx';
-import OrderList from './pages/Admin/OrderList.jsx';
-import AdminDashboard from './pages/Admin/AdminDashboard.jsx';
-import OrderSummaryPage from './pages/User/OrderSummaryPage.jsx';
-import ExpressCheckout from './pages/Orders/ExpressCheckout.jsx';
-import ErrorPage from './components/ErrorPage.jsx';
+// Lazy load components for better performance
+const App = lazy(() => import('./App.jsx'));
+const Home = lazy(() => import('./pages/Home.jsx'));
+const PrivateRoute = lazy(() => import('./components/PrivateRoute.jsx'));
+const Login = lazy(() => import('./pages/Auth/Login.jsx'));
+const Register = lazy(() => import('./pages/Auth/Register.jsx'));
+const EmailVerification = lazy(() => import('./pages/Auth/EmailVerification.jsx'));
+const Profile = lazy(() => import('./pages/User/Profile.jsx'));
+const AdminRoute = lazy(() => import('./pages/Admin/AdminRoute.jsx'));
+const UserList = lazy(() => import('./pages/Admin/UserList.jsx'));
+const CategoryList = lazy(() => import('./pages/Admin/CategoryList.jsx'));
+const ProductList = lazy(() => import('./pages/Admin/ProductList.jsx'));
+const ProductUpdate = lazy(() => import('./pages/Admin/ProductUpdate.jsx'));
+const AllProducts = lazy(() => import('./pages/Admin/AllProducts.jsx'));
+const Favorites = lazy(() => import('./pages/Products/Favorites.jsx'));
+const ProductDetails = lazy(() => import('./pages/Products/productDetails.jsx'));
+const Cart = lazy(() => import('./pages/Cart.jsx'));
+const Shop = lazy(() => import('./pages/Shop.jsx'));
+const ShippingCountry = lazy(() => import('./pages/Orders/ShippingCountry.jsx'));
+const PlaceOrder = lazy(() => import('./pages/Orders/PlaceOrder.jsx'));
+const Order = lazy(() => import('./pages/Orders/Order.jsx'));
+const UserOrder = lazy(() => import('./pages/User/UserOrder.jsx'));
+const OrderList = lazy(() => import('./pages/Admin/OrderList.jsx'));
+const AdminDashboard = lazy(() => import('./pages/Admin/AdminDashboard.jsx'));
+const OrderSummaryPage = lazy(() => import('./pages/User/OrderSummaryPage.jsx'));
+const ExpressCheckout = lazy(() => import('./pages/Orders/ExpressCheckout.jsx'));
+const ErrorPage = lazy(() => import('./components/ErrorPage.jsx'));
 
 // Google Client ID from env
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -47,7 +47,11 @@ const router = createBrowserRouter(
       <Route path="*" element={<ErrorPage />} />
 
       {/* All layout-based routes */}
-      <Route path="/" element={<App />}>
+      <Route path="/" element={
+        <Suspense fallback={<Loader />}>
+          <App />
+        </Suspense>
+      }>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email" element={<EmailVerification />} />

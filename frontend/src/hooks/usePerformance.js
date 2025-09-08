@@ -1,17 +1,6 @@
-import { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 
-// Optimized event handlers to prevent re-renders
-export const useOptimizedHandlers = (handlers) => {
-  return useMemo(() => {
-    const optimizedHandlers = {};
-    Object.keys(handlers).forEach(key => {
-      optimizedHandlers[key] = useCallback(handlers[key], []);
-    });
-    return optimizedHandlers;
-  }, [handlers]);
-};
-
-// Debounced callback hook
+// Debounce hook
 export const useDebounce = (callback, delay) => {
   const timeoutRef = useRef(null);
   
@@ -23,7 +12,7 @@ export const useDebounce = (callback, delay) => {
   }, [callback, delay]);
 };
 
-// Throttled callback hook
+// Throttle hook
 export const useThrottle = (callback, delay) => {
   const lastRun = useRef(Date.now());
   
@@ -33,4 +22,36 @@ export const useThrottle = (callback, delay) => {
       lastRun.current = Date.now();
     }
   }, [callback, delay]);
+};
+
+// Lazy loading hook
+export const useLazyLoad = (ref, options = {}) => {
+  const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1, ...options }
+    );
+    
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+    
+    return () => observer.disconnect();
+  }, [ref, options]);
+  
+  return isVisible;
+};
+
+// Memoized component wrapper
+export const withMemo = (Component) => {
+  return React.memo(Component, (prevProps, nextProps) => {
+    return JSON.stringify(prevProps) === JSON.stringify(nextProps);
+  });
 };

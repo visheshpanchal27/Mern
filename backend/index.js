@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 import cors from 'cors';
+import compression from 'compression';
 
 import userRouter from './routes/userRoutes.js';
 import categoryRouter from './routes/categoryRoutes.js';
@@ -55,6 +56,18 @@ const app = express();
 
 // Trust proxy for deployment platforms like Render
 app.set('trust proxy', 1);
+
+// Compression middleware for better performance
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+  level: 6,
+  threshold: 1024
+}));
 
 // CORS setup
 app.use(cors({

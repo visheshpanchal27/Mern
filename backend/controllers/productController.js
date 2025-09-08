@@ -220,7 +220,7 @@ const removeProduct = asyncHandler(async (req, res) => {
 // FETCH PRODUCTS (with search + limit)
 const fetchProducts = asyncHandler(async (req, res) => {
   try {
-    const pageSize = 6;
+    const pageSize = req.query.limit ? parseInt(req.query.limit) : 50; // Increased default limit
     const keyword = req.query.keyword ? { name: { $regex: req.query.keyword, $options: 'i' } } : {};
 
     const count = await Product.countDocuments({ ...keyword });
@@ -323,7 +323,7 @@ const addProductReview = asyncHandler(async (req, res) => {
 // FETCH TOP PRODUCTS
 const fetchTopProduct = asyncHandler(async (req, res) => {
   try {
-    const products = await Product.find({}).sort({ rating: -1 }).limit(4);
+    const products = await Product.find({}).sort({ rating: -1 }).limit(20); // Increased from 4 to 20
     res.json(products);
   } catch (error) {
     console.error(error);
@@ -334,7 +334,7 @@ const fetchTopProduct = asyncHandler(async (req, res) => {
 // FETCH NEW PRODUCTS
 const fetchNewProduct = asyncHandler(async (req, res) => {
   try {
-    const products = await Product.find().sort({ _id: -1 }).limit(5);
+    const products = await Product.find().sort({ _id: -1 }).limit(20); // Increased from 5 to 20
     res.json(products);
   } catch (error) {
     console.error(error);
@@ -359,11 +359,46 @@ const filterProducts = asyncHandler(async (req, res) => {
   }
 });
 
-// FETCH RANDOM PRODUCTS
+// FETCH RANDOM PRODUCTS (using MongoDB $sample)
 const fetchRandomProducts = asyncHandler(async (req, res) => {
   try {
-    const products = await Product.find();
-    res.json(products);
+    const limit = parseInt(req.query.limit) || 10;
+    const maxLimit = Math.min(limit, 50); // Cap at 50 products
+    
+    const randomProducts = await Product.aggregate([
+      { $sample: { size: maxLimit } },
+      {
+        $lookup: {
+          from: 'categories',
+          localField: 'category',
+          foreignField: '_id',
+          as: 'category'
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          description: 1,
+          price: 1,
+          originalPrice: 1,
+          image: 1,
+          images: 1,
+          brand: 1,
+          countInStock: 1,
+          rating: 1,
+          numReviews: 1,
+          category: { $arrayElemAt: ['$category.name', 0] },
+          createdAt: 1
+        }
+      }
+    ]);
+    
+    res.json({
+      products: randomProducts,
+      count: randomProducts.length,
+      limit: maxLimit,
+      timestamp: new Date().toISOString()
+    });
   } catch (error) {
     console.error('Error fetching random products:', error);
     res.status(500).json({ message: 'Failed to fetch random products' });
@@ -389,7 +424,7 @@ const searchProducts = asyncHandler(async (req, res) => {
       ]
     })
     .populate('category', 'name')
-    .limit(20)
+    .limit(50) // Increased search limit
     .sort({ createdAt: -1 });
 
     res.json(products);
