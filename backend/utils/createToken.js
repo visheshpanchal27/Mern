@@ -1,19 +1,16 @@
 import jwt from 'jsonwebtoken';
 
-const createToken = (res, userId) => {
-  const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+const createToken = (res, userId, clientType = 'web') => {
+  const isWeb = clientType === 'web';
+  const secret = isWeb ? process.env.JWT_WEB_SECRET : process.env.JWT_MOBILE_SECRET;
+  const cookieName = isWeb ? 'webToken' : 'mobileToken';
+  
+  const token = jwt.sign({ userId, clientType }, secret, {
     expiresIn: '30d',
   });
 
-  // Set cookie
-  res.cookie('jwt', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-  });
+  // Don't set cookies - use only localStorage tokens
 
-  // Also return token for header-based auth
   return token;
 };
 

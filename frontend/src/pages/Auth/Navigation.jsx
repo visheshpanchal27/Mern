@@ -17,7 +17,14 @@ import { logOut } from "../../redux/features/auth/authSlice";
 import "./Navigation.css";
 
 const Navigation = () => {
+  const [forceUpdate, setForceUpdate] = useState(0);
+  
   const { userInfo } = useSelector((state) => state.auth);
+  
+  // Force re-render when userInfo changes
+  useEffect(() => {
+    setForceUpdate(prev => prev + 1);
+  }, [userInfo]);
   const { data: cartData } = useGetCartQuery(undefined, { 
     skip: !userInfo,
     pollingInterval: 500,
@@ -47,6 +54,8 @@ const Navigation = () => {
     window.addEventListener("resize", checkIfMobile);
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
+  
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -102,6 +111,7 @@ const Navigation = () => {
 
   return (
     <motion.div
+      key={`nav-${forceUpdate}-${userInfo?._id || 'null'}`}
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}

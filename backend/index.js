@@ -15,6 +15,7 @@ import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import otpRoutes from './routes/otpRoutes.js';
+import syncRoutes from './routes/syncRoutes.js';
 
 import connectDB from './config/db.js';
 import { rateLimit } from './middlewares/rateLimiter.js';
@@ -73,6 +74,9 @@ app.use(compression({
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000', 
+  'http://localhost:3001',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3001',
   'https://shopping-canter.netlify.app',
   'https://mernbackend-tmp5.onrender.com'
 ];
@@ -88,7 +92,7 @@ app.use(cors({
   credentials: true,
   exposedHeaders: ['Authorization', 'Set-Cookie'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'x-client-type'],
   optionsSuccessStatus: 200
 }));
 
@@ -103,7 +107,8 @@ app.use((req, res, next) => {
   const origin = req.headers.origin;
   const allowedOrigins = [
     'http://localhost:5173',
-    'http://localhost:3000', 
+    'http://localhost:3000',
+    'http://localhost:3001',
     'https://shopping-canter.netlify.app',
     'https://mernbackend-tmp5.onrender.com'
   ];
@@ -114,7 +119,7 @@ app.use((req, res, next) => {
   
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin, x-client-type');
   
   next();
 });
@@ -130,8 +135,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// CSRF token generation for authenticated routes
-app.use('/api/', generateCSRFToken);
+// CSRF disabled - using JWT tokens for security
 
 // Routes
 app.use('/api/users', userRouter);
@@ -143,6 +147,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/admin/analytics', analyticsRoutes);
 app.use('/api/otp', otpRoutes);
+app.use('/api/sync', syncRoutes);
 
 // PayPal config
 app.get("/api/config/paypal", (req, res) => {

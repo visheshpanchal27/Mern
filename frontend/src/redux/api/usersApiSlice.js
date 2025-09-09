@@ -1,13 +1,6 @@
 import { apiSlice } from "./apiSlice";
 import { USERS_URL } from "../constants";
 
-// Centralized token management
-const getAuthToken = () => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No authentication token found');
-  return token;
-};
-
 export const userApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -16,12 +9,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: credentials,
       }),
-      transformResponse: (response) => {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-        }
-        return response;
-      },
     }),
     
     logout: builder.mutation({
@@ -29,10 +16,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
         url: `${USERS_URL}/logout`,
         method: 'POST',
       }),
-      transformResponse: (response) => {
-        localStorage.removeItem('token');
-        return response;
-      },
     }),
 
     register: builder.mutation({
@@ -41,14 +24,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: userData,
       }),
-      transformResponse: (response) => {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-        }
-        return response;
-      },
     }),
-
 
     profile: builder.mutation({
       query: (userData) => ({
@@ -59,12 +35,14 @@ export const userApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ['User'],
     }),
 
+    getUserProfile: builder.query({
+      query: () => `${USERS_URL}/profile`,
+      providesTags: ['User'],
+    }),
+
     getUsers: builder.query({
       query: () => ({
         url: USERS_URL,
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-        },
       }),
       providesTags: (result) => {
         const users = Array.isArray(result) ? result : [];
@@ -80,9 +58,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
       query: (id) => ({
         url: `${USERS_URL}/${id}`,
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-        },
       }),
       invalidatesTags: (result, error, id) => [
         'User',
@@ -93,17 +68,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
     getUserDetails: builder.query({
       query: (id) => ({
         url: `${USERS_URL}/${id}`,
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-        },
       }),
-      transformErrorResponse: (response) => {
-        if (response.status === 401) {
-          localStorage.removeItem('token');
-          window.location.href = '/login';
-        }
-        return response.data;
-      },
       providesTags: (result, error, id) => [{ type: 'User', id }],
     }),
 
@@ -112,9 +77,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
         url: `${USERS_URL}/${id}`,
         method: 'PUT',
         body: data,
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-        },
       }),
       invalidatesTags: (result, error, { id }) => [
         'User',
@@ -128,12 +90,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: tokenIdPayload, 
       }),
-      transformResponse: (response) => {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-        }
-        return response;
-      },
     }),
 
     verifyEmail: builder.mutation({
@@ -142,12 +98,6 @@ export const userApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: data,
       }),
-      transformResponse: (response) => {
-        if (response.token) {
-          localStorage.setItem('token', response.token);
-        }
-        return response;
-      },
     }),
 
     resendVerification: builder.mutation({
@@ -166,6 +116,7 @@ export const {
   useLogoutMutation,
   useRegisterMutation,
   useProfileMutation,
+  useGetUserProfileQuery,
   useGetUsersQuery,
   useDeleteUserMutation,
   useGetUserDetailsQuery,

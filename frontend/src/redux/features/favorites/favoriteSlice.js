@@ -7,10 +7,15 @@ const favoriteSlice = createSlice({
     addToFavorites: (state, action) => {
       if (!state.some((product) => product._id === action.payload._id)) {
         state.push(action.payload);
+        // Sync to localStorage for mobile
+        localStorage.setItem('favorites', JSON.stringify(state));
       }
     },
     removeFromFavorites: (state, action) => {
-      return state.filter((product) => product._id !== action.payload._id);
+      const newState = state.filter((product) => product._id !== action.payload._id);
+      // Sync to localStorage for mobile
+      localStorage.setItem('favorites', JSON.stringify(newState));
+      return newState;
     },
     setFavorites: (state, action) => {
       return action.payload;

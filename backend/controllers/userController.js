@@ -112,8 +112,11 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid email or password");
   }
 
+  // Determine client type
+  const clientType = req.headers['x-client-type'] === 'mobile' ? 'mobile' : 'web';
+  
   // Set cookie AND return token
-  const token = createToken(res, user._id);
+  const token = createToken(res, user._id, clientType);
 
   res.status(200).json({
     _id: user._id,
@@ -124,12 +127,12 @@ const loginUser = asyncHandler(async (req, res) => {
   });
 });
 
-// Logout User (unchanged)
+// Logout User
 const logoutCurrentUser = asyncHandler(async (req, res) => {
-  res.cookie('jwt', '', {
-    httpOnly: true,
-    expires: new Date(0),
-  });
+  const clientType = req.clientType || 'web';
+  const cookieName = clientType === 'web' ? 'webToken' : 'mobileToken';
+  
+  // No cookies to clear
   res.status(200).json({ message: "Logged out successfully" });
 });
 
@@ -155,37 +158,36 @@ const getCurrentUserProfile = asyncHandler(async (req, res) => {
 
 // Update Current User Profile
 const updateCurrentUserProfile = asyncHandler(async (req, res) => {
-  if (!req.user) {
-    res.status(401);
-    throw new Error("Not authenticated");
-  }
-
-  const user = await User.findById(req.user._id);
-
-  if (user) {
-    // Sanitize inputs
-    const sanitizedUsername = req.body.username ? sanitizeInput(req.body.username) : user.username;
-    const sanitizedEmail = req.body.email ? sanitizeInput(req.body.email) : user.email;
-
-    // Validate email if provided
-    if (req.body.email && !validateEmail(sanitizedEmail)) {
-      res.status(400);
-      throw new Error("Please enter a valid email");
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
     }
 
-    // Validate password if provided
-    if (req.body.password && !validatePassword(req.body.password)) {
-      res.status(400);
-      throw new Error("Password must be at least 8 characters with uppercase, lowercase, and number");
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    user.username = sanitizedUsername;
-    user.email = sanitizedEmail;
-
-    if (req.body.password) {
+    // Update only provided fields
+    if (req.body.username && req.body.username.trim() !== user.username) {
+      // Check if username already exists
+      const existingUser = await User.findOne({ username: req.body.username.trim() });
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+      user.username = req.body.username.trim();
+    }
+    if (req.body.email && req.body.email.trim() !== user.email) {
+      // Check if email already exists
+      const existingUser = await User.findOne({ email: req.body.email.trim() });
+      if (existingUser) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+      user.email = req.body.email.trim();
+    }
+    if (req.body.password && req.body.password.trim()) {
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(req.body.password, salt);
-      user.password = hashedPassword;
+      user.password = await bcrypt.hash(req.body.password, salt);
     }
 
     const updatedUser = await user.save();
@@ -195,9 +197,9 @@ const updateCurrentUserProfile = asyncHandler(async (req, res) => {
       email: updatedUser.email,
       isAdmin: updatedUser.isAdmin,
     });
-  } else {
-    res.status(404);
-    throw new Error("User not found");
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -281,8 +283,9 @@ const googleAuth = asyncHandler(async (req, res) => {
       });
     }
 
-    // Generate token and set it in cookie
-    const token = createToken(res, user._id);
+    // Determine client type and generate token
+    const clientType = req.headers['x-client-type'] === 'mobile' ? 'mobile' : 'web';
+    const token = createToken(res, user._id, clientType);
 
     res.status(200).json({
       _id: user._id,
@@ -325,7 +328,8 @@ const verifyEmail = asyncHandler(async (req, res) => {
   user.emailVerificationExpires = undefined;
   await user.save();
 
-  const token = createToken(res, user._id);
+  const clientType = req.headers['x-client-type'] === 'mobile' ? 'mobile' : 'web';
+  const token = createToken(res, user._id, clientType);
 
   res.status(200).json({
     _id: user._id,

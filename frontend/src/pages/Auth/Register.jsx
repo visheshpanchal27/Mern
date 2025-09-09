@@ -142,6 +142,7 @@ const Register = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-client-type': 'web'
           },
           credentials: 'include',
           body: JSON.stringify({
@@ -157,6 +158,10 @@ const Register = () => {
           throw new Error(backendData.message || 'Google auth failed');
         }
 
+        // Store web token in localStorage
+        if (backendData.token) {
+          localStorage.setItem('webToken', backendData.token);
+        }
         dispatch(setCredentials(backendData));
         navigate(redirect);
         toast.success("Welcome! Google login successful", {

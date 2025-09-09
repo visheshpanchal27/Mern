@@ -38,4 +38,6 @@ const store = configureStore({
 
 setupListeners(store.dispatch);
 
+// No sync - PC and mobile are completely separate
+
 export default store;

@@ -2,7 +2,8 @@
 export const validateEnvironment = () => {
   const requiredEnvVars = [
     'MONGO_URI',
-    'JWT_SECRET',
+    'JWT_WEB_SECRET',
+    'JWT_MOBILE_SECRET',
     'CLOUDINARY_CLOUD_NAME',
     'CLOUDINARY_API_KEY',
     'CLOUDINARY_API_SECRET'

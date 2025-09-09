@@ -3,13 +3,17 @@ import User from '../models/userModels.js';
 import asyncHandler from './asyncHandler.js';
 
 const authentication = asyncHandler(async (req, res, next) => {
-  // 1. Check Authorization header first
-  let token = req.headers.authorization?.split(' ')[1];
+  let token;
+  let clientType = 'web';
   
-  // 2. Fallback to cookie if no header token
-  if (!token && req.cookies.jwt) {
-    token = req.cookies.jwt;
+  // 1. Check Authorization header first
+  if (req.headers.authorization?.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+    // Determine client type from User-Agent or custom header
+    clientType = req.headers['x-client-type'] === 'mobile' ? 'mobile' : 'web';
   }
+  
+  // No cookie fallback - use only header tokens
 
   if (!token) {
     return res.status(401).json({ 
@@ -19,7 +23,16 @@ const authentication = asyncHandler(async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = clientType === 'web' ? process.env.JWT_WEB_SECRET : process.env.JWT_MOBILE_SECRET;
+    const decoded = jwt.verify(token, secret);
+    
+    // Verify client type matches token
+    if (decoded.clientType !== clientType) {
+      return res.status(401).json({ 
+        message: 'Invalid token for client type',
+        code: 'INVALID_CLIENT_TOKEN'
+      });
+    }
     
     // Check if user still exists
     const user = await User.findById(decoded.userId).select('-password');
@@ -39,6 +52,7 @@ const authentication = asyncHandler(async (req, res, next) => {
     }
     
     req.user = user;
+    req.clientType = clientType;
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {

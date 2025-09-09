@@ -93,7 +93,7 @@ const Cart = () => {
     try {
       // Simulate quick checkout process
       await new Promise(resolve => setTimeout(resolve, 1000));
-      navigate("/shipping?quick=true");
+      navigate("/checkout?quick=true");
       toast.success("🚀 Quick checkout initiated!");
     } catch (error) {
       toast.error("Quick checkout failed");

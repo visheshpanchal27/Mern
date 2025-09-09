@@ -53,6 +53,10 @@ const Login = () => {
 
     try {
       const res = await login({ email, password }).unwrap();
+      // Store web token in localStorage
+      if (res.token) {
+        localStorage.setItem('webToken', res.token);
+      }
       dispatch(setCredentials({ ...res }));
       navigate(redirect);
       toast.success("Login successful");
@@ -88,6 +92,7 @@ const Login = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-client-type': 'web'
         },
         credentials: 'include',
         body: JSON.stringify({
@@ -103,6 +108,10 @@ const Login = () => {
         throw new Error(backendData.message || 'Google auth failed');
       }
 
+      // Store web token in localStorage
+      if (backendData.token) {
+        localStorage.setItem('webToken', backendData.token);
+      }
       dispatch(setCredentials(backendData));
       navigate(redirect);
       toast.success("Google login successful");

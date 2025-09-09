@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Sync</title>
+</head>
+<body>
+    <h1>Test Cross-App Sync</h1>
+    <button onclick="sendLogout()">Send Mobile Logout Signal</button>
+    <button onclick="checkSignals()">Check for Signals</button>
+    <div id="output"></div>
+
+    <script>
+        async function sendLogout() {
+            try {
+                const response = await fetch('http://localhost:5000/api/sync/logout-signal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ source: 'mobile', timestamp: Date.now() })
+                });
+                const data = await response.json();
+                document.getElementById('output').innerHTML += '<p>✅ Logout signal sent: ' + JSON.stringify(data) + '</p>';
+            } catch (error) {
+                document.getElementById('output').innerHTML += '<p>❌ Error: ' + error.message + '</p>';
+            }
+        }
+
+        async function checkSignals() {
+            try {
+                const response = await fetch('http://localhost:5000/api/sync/logout-signal?after=0');
+                const data = await response.json();
+                document.getElementById('output').innerHTML += '<p>📡 Signals: ' + JSON.stringify(data) + '</p>';
+            } catch (error) {
+                document.getElementById('output').innerHTML += '<p>❌ Error: ' + error.message + '</p>';
+            }
+        }
+
+        // Auto-check every 2 seconds
+        setInterval(checkSignals, 2000);
+    </script>
+</body>
+</html>

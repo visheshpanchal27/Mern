@@ -217,20 +217,50 @@ const removeProduct = asyncHandler(async (req, res) => {
   }
 });
 
-// FETCH PRODUCTS (with search + limit)
+// FETCH PRODUCTS (with search + limit + category filter)
 const fetchProducts = asyncHandler(async (req, res) => {
   try {
-    const pageSize = req.query.limit ? parseInt(req.query.limit) : 50; // Increased default limit
-    const keyword = req.query.keyword ? { name: { $regex: req.query.keyword, $options: 'i' } } : {};
+    const pageSize = req.query.limit ? parseInt(req.query.limit) : 50;
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const skip = (page - 1) * pageSize;
+    
+    let query = {};
+    
+    // Search by keyword
+    if (req.query.search || req.query.keyword) {
+      const searchTerm = req.query.search || req.query.keyword;
+      query.$or = [
+        { name: { $regex: searchTerm, $options: 'i' } },
+        { description: { $regex: searchTerm, $options: 'i' } },
+        { brand: { $regex: searchTerm, $options: 'i' } }
+      ];
+    }
+    
+    // Filter by category
+    if (req.query.category) {
+      query.category = req.query.category;
+    }
+    
+    // Filter by price range
+    if (req.query.minPrice || req.query.maxPrice) {
+      query.price = {};
+      if (req.query.minPrice) query.price.$gte = parseFloat(req.query.minPrice);
+      if (req.query.maxPrice) query.price.$lte = parseFloat(req.query.maxPrice);
+    }
 
-    const count = await Product.countDocuments({ ...keyword });
-    const products = await Product.find({ ...keyword }).limit(pageSize);
+    const count = await Product.countDocuments(query);
+    const products = await Product.find(query)
+      .populate('category', 'name')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize);
 
     res.json({
       products,
-      page: 1,
+      total: count,
+      page,
       pages: Math.ceil(count / pageSize),
-      hasMore: false,
+      hasMore: page < Math.ceil(count / pageSize),
     });
 
   } catch (error) {
