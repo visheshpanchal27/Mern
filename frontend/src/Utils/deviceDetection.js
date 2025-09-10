@@ -5,6 +5,10 @@ export const isMobileDevice = () => {
 }
 
 export const redirectToMobile = () => {
+  // Prevent redirect loops
+  const hasRedirected = sessionStorage.getItem('hasRedirected')
+  if (hasRedirected) return
+  
   // Don't redirect on login/register pages ONLY if user is actually logging in
   const currentPath = window.location.pathname
   const userInfo = localStorage.getItem('userInfo')
@@ -15,6 +19,7 @@ export const redirectToMobile = () => {
   }
   
   if (isMobileDevice()) {
+    sessionStorage.setItem('hasRedirected', 'true')
     console.log('PC: Redirecting to mobile')
     
     // Show smooth loader

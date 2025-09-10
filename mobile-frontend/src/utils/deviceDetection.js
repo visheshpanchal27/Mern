@@ -7,6 +7,10 @@ export const isDesktopDevice = () => {
 }
 
 export const redirectToDesktop = () => {
+  // Prevent redirect loops
+  const hasRedirected = sessionStorage.getItem('hasRedirected')
+  if (hasRedirected) return
+  
   // Don't redirect on login/register pages ONLY if user is actually logging in
   const currentPath = window.location.pathname
   const userInfo = localStorage.getItem('userInfo')
@@ -18,6 +22,7 @@ export const redirectToDesktop = () => {
   }
   
   if (isDesktopDevice()) {
+    sessionStorage.setItem('hasRedirected', 'true')
     console.log('Mobile: Redirecting to desktop')
     
     // Show smooth loader
