@@ -78,6 +78,7 @@ const allowedOrigins = [
   'http://127.0.0.1:5173',
   'http://127.0.0.1:3001',
   'https://shopping-canter.netlify.app',
+  'https://infinity-plaza.netlify.app',
   'https://mernbackend-tmp5.onrender.com'
 ];
 
@@ -110,6 +111,7 @@ app.use((req, res, next) => {
     'http://localhost:3000',
     'http://localhost:3001',
     'https://shopping-canter.netlify.app',
+    'https://infinity-plaza.netlify.app',
     'https://mernbackend-tmp5.onrender.com'
   ];
   

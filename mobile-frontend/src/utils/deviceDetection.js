@@ -73,7 +73,7 @@ export const redirectToDesktop = () => {
     // Redirect after animation
     setTimeout(() => {
       const fullPath = window.location.pathname + window.location.search
-      const desktopUrl = import.meta.env.VITE_DESKTOP_URL || 'http://localhost:5173'
+      const desktopUrl = import.meta.env.VITE_DESKTOP_URL || 'https://shopping-canter.netlify.app'
       window.location.replace(`${desktopUrl}${fullPath}`)
     }, 800)
   } else {

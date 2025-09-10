@@ -70,7 +70,7 @@ export const redirectToMobile = () => {
     // Redirect after animation
     setTimeout(() => {
       const fullPath = window.location.pathname + window.location.search
-      const mobileUrl = import.meta.env.VITE_MOBILE_URL || 'http://localhost:3001'
+      const mobileUrl = import.meta.env.VITE_MOBILE_URL || 'https://infinity-plaza.netlify.app'
       window.location.replace(`${mobileUrl}${fullPath}`)
     }, 800)
   }
@@ -95,7 +95,7 @@ export const setupMobileRedirect = () => {
       if (isMobileDevice()) {
         console.log('Redirecting to mobile')
         const fullPath = window.location.pathname + window.location.search
-        const mobileUrl = import.meta.env.VITE_MOBILE_URL || 'http://localhost:3001'
+        const mobileUrl = import.meta.env.VITE_MOBILE_URL || 'https://infinity-plaza.netlify.app'
         window.location.replace(`${mobileUrl}${fullPath}`)
       }
     }, 200)
