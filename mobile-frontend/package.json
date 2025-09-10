@@ -1,5 +1,6 @@
 {
   "name": "mern-mobile-frontend",
+  "description": "Mobile frontend for MERN e-commerce",
   "private": true,
   "version": "0.0.0",
   "type": "module",
