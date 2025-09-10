@@ -5,9 +5,9 @@ export const isMobileDevice = () => {
 }
 
 export const redirectToMobile = () => {
-  // Prevent redirect loops
-  const hasRedirected = sessionStorage.getItem('hasRedirected')
-  if (hasRedirected) return
+  // Prevent redirect loops - allow max 3 redirects
+  const redirectCount = parseInt(sessionStorage.getItem('redirectCount') || '0')
+  if (redirectCount >= 5) return
   
   // Don't redirect on login/register pages ONLY if user is actually logging in
   const currentPath = window.location.pathname
@@ -19,7 +19,7 @@ export const redirectToMobile = () => {
   }
   
   if (isMobileDevice()) {
-    sessionStorage.setItem('hasRedirected', 'true')
+    sessionStorage.setItem('redirectCount', (redirectCount + 1).toString())
     console.log('PC: Redirecting to mobile')
     
     // Show smooth loader
