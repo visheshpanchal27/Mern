@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import ErrorBoundary from './components/ErrorBoundary';
 import Loader from './components/Loader';
 import AuthCheck from './components/AuthCheck';
-import { redirectToMobile, setupMobileRedirect } from './utils/deviceDetection';
+import { redirectToMobile, setupMobileRedirect } from './Utils/deviceDetection';
 
 
 // Lazy load components
