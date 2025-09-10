@@ -21,14 +21,20 @@ export const getDeviceInfo = () => {
 export const isDesktopDevice = () => {
   const device = getDeviceInfo()
   
-  // Multiple criteria for desktop detection
-  const hasLargeScreen = device.width >= 1024 && device.height >= 600
+  // Primary desktop indicators
+  const hasLargeScreen = device.width >= 1024
   const hasDesktopUA = device.isDesktopUA
-  const noTouchOrLargeTouch = !device.touchSupport || (device.touchSupport && device.width >= 1200)
-  const lowPixelRatio = device.pixelRatio <= 2
+  const notMobileUA = !device.isMobileUA
   
-  // Desktop if: large screen + (desktop UA OR (no touch OR large touch screen)) + reasonable pixel ratio
-  return hasLargeScreen && (hasDesktopUA || noTouchOrLargeTouch) && lowPixelRatio
+  // Strong mobile indicators (override desktop detection)
+  const isDefinitelyMobile = device.isMobileUA || (device.width <= 768 && device.touchSupport)
+  
+  if (isDefinitelyMobile) {
+    return false
+  }
+  
+  // Desktop if: large screen AND (desktop UA OR not mobile UA)
+  return hasLargeScreen && (hasDesktopUA || notMobileUA)
 }
 
 // User preference management
