@@ -3,7 +3,9 @@ import { useEffect } from 'react'
 import BottomNav from './components/BottomNav'
 import MenuDrawer from './components/MenuDrawer'
 import AuthCheck from './components/AuthCheck'
+import RealTimeUpdates from './components/RealTimeUpdates'
 import { redirectToDesktop, setupDesktopRedirect } from './utils/deviceDetection'
+
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import Search from './pages/Search'
@@ -25,6 +27,7 @@ import ChangePassword from './pages/ChangePassword'
 import Language from './pages/Language'
 
 import UserOrder from './pages/UserOrder'
+import Shipping from './pages/Shipping'
 
 import PlaceOrder from './pages/PlaceOrder'
 import ExpressCheckout from './pages/ExpressCheckout'
@@ -39,6 +42,7 @@ function App() {
 
   return (
     <AuthCheck>
+      <RealTimeUpdates />
       <div className="min-h-screen bg-dark text-white">
         <main className="pb-20">
           <Routes>
@@ -51,8 +55,8 @@ function App() {
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
-
-            <Route path="/shipping" element={<Checkout />} />
+            <Route path="/shipping" element={<Shipping />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/placeorder" element={<PlaceOrder />} />
             <Route path="/express-checkout" element={<ExpressCheckout />} />
             <Route path="/order/:id" element={<Order />} />

@@ -119,7 +119,7 @@ mern1/
    ```
 3. Create a `.env` file with:
    ```
-   VITE_API_URL=http://localhost:5000/api
+   VITE_API_URL=https://mernbackend-tmp5.onrender.com/api
    VITE_GOOGLE_CLIENT_ID=your_google_client_id
    ```
 4. Start the frontend:
@@ -129,8 +129,8 @@ mern1/
 
 ### Access the App
 
-- Frontend: [http://localhost:5173](http://localhost:5173)
-- Backend API: [http://localhost:5000/api](http://localhost:5000/api)
+- Frontend: [https://shopping-canter.netlify.app](https://shopping-canter.netlify.app)
+- Backend API: [https://mernbackend-tmp5.onrender.com/api](https://mernbackend-tmp5.onrender.com/api)
 
 ---
 
@@ -202,7 +202,7 @@ PORT=5000
 
 ### Frontend (`frontend/.env`)
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=https://mernbackend-tmp5.onrender.com/api
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
@@ -283,10 +283,10 @@ Run the complete improvement suite:
 ./install-advanced-improvements.bat
 
 # Test security features
-curl -X GET http://localhost:5000/api/health
+curl -X GET https://mernbackend-tmp5.onrender.com/api/health
 
 # Monitor performance
-curl -X GET http://localhost:5000/api/metrics
+curl -X GET https://mernbackend-tmp5.onrender.com/api/metrics
 ```
 
 ## Notes

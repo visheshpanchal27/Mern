@@ -12,25 +12,21 @@ const Shop = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState('grid')
   const [sortOpen, setSortOpen] = useState(false)
-  const [quickFilters, setQuickFilters] = useState({
-    onSale: false,
-    freeShipping: false,
-    inStock: true
-  })
-  
+
   useEffect(() => {
     const categoryFromUrl = searchParams.get('category')
     if (categoryFromUrl) {
       setFilters(prev => ({ ...prev, category: categoryFromUrl }))
     }
   }, [searchParams])
-  
+
   const { data: productsData, isLoading } = useGetProductsQuery({
     ...(filters.category && { category: filters.category }),
     ...(filters.minPrice && { minPrice: filters.minPrice }),
     ...(filters.maxPrice && { maxPrice: filters.maxPrice }),
     ...(searchTerm && { search: searchTerm })
   })
+
   const { data: categories } = useGetCategoriesQuery()
 
   const clearFilters = () => {
@@ -59,7 +55,7 @@ const Shop = () => {
           {/* Top Row */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
-              <motion.div 
+              <motion.div
                 className="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg"
                 whileHover={{ rotate: 360, scale: 1.1 }}
                 transition={{ duration: 0.6 }}
@@ -67,27 +63,33 @@ const Shop = () => {
                 <FaStore className="text-white" size={20} />
               </motion.div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Shop</h1>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Shop
+                </h1>
               </div>
             </div>
-            
+
             {/* View Toggle & Filter */}
             <div className="flex items-center space-x-2">
               <div className="flex bg-gray-800 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === 'grid' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'
+                  }`}
                 >
                   <FaTh size={14} />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                  className={`p-2 rounded-md transition-all ${
+                    viewMode === 'list' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'
+                  }`}
                 >
                   <FaList size={14} />
                 </button>
               </div>
-              
+
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowFilters(true)}
@@ -98,11 +100,14 @@ const Shop = () => {
               </motion.button>
             </div>
           </div>
-          
+
           {/* Search & Quick Actions */}
           <div className="flex items-center space-x-3">
             <div className="relative flex-1">
-              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+              <FaSearch
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={16}
+              />
               <input
                 type="text"
                 placeholder="Search products, brand..."
@@ -119,12 +124,11 @@ const Shop = () => {
               Sort
             </button>
           </div>
-            
+
           {/* Quick Filters & Sort */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center space-x-2 overflow-x-auto">
-            </div>
-            
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 overflow-x-auto"></div>
+
             <div className="relative">
               <AnimatePresence>
                 {sortOpen && (
@@ -159,7 +163,7 @@ const Shop = () => {
 
       {/* Products Grid */}
       <div className="p-4">
-        <motion.div 
+        <motion.div
           className={`${viewMode === 'grid' ? 'grid grid-cols-2 gap-4' : 'space-y-4'}`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -178,7 +182,11 @@ const Shop = () => {
                 <ProductCard product={product} />
               ) : (
                 <div className="bg-gray-800 rounded-xl p-4 flex items-center space-x-4 hover:bg-gray-700 transition-all">
-                  <img src={product.image} alt={product.name} className="w-20 h-20 object-cover rounded-lg" />
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-20 h-20 object-cover rounded-lg"
+                  />
                   <div className="flex-1">
                     <h3 className="text-white font-semibold mb-1">{product.name}</h3>
                     <p className="text-gray-400 text-sm mb-2 line-clamp-2">{product.description}</p>
@@ -209,22 +217,22 @@ const Shop = () => {
 
       {/* Enhanced Filter Modal */}
       {showFilters && (
-        <motion.div 
+        <motion.div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          <motion.div 
+          <motion.div
             className="bg-gradient-to-t from-gray-900 to-gray-800 w-full rounded-t-3xl p-6 safe-area-bottom border-t border-gray-600/50"
-            initial={{ y: "100%" }}
+            initial={{ y: '100%' }}
             animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">Filters</h3>
-              <motion.button 
+              <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowFilters(false)}
                 className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center"
@@ -243,7 +251,9 @@ const Shop = () => {
               >
                 <option value="">All Categories</option>
                 {categories?.map(cat => (
-                  <option key={cat._id} value={cat._id}>{cat.name}</option>
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -271,16 +281,16 @@ const Shop = () => {
 
             {/* Actions */}
             <div className="flex space-x-4">
-              <motion.button 
+              <motion.button
                 whileTap={{ scale: 0.95 }}
-                onClick={clearFilters} 
+                onClick={clearFilters}
                 className="flex-1 py-3 bg-gray-700 text-white rounded-xl font-medium hover:bg-gray-600 transition-colors"
               >
                 Clear All
               </motion.button>
-              <motion.button 
+              <motion.button
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setShowFilters(false)} 
+                onClick={() => setShowFilters(false)}
                 className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-medium shadow-lg"
               >
                 Apply Filters

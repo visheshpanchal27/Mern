@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: 'http://localhost:5000/api',
+  baseUrl: import.meta.env.VITE_API_URL || 'https://mernbackend-tmp5.onrender.com/api',
   credentials: 'include',
   prepareHeaders: (headers, { getState }) => {
     const token = localStorage.getItem('mobileToken')
@@ -15,7 +15,7 @@ const baseQuery = fetchBaseQuery({
 
 export const apiSlice = createApi({
   baseQuery,
-  tagTypes: ['Product', 'User', 'Order', 'Category'],
+  tagTypes: ['Product', 'User', 'Order', 'Category', 'Cart'],
   endpoints: (builder) => ({
     // Products
     getProducts: builder.query({
@@ -53,6 +53,7 @@ export const apiSlice = createApi({
     // Cart
     getCart: builder.query({
       query: () => 'cart',
+      providesTags: ['Cart'],
     }),
     updateCart: builder.mutation({
       query: (items) => ({
@@ -60,6 +61,7 @@ export const apiSlice = createApi({
         method: 'PUT',
         body: { items },
       }),
+      invalidatesTags: ['Cart'],
     }),
     addToCart: builder.mutation({
       query: ({ productId, quantity = 1 }) => ({
@@ -67,12 +69,14 @@ export const apiSlice = createApi({
         method: 'POST',
         body: { productId, quantity },
       }),
+      invalidatesTags: ['Cart'],
     }),
     clearCart: builder.mutation({
       query: () => ({
         url: 'cart',
         method: 'DELETE',
       }),
+      invalidatesTags: ['Cart'],
     }),
     
     // Orders

@@ -22,7 +22,7 @@ const Checkout = () => {
     postalCode: '',
     country: 'US'
   })
-  const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery')
+  const [paymentMethod, setPaymentMethod] = useState('PayPal')
 
   const cartItems = cartData?.items || []
   const subtotal = cartItems.reduce((acc, item) => acc + item.qty * (item.product?.price || 0), 0)
@@ -181,8 +181,8 @@ const Checkout = () => {
             
             <div className="space-y-3">
               {[
-                { value: 'Cash on Delivery', icon: '💵', desc: 'Pay when you receive' },
-                { value: 'PayPal', icon: '💳', desc: 'Secure online payment' }
+                { value: 'PayPal', icon: '💳', desc: 'Secure online payment' },
+                { value: 'CashOnDelivery', icon: '💵', desc: 'Pay when you receive' }
               ].map((method) => (
                 <label key={method.value} className={`block p-4 rounded-xl border-2 cursor-pointer transition-all ${
                   paymentMethod === method.value 

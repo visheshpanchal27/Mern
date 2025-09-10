@@ -386,20 +386,24 @@ const UserOrder = () => {
                           </button>
                           <div className="flex -space-x-2">
                             {order.items.slice(0, 3).map((item, index) => (
-                              <img
-                                key={index}
-                                src={
-                                  item.image?.startsWith("http")
-                                    ? item.image
-                                    : `${import.meta.env.VITE_API_URL}${item.image}`
-                                }
-                                alt={item.name}
-                                className="w-10 h-10 object-cover rounded-full border-2 border-gray-700"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = "https://via.placeholder.com/40?text=No+Image";
-                                }}
-                              />
+                              <div key={index} className="relative group">
+                                <img
+                                  src={
+                                    item.image?.startsWith("http")
+                                      ? item.image
+                                      : `${import.meta.env.VITE_API_URL}${item.image}`
+                                  }
+                                  alt={item.name}
+                                  className="w-12 h-12 object-cover rounded-full border-2 border-gray-700 hover:border-pink-500 transition-all cursor-pointer"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "https://via.placeholder.com/48?text=No+Image";
+                                  }}
+                                />
+                                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                  {item.name}
+                                </div>
+                              </div>
                             ))}
                             {order.items.length > 3 && (
                               <div className="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-700 flex items-center justify-center text-xs">
@@ -473,7 +477,7 @@ const UserOrder = () => {
 
                     {/* Expanded Items Row */}
                     {isExpanded && (
-                      <tr className="bg-gray-900/50">
+                      <tr key={`${order.orderId}-expanded`} className="bg-gray-900/50">
                         <td colSpan="7" className="p-4">
                           <div className="pl-12 pr-4">
                             <h4 className="font-medium text-gray-300 mb-3">
@@ -490,15 +494,22 @@ const UserOrder = () => {
                                     key={index} 
                                     className="flex items-center gap-4 p-3 bg-gray-800/30 rounded-lg border border-gray-700"
                                   >
-                                    <img
-                                      src={itemImageUrl}
-                                      alt={item.name}
-                                      className="w-16 h-16 object-contain rounded-md bg-white p-1"
-                                      onError={(e) => {
-                                        e.target.onerror = null;
-                                        e.target.src = "https://via.placeholder.com/64?text=No+Image";
-                                      }}
-                                    />
+                                    <div className="relative group">
+                                      <img
+                                        src={itemImageUrl}
+                                        alt={item.name}
+                                        className="w-20 h-20 object-cover rounded-lg bg-gray-800 p-1 hover:scale-105 transition-transform cursor-pointer"
+                                        onError={(e) => {
+                                          e.target.onerror = null;
+                                          e.target.src = "https://via.placeholder.com/80?text=No+Image";
+                                        }}
+                                      />
+                                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all flex items-center justify-center">
+                                        <span className="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                          View
+                                        </span>
+                                      </div>
+                                    </div>
                                     <div className="flex-1">
                                       <p className="font-medium">{item.name}</p>
                                       <div className="text-sm text-gray-400 mt-1">

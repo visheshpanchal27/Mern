@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { useState, useEffect } from 'react'
-import { useAddToCartMutation } from '../api/apiSlice'
+import { useAddToCartMutation, apiSlice } from '../api/apiSlice'
 import { FaShoppingCart, FaHeart, FaStar } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import { useHaptic } from '../hooks/useHaptic'
@@ -23,6 +23,8 @@ const ProductCard = ({ product }) => {
     e.stopPropagation()
     try {
       await addToCart({ productId: product._id, quantity: 1 }).unwrap()
+      // Invalidate cart cache to trigger real-time update
+      dispatch(apiSlice.util.invalidateTags(['Cart']))
       haptic.success()
       toast.success('Added to cart!')
     } catch (error) {

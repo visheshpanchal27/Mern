@@ -48,14 +48,17 @@ const Profile = () => {
   return (
     <div className="safe-area-top">
       {/* Profile Header */}
-      <div className="p-4 bg-gradient-to-r from-primary to-secondary">
-        <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-            <FaUser size={24} />
+      <div className="relative p-6 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+        <div className="relative flex items-center space-x-4">
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/30 shadow-lg">
+            <FaUser className="text-white" size={28} />
           </div>
-          <div>
-            <h1 className="text-xl font-bold">{userInfo.username}</h1>
-            <p className="text-pink-100">{userInfo.email}</p>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-white mb-1">{userInfo.username}</h1>
+            <p className="text-blue-100 text-sm opacity-90">{userInfo.email}</p>
           </div>
         </div>
       </div>

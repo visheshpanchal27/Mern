@@ -1,67 +1,102 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { FaBolt, FaShippingFast } from 'react-icons/fa'
+import { toast } from 'react-toastify'
+import { useGetCartQuery, useClearCartMutation, useCreateOrderMutation } from '../api/apiSlice'
+import { FaBolt, FaCheck, FaCreditCard, FaShieldAlt, FaTruck, FaEdit, FaArrowLeft } from 'react-icons/fa'
 
 const ExpressCheckout = () => {
   const navigate = useNavigate()
-  const { cartItems } = useSelector(state => state.cart)
   const { userInfo } = useSelector(state => state.auth)
-  const [loading, setLoading] = useState(false)
-
-  const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0)
-
-  const handleExpressCheckout = async () => {
+  
+  const { data: cart, isLoading: cartLoading } = useGetCartQuery()
+  const [createOrder, { isLoading: orderLoading }] = useCreateOrderMutation()
+  const [clearCart] = useClearCartMutation()
+  
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [orderStep, setOrderStep] = useState('review')
+  
+  useEffect(() => {
     if (!userInfo) {
-      console.log('User not authenticated for express checkout')
-      navigate('/login')
+      navigate('/login?redirect=/express-checkout')
+    }
+  }, [userInfo, navigate])
+  
+  const cartItems = cart?.items || []
+  
+  const savedAddress = JSON.parse(localStorage.getItem('shippingAddress') || '{}')
+  const savedPaymentMethod = localStorage.getItem('paymentMethod') || 'PayPal'
+  
+  const totals = useMemo(() => {
+    const subtotal = cartItems.reduce((acc, item) => 
+      acc + item.qty * (item.product?.price || 0), 0
+    )
+    const shipping = subtotal > 100 ? 0 : 10
+    const tax = subtotal * 0.08
+    const total = subtotal + shipping + tax
+    
+    return {
+      subtotal: Number(subtotal.toFixed(2)),
+      shipping: Number(shipping.toFixed(2)),
+      tax: Number(tax.toFixed(2)),
+      total: Number(total.toFixed(2))
+    }
+  }, [cartItems])
+
+  const handleExpressOrder = async () => {
+    if (!savedAddress.address || !savedAddress.city) {
+      toast.error('Please set up your shipping address first')
+      navigate('/shipping')
       return
     }
-
-    setLoading(true)
+    
+    setIsProcessing(true)
+    setOrderStep('processing')
+    
     try {
-      console.log('Starting express checkout...')
-      // Express checkout with default settings
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
       const orderData = {
-        orderItems: cartItems,
-        paymentMethod: 'paypal',
-        expressCheckout: true,
-        totalPrice: totalPrice + 15 // Express shipping fee
+        orderItems: cartItems.map(item => ({
+          _id: item.product._id,
+          qty: item.qty,
+          price: item.product.price,
+          name: item.product.name,
+          image: item.product.image,
+        })),
+        shippingAddress: savedAddress,
+        paymentMethod: savedPaymentMethod,
+        itemsPrice: totals.subtotal,
+        shippingPrice: totals.shipping,
+        taxPrice: totals.tax,
+        totalPrice: totals.total,
       }
-      console.log('Express checkout data:', orderData)
-
-      // Replace with actual API call
-      const response = await fetch('/api/orders/express', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userInfo.token}`
-        },
-        body: JSON.stringify(orderData)
-      })
-
-      if (response.ok) {
-        const order = await response.json()
-        console.log('Express checkout successful:', order._id)
-        navigate(`/order/${order._id}`)
-      } else {
-        console.error('Express checkout failed:', response.status)
-      }
+      
+      const result = await createOrder(orderData).unwrap()
+      
+      await clearCart().unwrap()
+      
+      setOrderStep('success')
+      
+      setTimeout(() => {
+        navigate(`/order-summary/${result.trackingId}`)
+      }, 3000)
+      
     } catch (error) {
-      console.error('Express checkout error:', error)
+      toast.error(error?.data?.message || 'Order failed')
+      setOrderStep('review')
     } finally {
-      setLoading(false)
+      setIsProcessing(false)
     }
   }
 
+  if (cartLoading) return <div className="p-4 text-center">Loading...</div>
+  
   if (cartItems.length === 0) {
     return (
-      <div className="p-4 text-center">
-        <p className="mb-4">Your cart is empty</p>
-        <button
-          onClick={() => navigate('/shop')}
-          className="btn-primary"
-        >
+      <div className="safe-area-top p-4 text-center">
+        <h2 className="text-xl font-bold mb-4">Your cart is empty</h2>
+        <button onClick={() => navigate('/shop')} className="btn-primary">
           Continue Shopping
         </button>
       </div>
@@ -69,91 +104,151 @@ const ExpressCheckout = () => {
   }
 
   return (
-    <div className="p-4">
-      <div className="text-center mb-6">
-        <FaBolt className="text-4xl text-yellow-500 mx-auto mb-2" />
-        <h1 className="text-2xl font-bold">Express Checkout</h1>
-        <p className="text-gray-400">Fast & secure one-click ordering</p>
-      </div>
-
-      {/* Express Benefits */}
-      <div className="bg-gradient-to-r from-primary to-secondary rounded-lg p-4 mb-4">
-        <div className="flex items-center mb-2">
-          <FaShippingFast className="text-white mr-2" />
-          <span className="text-white font-bold">Express Benefits</span>
+    <div className="safe-area-top bg-dark min-h-screen">
+      {/* Header */}
+      <div className="flex items-center p-4 border-b border-gray-800">
+        <button onClick={() => navigate(-1)} className="p-2 mr-3">
+          <FaArrowLeft className="text-white" size={20} />
+        </button>
+        <div className="flex items-center">
+          <FaBolt className="text-orange-500 mr-2" />
+          <h1 className="text-xl font-bold text-white">Express Checkout</h1>
         </div>
-        <ul className="text-white text-sm space-y-1">
-          <li>• Free express shipping (1-2 days)</li>
-          <li>• Priority processing</li>
-          <li>• Real-time tracking</li>
-          <li>• 24/7 support</li>
-        </ul>
       </div>
 
-      {/* Order Items */}
-      <div className="card mb-4">
-        <h3 className="font-bold mb-3">Your Items</h3>
-        {cartItems.map(item => (
-          <div key={item._id} className="flex items-center space-x-3 mb-3">
-            <img 
-              src={item.image} 
-              alt={item.name}
-              className="w-12 h-12 object-cover rounded"
-            />
-            <div className="flex-1">
-              <p className="font-medium text-sm">{item.name}</p>
-              <p className="text-xs text-gray-400">Qty: {item.qty}</p>
+      {orderStep === 'review' && (
+        <div className="p-4 space-y-4">
+          {/* Order Items */}
+          <div className="bg-gray-800 rounded-xl p-4">
+            <h3 className="text-white font-semibold mb-3">Order Summary</h3>
+            {cartItems.map(item => (
+              <div key={item.product._id} className="flex items-center gap-3 mb-3">
+                <img
+                  src={item.product.image?.startsWith('http') 
+                    ? item.product.image 
+                    : `${import.meta.env.VITE_API_URL}${item.product.image}`
+                  }
+                  alt={item.product.name}
+                  className="w-12 h-12 object-cover rounded"
+                />
+                <div className="flex-1">
+                  <p className="text-white font-medium text-sm">{item.product.name}</p>
+                  <p className="text-gray-400 text-xs">Qty: {item.qty}</p>
+                </div>
+                <p className="text-white font-semibold">
+                  ${(item.qty * item.product.price).toFixed(2)}
+                </p>
+              </div>
+            ))}
+            
+            <div className="border-t border-gray-600 pt-3 mt-3 space-y-2">
+              <div className="flex justify-between text-gray-300 text-sm">
+                <span>Subtotal:</span>
+                <span>${totals.subtotal}</span>
+              </div>
+              <div className="flex justify-between text-gray-300 text-sm">
+                <span>Shipping:</span>
+                <span>{totals.shipping === 0 ? 'FREE' : `$${totals.shipping}`}</span>
+              </div>
+              <div className="flex justify-between text-gray-300 text-sm">
+                <span>Tax:</span>
+                <span>${totals.tax}</span>
+              </div>
+              <div className="flex justify-between text-white font-bold">
+                <span>Total:</span>
+                <span>${totals.total}</span>
+              </div>
             </div>
-            <p className="font-bold">${(item.price * item.qty).toFixed(2)}</p>
           </div>
-        ))}
-      </div>
 
-      {/* Express Summary */}
-      <div className="card mb-4">
-        <h3 className="font-bold mb-3">Express Summary</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span>Subtotal:</span>
-            <span>${totalPrice.toFixed(2)}</span>
+          {/* Shipping Address */}
+          <div className="bg-gray-800 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-white font-semibold flex items-center gap-2">
+                <FaTruck className="text-blue-400" />
+                Shipping
+              </h3>
+              <button
+                onClick={() => navigate('/shipping')}
+                className="text-primary text-sm flex items-center gap-1"
+              >
+                <FaEdit /> Edit
+              </button>
+            </div>
+            
+            {savedAddress.address ? (
+              <div className="text-gray-300 text-sm">
+                <p>{savedAddress.address}</p>
+                <p>{savedAddress.city}, {savedAddress.postalCode}</p>
+              </div>
+            ) : (
+              <div className="text-center py-2">
+                <p className="text-gray-400 text-sm mb-2">No address set</p>
+                <button
+                  onClick={() => navigate('/shipping')}
+                  className="btn-primary px-4 py-2 text-sm"
+                >
+                  Add Address
+                </button>
+              </div>
+            )}
           </div>
-          <div className="flex justify-between text-primary">
-            <span>Express Shipping:</span>
-            <span>FREE (Value: $15)</span>
+
+          {/* Payment Method */}
+          <div className="bg-gray-800 rounded-xl p-4">
+            <h3 className="text-white font-semibold flex items-center gap-2 mb-3">
+              <FaCreditCard className="text-green-400" />
+              Payment: {savedPaymentMethod}
+            </h3>
           </div>
-          <div className="flex justify-between">
-            <span>Processing Fee:</span>
-            <span>$0</span>
+
+          {/* Security */}
+          <div className="bg-gray-800 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <FaShieldAlt className="text-green-400" />
+              <span className="text-white font-semibold text-sm">Secure Checkout</span>
+            </div>
+            <div className="space-y-1 text-xs text-gray-300">
+              <div className="flex items-center gap-2">
+                <FaCheck className="text-green-400" />
+                <span>SSL encryption</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaCheck className="text-green-400" />
+                <span>Secure payment</span>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-between font-bold text-lg border-t border-gray-700 pt-2">
-            <span>Total:</span>
-            <span>${totalPrice.toFixed(2)}</span>
-          </div>
+
+          {/* Express Order Button */}
+          <button
+            onClick={handleExpressOrder}
+            disabled={!savedAddress.address || isProcessing}
+            className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <FaBolt />
+            Complete Order - ${totals.total}
+          </button>
         </div>
-      </div>
-
-      {/* Express Actions */}
-      <div className="space-y-3">
-        <button
-          onClick={handleExpressCheckout}
-          disabled={loading}
-          className="w-full btn-primary disabled:opacity-50 flex items-center justify-center"
-        >
-          <FaBolt className="mr-2" />
-          {loading ? 'Processing...' : 'Express Checkout'}
-        </button>
-        
-        <button
-          onClick={() => navigate('/placeorder')}
-          className="w-full btn-secondary"
-        >
-          Regular Checkout
-        </button>
-      </div>
-
-      <p className="text-xs text-gray-500 text-center mt-4">
-        By using Express Checkout, you agree to our terms and use your default payment method.
-      </p>
+      )}
+      
+      {orderStep === 'processing' && (
+        <div className="flex flex-col items-center justify-center h-96">
+          <div className="animate-spin w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full mb-4"></div>
+          <h2 className="text-xl font-bold text-white mb-2">Processing Order</h2>
+          <p className="text-gray-400 text-sm">Please wait...</p>
+        </div>
+      )}
+      
+      {orderStep === 'success' && (
+        <div className="flex flex-col items-center justify-center h-96">
+          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-4">
+            <FaCheck className="text-white" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Order Successful!</h2>
+          <p className="text-gray-400 text-sm">Redirecting...</p>
+        </div>
+      )}
     </div>
   )
 }

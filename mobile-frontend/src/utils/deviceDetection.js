@@ -73,7 +73,8 @@ export const redirectToDesktop = () => {
     // Redirect after animation
     setTimeout(() => {
       const fullPath = window.location.pathname + window.location.search
-      window.location.replace(`http://localhost:5173${fullPath}`)
+      const desktopUrl = import.meta.env.VITE_DESKTOP_URL || 'http://localhost:5173'
+      window.location.replace(`${desktopUrl}${fullPath}`)
     }, 800)
   } else {
     console.log('Mobile: Not redirecting, staying on mobile')
