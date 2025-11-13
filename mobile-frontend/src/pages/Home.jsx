@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useGetProductsQuery, useGetCategoriesQuery } from '../api/apiSlice'
 import ProductCard from '../components/ProductCard'
+import { HomeSkeleton } from '../components/Skeleton'
 import { FaFire, FaArrowRight, FaUser } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 
@@ -12,15 +13,7 @@ const Home = () => {
   const { userInfo } = useSelector(state => state.auth)
 
   if (isLoading) {
-    return (
-      <div className="p-4 safe-area-top">
-        <div className="animate-pulse space-y-4">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-gray-800 h-48 rounded-xl"></div>
-          ))}
-        </div>
-      </div>
-    )
+    return <HomeSkeleton />
   }
 
   return (

@@ -7,7 +7,8 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "build": "npm install --prefix ../frontend && npm run build --prefix ../frontend",
-    "postinstall": "npm install --prefix ../frontend && npm run build --prefix ../frontend"
+    "postinstall": "npm install --prefix ../frontend && npm run build --prefix ../frontend",
+    "generate-secret": "node -e \"console.log('JWT_SECRET=' + require('crypto').randomBytes(32).toString('hex'))\""
   },
   "keywords": [],
   "author": "",

@@ -2,7 +2,8 @@
 node_modules/
 */node_modules/
 
-# Environment variables
+# Environment variables - NEVER COMMIT THESE
+# Contains sensitive credentials (DB passwords, API keys, JWT secrets)
 .env
 .env.local
 .env.development.local
@@ -10,6 +11,8 @@ node_modules/
 .env.production.local
 backend/.env
 frontend/.env
+mobile-frontend/.env
+**/.env
 
 # Build outputs
 build/

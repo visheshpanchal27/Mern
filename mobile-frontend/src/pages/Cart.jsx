@@ -1,12 +1,11 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { useGetCartQuery, useUpdateCartMutation, useClearCartMutation } from '../api/apiSlice'
-import { setCartItems, clearCart } from '../store/cartSlice'
+import { useUpdateCartMutation, useClearCartMutation } from '../api/apiSlice'
+import { clearCart } from '../store/cartSlice'
 import { FaTrash, FaMinus, FaPlus, FaShoppingBag, FaCreditCard } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import SwipeableCard from '../components/SwipeableCard'
 import { useHaptic } from '../hooks/useHaptic'
-import { useEffect } from 'react'
 
 const Cart = () => {
   const dispatch = useDispatch()
@@ -15,15 +14,8 @@ const Cart = () => {
   const { userInfo } = useSelector(state => state.auth)
   const { items, total } = useSelector(state => state.cart)
   
-  const { data: cartData, isLoading } = useGetCartQuery(undefined, { skip: !userInfo })
   const [updateCart] = useUpdateCartMutation()
   const [clearCartAPI] = useClearCartMutation()
-
-  useEffect(() => {
-    if (cartData?.items) {
-      dispatch(setCartItems(cartData.items))
-    }
-  }, [cartData, dispatch])
 
   const handleRemove = async (id) => {
     try {
@@ -83,15 +75,6 @@ const Cart = () => {
         <Link to="/login" className="btn-primary inline-block">
           Login
         </Link>
-      </div>
-    )
-  }
-
-  if (isLoading) {
-    return (
-      <div className="safe-area-top p-4 text-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary mx-auto mb-4"></div>
-        <p className="text-gray-400">Loading cart...</p>
       </div>
     )
   }

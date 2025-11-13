@@ -2,6 +2,10 @@
 
 # 🛒 MERN E-Commerce Platform
 
+## ⚠️ SECURITY WARNING
+**NEVER commit `.env` files to git. Use `.env.example` templates only.**
+**Generate strong JWT secrets:** `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-blue?style=for-the-badge&logo=netlify)](https://shopping-canter.netlify.app/)
 [![Backend API](https://img.shields.io/badge/🔗_API-Backend-green?style=for-the-badge&logo=render)](https://mernbackend-tmp5.onrender.com/api)
 
@@ -148,9 +152,14 @@ npm run dev
 
 **Environment Variables:**
 ```env
+# Copy from backend/.env.example and fill with your values
+# Generate strong secrets: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
-CLOUDINARY_URL=your_cloudinary_url
+JWT_WEB_SECRET=generate_strong_64_char_random_hex
+JWT_MOBILE_SECRET=generate_strong_64_char_random_hex
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 ### 🔵 **Frontend Setup**
@@ -171,6 +180,7 @@ npm run dev
 
 **Environment Variables:**
 ```env
+# Copy from frontend/.env.example and fill with your values
 VITE_API_URL=https://mernbackend-tmp5.onrender.com/api
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
@@ -292,20 +302,39 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ## ⚙️ Environment Variables
 
 ### Backend (`backend/.env`)
-```
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_super_secure_jwt_secret_minimum_32_characters
-CLOUDINARY_URL=your_cloudinary_url
-NODE_ENV=production
+```bash
+# DO NOT commit this file to git
+# Copy from backend/.env.example
+# Generate secrets: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
 PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_WEB_SECRET=generate_64_char_hex_string
+JWT_MOBILE_SECRET=generate_64_char_hex_string
+NODE_ENV=production
+PAYPAL_CLIENT_ID=your_paypal_client_id
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
+EMAIL_FROM_NAME=Your Store Name
 ```
 
-**Security Note:** Use a strong JWT secret (minimum 32 characters) for production.
+**🔒 Security:** 
+- Never commit `.env` files
+- Use cryptographically strong secrets (64+ characters)
+- Rotate credentials if exposed
 
 ### Frontend (`frontend/.env`)
-```
+```bash
+# DO NOT commit this file to git
+# Copy from frontend/.env.example
+
 VITE_API_URL=https://mernbackend-tmp5.onrender.com/api
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_MOBILE_URL=your_mobile_app_url
 ```
 
 ---
