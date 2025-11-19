@@ -89,7 +89,17 @@ const Register = () => {
     <div className="min-h-screen flex flex-col justify-center p-4 safe-area-top">
       <div className="max-w-sm mx-auto w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Create Account</h1>
+          <div className="w-20 h-20 mx-auto mb-6 relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-500/30 via-purple-500/30 to-cyan-500/30 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500 animate-pulse"></div>
+            <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl p-1 shadow-xl border border-pink-500/40 hover:border-pink-400/60 transition-all duration-300 hover:scale-105 transform">
+              <img
+                src="https://res.cloudinary.com/dhyc478ch/image/upload/e_background_removal/f_png/v1763323471/create_d5i5lb.png"
+                alt="Create Account"
+                className="w-full h-full object-contain drop-shadow-xl relative z-10 group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold mb-2 text-white">Create Account</h2>
           <p className="text-gray-400">Join us today</p>
         </div>
 

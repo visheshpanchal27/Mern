@@ -34,20 +34,21 @@ const Home = () => {
         {/* Logo and Brand */}
         <div className="flex items-center mb-6 relative z-10">
           <motion.div 
-            className="flex items-center space-x-2"
+            className="flex items-center space-x-3"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-8 h-8 flex items-center justify-center">
-              <svg viewBox="0 0 40 40" className="w-full h-full">
-                <path d="M8 20c0-4 4-8 8-8s8 4 8 8-4 8-8 8-8-4-8-8z" fill="#2563eb" />
-                <path d="M16 20c0-4 4-8 8-8s8 4 8 8-4 8-8 8-8-4-8-8z" fill="#059669" />
-                <path d="M12 16c2-2 6-2 8 0s2 6 0 8-6 2-8 0-2-6 0-8z" fill="none" stroke="#fff" strokeWidth="1" />
-              </svg>
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img 
+                src="https://res.cloudinary.com/dhyc478ch/image/upload/v1763318624/logo_kxilm7.svg" 
+                alt="INFINITY PLAZA Logo" 
+                className="w-full h-full select-none pointer-events-none"
+              />
             </div>
             <div>
-              <div className="text-sm font-bold text-white">INFINITY</div>
-              <div className="text-xs font-bold bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">PLAZA</div>
+              <h1 className="text-lg font-bold tracking-wide bg-gradient-to-r from-teal-400 via-orange-400 to-pink-400 bg-clip-text text-transparent drop-shadow-lg">
+                INFINITY PLAZA
+              </h1>
             </div>
           </motion.div>
         </div>

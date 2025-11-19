@@ -5,6 +5,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3001,
+    hmr: {
+      overlay: false
+    },
     proxy: {
       '/api': {
         target: 'https://mernbackend-tmp5.onrender.com',
@@ -12,5 +15,8 @@ export default defineConfig({
         secure: false
       }
     }
+  },
+  optimizeDeps: {
+    exclude: ['debug']
   }
 })

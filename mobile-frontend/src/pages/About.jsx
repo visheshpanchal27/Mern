@@ -17,14 +17,14 @@ const About = () => {
       </div>
       <div className="p-4 space-y-4">
         <div className="text-center bg-gray-800 p-6 rounded-xl">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-            <svg viewBox="0 0 40 40" className="w-10 h-10">
-              <path d="M8 20c0-4 4-8 8-8s8 4 8 8-4 8-8 8-8-4-8-8z" fill="#2563eb" />
-              <path d="M16 20c0-4 4-8 8-8s8 4 8 8-4 8-8 8-8-4-8-8z" fill="#059669" />
-              <path d="M12 16c2-2 6-2 8 0s2 6 0 8-6 2-8 0-2-6 0-8z" fill="none" stroke="#fff" strokeWidth="1" />
-            </svg>
+          <div className="w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+            <img 
+              src="https://res.cloudinary.com/dhyc478ch/image/upload/v1763318624/logo_kxilm7.svg" 
+              alt="INFINITY PLAZA Logo" 
+              className="w-full h-full select-none pointer-events-none"
+            />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Infinity Plaza</h2>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-teal-400 via-orange-400 to-pink-400 bg-clip-text text-transparent mb-2">INFINITY PLAZA</h2>
           <p className="text-gray-400 mb-2">Version 1.0.0</p>
           <p className="text-gray-300 text-sm">Your ultimate shopping destination</p>
         </div>
