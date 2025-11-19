@@ -7,7 +7,6 @@ import { useState, useMemo, useEffect, memo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import HeartIcon from "./HeartIcon";
 import { useAddToCartMutation } from "../../redux/api/cartApiSlice";
-import { ProductCardSkeleton } from "../../components/Skeletons";
 import QuickViewModal from "../../components/QuickViewModal";
 
 const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
@@ -18,7 +17,7 @@ const ProductCard = ({ p, viewMode = 'grid', isLoading = false }) => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showQuickView, setShowQuickView] = useState(false);
 
-  if (isLoading || !p) return <ProductCardSkeleton viewMode={viewMode} />;
+  if (isLoading || !p) return null;
 
   // Get all product images
   const allImages = useMemo(() => {

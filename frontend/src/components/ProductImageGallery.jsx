@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { ImageGallerySkeleton } from "./Skeletons";
 import { useSwipe } from "../hooks/useSwipe";
 
 const ProductImageGallery = ({ 
@@ -36,7 +35,7 @@ const ProductImageGallery = ({
     return images;
   }, [product]);
 
-  if (isLoading) return <ImageGallerySkeleton />;
+  if (isLoading) return <div className="text-gray-400">Loading...</div>;
   if (!allImages.length) return null;
 
   const handleImageClick = () => {

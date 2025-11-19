@@ -11,6 +11,7 @@ import Loader from './components/Loader.jsx';
 
 // Lazy load components for better performance
 const App = lazy(() => import('./App.jsx'));
+const Introduction = lazy(() => import('./pages/Introduction.jsx'));
 const Home = lazy(() => import('./pages/Home.jsx'));
 const PrivateRoute = lazy(() => import('./components/PrivateRoute.jsx'));
 const Login = lazy(() => import('./pages/Auth/Login.jsx'));
@@ -46,16 +47,23 @@ const router = createBrowserRouter(
       {/* 404 outside of layout */}
       <Route path="*" element={<ErrorPage />} />
 
-      {/* All layout-based routes */}
+      {/* Introduction page without layout */}
       <Route path="/" element={
+        <Suspense fallback={<Loader />}>
+          <Introduction />
+        </Suspense>
+      } />
+
+      {/* All layout-based routes */}
+      <Route element={
         <Suspense fallback={<Loader />}>
           <App />
         </Suspense>
       }>
+        <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email" element={<EmailVerification />} />
-        <Route index element={<Home />} />
         <Route path="/favorite" element={<Favorites />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />

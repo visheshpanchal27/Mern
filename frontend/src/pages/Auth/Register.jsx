@@ -220,14 +220,19 @@ const Register = () => {
           </div>
           <div className="relative z-10">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-r from-primary-500 to-purple-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-primary-500/25 relative overflow-hidden">
-              <div className="absolute inset-0 bg-white/10 rounded-2xl"></div>
-              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
-              </svg>
+            <div className="w-24 h-24 mx-auto mb-4 relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/30 via-purple-500/30 to-cyan-500/30 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500 animate-pulse"></div>
+              <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl p-1 shadow-2xl border border-pink-500/40 hover:border-pink-400/60 transition-all duration-300 hover:scale-105 transform">
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-purple-500/10 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <img
+                  src="https://res.cloudinary.com/dhyc478ch/image/upload/e_background_removal/f_png/v1763323471/create_d5i5lb.png"
+                  alt="Create Account"
+                  className="w-full h-full object-contain drop-shadow-2xl relative z-10 group-hover:scale-110 transition-transform duration-300"
+                />
+              </div>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-            <p className="text-gray-400">Join us today</p>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent mb-3 hover:scale-105 transition-transform duration-300">Create Account</h1>
+            <p className="text-gray-300 text-lg">Join us today and start your journey</p>
           </div>
 
           <form onSubmit={submitHandler} className="space-y-5">

@@ -5,7 +5,6 @@ import { useFetchCategoriesQuery } from "../redux/api/categoryApiSlice";
 import { setCategories, setChecked } from "../redux/features/Shop/shopSlice";
 import Loader from "../components/Loader";
 import ProductCard from "./Products/ProductCard";
-import { ProductCardSkeleton } from "../components/Skeletons";
 import Breadcrumb from "../components/Breadcrumb";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch, FaFilter, FaTimes, FaTh, FaList, FaRedo } from "react-icons/fa";

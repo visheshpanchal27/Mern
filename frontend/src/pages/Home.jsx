@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { HomeSkeleton } from "../components/Skeletons";
-import EnhancedHomeSkeleton from "../components/AdvancedSkeleton";
 import Header from "../components/Header";
 import Massage from "../components/Massage";
+import Loader from "../components/Loader";
 import ProductAll from "./Products/ProductAll.jsx";
 import SEOHead from "../components/SEOHead";
 import HeroSection from "../components/HeroSection";
@@ -55,7 +54,7 @@ const Home = () => {
       />
       <Header refreshKey={headerRefreshKey} />
       {isLoading ? (
-        <HomeSkeleton />
+        <Loader />
       ) : error ? (
         <Massage variant="danger">Something went wrong!</Massage>
       ) : (

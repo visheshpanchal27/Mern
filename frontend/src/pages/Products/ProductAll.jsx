@@ -180,6 +180,28 @@ const Product = ({ product }) => {
           
           {/* Advanced Badges */}
           <div className="absolute top-2 sm:top-3 left-2 sm:left-3 z-20 flex flex-col gap-1">
+            <motion.button
+              onClick={handleShare}
+              className="group relative p-1.5 bg-gradient-to-br from-blue-500/90 via-purple-500/90 to-pink-500/90 backdrop-blur-md rounded-full text-white shadow-lg border border-white/30 w-fit overflow-hidden"
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.9, rotate: -5 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            >
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              />
+              <FaShare className="text-xs relative z-10 drop-shadow-lg" />
+              <motion.div
+                className="absolute inset-0 rounded-full bg-white/20"
+                initial={{ scale: 0, opacity: 1 }}
+                whileHover={{ scale: 2, opacity: 0 }}
+                transition={{ duration: 0.5 }}
+              />
+            </motion.button>
             {product.countInStock === 0 && (
               <motion.span 
                 className="bg-red-500/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg"
@@ -237,25 +259,8 @@ const Product = ({ product }) => {
             )}
           </div>
           
-          <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20 flex flex-col gap-1 sm:gap-2">
+          <div className="absolute top-2 sm:top-3 right-2 sm:right-3 z-20 flex gap-1 sm:gap-2">
             <HeartIcon product={product} />
-            {isHovered && (
-              <motion.button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigator.share ? 
-                    navigator.share({ title: product.name, url: window.location.href }) :
-                    navigator.clipboard.writeText(window.location.href);
-                  toast.success('Link copied!');
-                }}
-                className="p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-all"
-                initial={{ scale: 0, rotate: -90 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <FaShare className="text-xs" />
-              </motion.button>
-            )}
           </div>
           
           {/* Quick Actions */}

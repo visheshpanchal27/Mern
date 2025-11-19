@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCartBackend } from "../../redux/features/Cart/CartSlice";
 import { toast } from "react-toastify";
 import HeartIcon from "./HeartIcon";
-import { SmallProductSkeleton } from "../../components/Skeletons";
 import QuickViewModal from "../../components/QuickViewModal";
 
 const SmallProduct = ({ product, isLoading, refreshKey = 0 }) => {
@@ -90,7 +89,7 @@ const SmallProduct = ({ product, isLoading, refreshKey = 0 }) => {
   const isLowStock = (product?.countInStock || 0) > 0 && (product?.countInStock || 0) <= 3;
 
   if (isLoading || !product) {
-    return <SmallProductSkeleton />;
+    return null;
   }
 
   return (

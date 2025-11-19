@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { MultiImageUploadSkeleton } from "./Skeletons";
 import { useUploadProductImageMutation } from "../redux/api/productApiSlice";
 
 const MultiImageUpload = ({ onImagesUploaded, existingImages = [], isLoading = false, onImageDeleted }) => {
@@ -9,7 +8,7 @@ const MultiImageUpload = ({ onImagesUploaded, existingImages = [], isLoading = f
   const [deleting, setDeleting] = useState(null);
   const [uploadProductImage] = useUploadProductImageMutation();
 
-  if (isLoading) return <MultiImageUploadSkeleton />;
+  if (isLoading) return <div className="text-gray-400">Loading...</div>;
 
   const deleteImage = async (imageUrl, index) => {
     setDeleting(index);

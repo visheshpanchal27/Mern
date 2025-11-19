@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 import {
   useGetProductDetailsQuery,
   useCreateReviewMutation,
@@ -27,7 +28,6 @@ import HeartIcon from "./HeartIcon";
 import Ratings from "./Ratings";
 import ProductTabs from "./ProductTabs";
 import ProductImageGallery from "../../components/ProductImageGallery";
-import { ProductDetailsSkeleton } from "../../components/Skeletons";
 
 const ProductDetails = () => {
   const { id: productId } = useParams();
@@ -38,7 +38,6 @@ const ProductDetails = () => {
   const [comment, setComment] = useState("");
   const [zoomImage, setZoomImage] = useState(false);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
-  const [isOneClickBuying, setIsOneClickBuying] = useState(false);
   const [stockAlert, setStockAlert] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
 
@@ -47,8 +46,6 @@ const ProductDetails = () => {
 
   const [createReview, { isLoading: loadingProductReview }] = useCreateReviewMutation();
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
-  const [createOrder, { isLoading: isCreatingOrder }] = useCreateOrderMutation();
-  const dispatch = useDispatch();
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -81,13 +78,12 @@ const ProductDetails = () => {
     try {
       await addToCart({ _id: product._id, qty }).unwrap();
       setAddedToCart(true);
-      toast.success("🛒 Product added to cart successfully!");
+      toast.success("🛒 Product added to cart successfully!", {
+        onClick: () => navigate("/cart")
+      });
       
-      // Auto-hide success state after 2 seconds
-      setTimeout(() => setAddedToCart(false), 2000);
-      
-      // Optional: Navigate to cart after delay
-      setTimeout(() => navigate("/cart"), 1500);
+      // Auto-hide success state after 3 seconds
+      setTimeout(() => setAddedToCart(false), 3000);
     } catch (err) {
       const status = err?.status;
       const serverMessage = err?.data?.message;
@@ -208,15 +204,17 @@ const ProductDetails = () => {
   
   return (
     <div className="p-4 xl:px-20">
-      <button
+      <motion.button
         onClick={() => navigate(-1)}
         className="cursor-pointer flex items-center gap-2 mb-8 text-gray-300 hover:text-white bg-transparent border border-gray-600 hover:border-pink-500 rounded-full py-2 px-5 transition duration-300"
+        whileHover={{ scale: 1.05, x: -5 }}
+        whileTap={{ scale: 0.95 }}
       >
         <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
         Go Back
-      </button>
+      </motion.button>
 
       {error ? (
         <Massage variant="danger">
@@ -238,13 +236,29 @@ const ProductDetails = () => {
                 <div className="flex items-center justify-between">
                   <HeartIcon product={product} className="cursor-pointer" />
                   <div className="flex gap-2">
-                    <button
+                    <motion.button
                       onClick={shareProduct}
-                      className="p-2 bg-gray-700 hover:bg-gray-600 rounded-full transition"
+                      className="group relative p-2.5 bg-gradient-to-br from-blue-500/90 via-purple-500/90 to-pink-500/90 backdrop-blur-md rounded-full text-white shadow-lg border border-white/30 overflow-hidden"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      whileTap={{ scale: 0.9, rotate: -5 }}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
                       title="Share Product"
                     >
-                      <FaShare className="text-white" />
-                    </button>
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                      />
+                      <FaShare className="text-sm relative z-10 drop-shadow-lg" />
+                      <motion.div
+                        className="absolute inset-0 rounded-full bg-white/20"
+                        initial={{ scale: 0, opacity: 1 }}
+                        whileHover={{ scale: 2, opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                      />
+                    </motion.button>
                     <div className="flex items-center gap-1 text-gray-400 text-sm">
                       <FaEye />
                       <span>{recentlyViewed.length} recently viewed</span>
@@ -289,10 +303,15 @@ const ProductDetails = () => {
 
                 {/* Stock Alert */}
                 {stockAlert && (
-                  <div className="bg-orange-500/20 border border-orange-500 text-orange-400 px-4 py-2 rounded-lg flex items-center gap-2">
-                    <FaClock className="text-sm" />
-                    <span className="text-sm">Only {product.countInStock} left in stock!</span>
-                  </div>
+                  <motion.div 
+                    className="bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500 text-orange-400 px-4 py-2 rounded-lg flex items-center gap-2 shadow-lg"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0, scale: [1, 1.02, 1] }}
+                    transition={{ duration: 0.5, scale: { repeat: Infinity, duration: 2 } }}
+                  >
+                    <FaClock className="text-sm animate-pulse" />
+                    <span className="text-sm font-semibold">⚡ Only {product.countInStock} left in stock!</span>
+                  </motion.div>
                 )}
 
                 <div className="flex flex-wrap items-center gap-4">
